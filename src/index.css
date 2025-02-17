@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #f3f4f6;
+  --color-secondary: #ffffff;
+  --color-text: #1a1a1a;
+  --color-accent: #3b82f6;
+}
+
+.dark {
+  --color-primary: #1a1a1a;
+  --color-secondary: #1f1f1f;
+  --color-text: #f3f4f6;
+  --color-accent: #60a5fa;
+}
+
+/* Your custom styles here */
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--color-primary);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
