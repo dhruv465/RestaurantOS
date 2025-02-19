@@ -30,11 +30,11 @@ const MenuContainer = () => {
 
   return (
     <>
-      <div className="flex overflow-x-auto whitespace-nowrap gap-4 px-4 sm:px-6 md:px-8 lg:px-10 py-4 w-full">
+      <div className="grid grid-cols-4 gap-4 px-4 sm:px-6 md:px-8 lg:px-10 py-4 w-full min-w-[900px]">
         {menus.map((menu, index) => (
           <div
             key={menu.id}
-            className="flex flex-col items-start justify-between p-3 sm:p-4 rounded-lg h-[90px] sm:h-[100px] cursor-pointer bg-[var(--card-bg)] min-w-[200px]"
+            className="flex flex-col items-start justify-between p-3 sm:p-4 rounded-lg h-[90px] sm:h-[100px] cursor-pointer min-w-[200px]"
             style={{ background: colors[index] }}
             onClick={() => setSelected(menu)}
           >
@@ -65,22 +65,27 @@ const MenuContainer = () => {
               <h1 className="text-[var(--text-color)] text-lg font-semibold">
                 {menu.name}
               </h1>
-              <button className="bg-[var(--card-bg)] p-2 rounded-lg text-[var(--text-color)]">
-                <IoMdCart size={20}/>
-              </button>
+              {/* <button
+                className="p-2 rounded-lg text-[var(--text-color)]"
+                style={{ background: colors[selected.id] }}
+              >
+                <IoMdCart size={20} />
+              </button> */}
             </div>
             <div className="flex items-center justify-between w-full">
               <p className="text-[var(--text-color)] text-xl font-semibold">
                 ₹{menu.price}
               </p>
-              <div className="flex items-center justify-between bg-[var(--card-bg)] px-4 py-3 rounded-lg gap-6">
+              <div className="flex items-center justify-between px-4 py-3 rounded-lg gap-6">
                 <button
                   onClick={() => decrement(menu.id)}
                   className="text-[var(--text-color)] text-2xl"
                 >
                   &minus;
                 </button>
-                <span className="text-[var(--text-color)]">{itemCounts[menu.id] || 0}</span>
+                <span className="text-[var(--text-color)]">
+                  {itemCounts[menu.id] || 0}
+                </span>
                 <button
                   onClick={() => increment(menu.id)}
                   className="text-[var(--text-color)] text-2xl"

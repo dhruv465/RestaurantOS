@@ -4,15 +4,11 @@ const Bill = () => {
   return (
     <div>
       <div className="flex items-center justify-between px-4 mt-2">
-        <p className="text-xs text-[var(--text-color)] font-medium mt-2">
-          Items(1)
-        </p>
+        <p className="text-xs text-[var(--text-color)] font-medium mt-2">Items(1)</p>
         <h1 className="text-[var(--text-color)] text-md font-bold">₹250</h1>
       </div>
       <div className="flex items-center justify-between px-5 mt-2">
-        <p className="text-xs text-[var(--text-color)] font-medium mt-2">
-          Tax(5.25%)
-        </p>
+        <p className="text-xs text-[var(--text-color)] font-medium mt-2">Tax(5.25%)</p>
         <h1 className="text-[var(--text-color)] text-md font-bold">₹24</h1>
       </div>
       <div className="flex items-center gap-3 px-5 mt-4">

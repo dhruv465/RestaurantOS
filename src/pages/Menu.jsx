@@ -9,19 +9,18 @@ import Bill from "../components/menu/Bill";
 
 const Menu = () => {
   return (
-    <section className="bg-[var(--main-bg)] min-h-screen pb-20 overflow-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-[3fr_1fr] gap-3 p-3">
-        <div className="bg-[var(--card-bg)] rounded-lg p-4">
-          <div className="flex flex-col md:flex-row items-center justify-between px-4 py-4 gap-4">
-            <div className="flex items-center gap-4">
+    <section className="bg-[var(--main-bg)] min-h-screen pb-20 overflow-auto flex flex-col md:flex-row gap-3 px-2 sm:px-4">
+      <div className="w-full md:flex-[3]">
+        <div className="flex flex-col md:flex-row items-center justify-between px-2 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 gap-3 sm:gap-4">
+          <div className="flex items-center gap-4">
             <BackButton />
-            <h1 className="text-xl md:text-2xl text-[var(--text-color)] tracking-wider font-bold">
+            <h1 className="text-lg sm:text-xl md:text-2xl text-[var(--text-color)] tracking-wider font-bold">
               Menu
             </h1>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
             <button
-              className="profile flex items-center gap-2 cursor-pointer bg-[var(--card-bg)] p-3 rounded-lg"
+              className="profile flex items-center gap-2 cursor-pointer bg-[var(--card-bg)] p-2 sm:p-3 rounded-lg"
               aria-label="User profile"
             >
               <IoRestaurant
@@ -35,20 +34,19 @@ const Menu = () => {
                 </p>
               </div>
             </button>
-            </div>
           </div>
+        </div>
 
-          <MenuContainer />
-        </div>
-        {/* Right Div */}
-        <div className="bg-[var(--card-bg)] rounded-lg p-4">
-          <CustomerInfo />
-          <hr className="border-t-2 border-[var(--border-color)] m-2" />
-          {/* Order Items */}
-          <CartInfo />
-          {/* Bill */}
-          <Bill />
-        </div>
+        <MenuContainer />
+      </div>
+      {/* Right Div */}
+      <div className="w-full md:w-auto md:flex-[1] bg-[var(--card-bg)] mt-2 md:mt-4 mx-2 md:mr-3 rounded-lg pt-2 px-2 sm:px-4">
+        <CustomerInfo />
+        <hr className="border-t-2 border-[var(--border-color)] m-2" />
+        {/* Order Items */}
+        <CartInfo />
+        {/* Bill */}
+        <Bill />
       </div>
       <div className="fixed bottom-0 left-0 right-0">
         <BottomNav />
