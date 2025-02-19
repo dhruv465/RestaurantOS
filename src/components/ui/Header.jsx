@@ -248,7 +248,7 @@ const Header = () => {
           <input
             type="text"
             placeholder="Search for food, coffee, etc."
-            className="bg-transparent outline-none text-[var(--text-color)] placeholder:text-[var(--text-color)]/50 text-sm w-full focus:ring-2 focus:ring-[var(--border-color)] transition-all"
+            className="bg-transparent outline-none text-[var(--text-color)] placeholder:text-[var(--text-color)]/50 text-sm w-full  transition-all"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search"

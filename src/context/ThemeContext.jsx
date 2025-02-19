@@ -23,8 +23,8 @@ export const ThemeProvider = ({ children }) => {
     
     // Set background colors for light theme
     if (theme === 'light') {
-      document.documentElement.style.setProperty('--header-bg', '#f8fafc');
-      document.documentElement.style.setProperty('--main-bg', '#ffffff');
+      document.documentElement.style.setProperty('--header-bg', '#e0e0e0');
+      document.documentElement.style.setProperty('--main-bg', '#f0f0f0');
       document.documentElement.style.setProperty('--nav-bg', '#f1f5f9');
       document.documentElement.style.setProperty('--card-bg', '#f8fafc');
     } else {
