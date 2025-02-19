@@ -19,7 +19,7 @@ const RecentOders = () => {
           <input
             type="text"
             placeholder="Search"
-            className="bg-transparent w-full text-[var(--text-color)] placeholder:text-[var(--text-color)]/70 focus:outline-none"
+            className="bg-[var(--card-bg)] w-full text-[var(--text-color)] placeholder:text-[var(--text-color)]/70 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--border-color)] focus:outline-none transition-all"
           />
         </div>
 

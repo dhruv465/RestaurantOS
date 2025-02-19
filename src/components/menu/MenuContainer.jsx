@@ -30,61 +30,60 @@ const MenuContainer = () => {
 
   return (
     <>
-      <div className="grid grid-cols-4 gap-4 px-10 py-4 w-[100%]">
+      <div className="flex overflow-x-auto whitespace-nowrap gap-4 px-4 sm:px-6 md:px-8 lg:px-10 py-4 w-full">
         {menus.map((menu, index) => (
           <div
             key={menu.id}
-            className="flex flex-col items-start justify-between p-4 rounded-lg h-[100px] cursor-pointer bg-[var(--card-bg)]"
+            className="flex flex-col items-start justify-between p-3 sm:p-4 rounded-lg h-[90px] sm:h-[100px] cursor-pointer bg-[var(--card-bg)] min-w-[200px]"
             style={{ background: colors[index] }}
             onClick={() => setSelected(menu)}
           >
             <div className="flex items-center justify-between w-full">
-              <h1 className="text-[#f5f5f5] text-lg font-semibold">
+              <h1 className="text-[var(--text-color)] text-lg font-semibold">
                 {menu.icon} {menu.name}
               </h1>
               {selected.id === menu.id && (
-                <GrRadialSelected className="text-[#f5f5f5] text-lg" />
+                <GrRadialSelected className="text-[var(--text-color)] text-lg" />
               )}
             </div>
-            <p className="text-[#ababab] text-sm font-semibold">
+            <p className="text-[var(--text-color)] text-sm font-semibold">
               {menu.items ? menu.items.length : "No "} Items
             </p>
           </div>
         ))}
       </div>
 
-      <hr className="border-[#2a2a2a] border-t-2 mt-4" />
+      <hr className="border-[var(--border-color)] border-t-2 mt-4" />
 
-      <div className="grid grid-cols-4 gap-4 px-10 py-4 w-[100%]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4 sm:px-6 md:px-8 lg:px-10 py-4 w-full overflow-y-auto">
         {selected?.items.map((menu) => (
           <div
             key={menu.id}
-            className="flex flex-col items-start justify-between p-4 rounded-lg h-[150px] cursor-pointer bg-[var(--card-bg)] hover:bg-[#1a1a1a]"
-            style={{ background: "#1a1a1a" }}
+            className="flex flex-col items-start justify-between p-3 sm:p-4 rounded-lg h-[120px] sm:h-[150px] cursor-pointer bg-[var(--card-bg)] hover:bg-[var(--card-bg)]/90"
           >
             <div className="flex items-center justify-between w-full">
-              <h1 className="text-[#f5f5f5] text-lg font-semibold">
+              <h1 className="text-[var(--text-color)] text-lg font-semibold">
                 {menu.name}
               </h1>
-              <button className="bg-[#f6b0006e] text-white p-2 rounded-lg">
+              <button className="bg-[var(--card-bg)] p-2 rounded-lg text-[var(--text-color)]">
                 <IoMdCart size={20}/>
               </button>
             </div>
             <div className="flex items-center justify-between w-full">
-              <p className="text-[#ababab] text-xl font-semibold">
+              <p className="text-[var(--text-color)] text-xl font-semibold">
                 ₹{menu.price}
               </p>
-              <div className="flex items-center justify-between bg-[#1f1f1f] px-4 py-3 rounded-lg gap-6">
+              <div className="flex items-center justify-between bg-[var(--card-bg)] px-4 py-3 rounded-lg gap-6">
                 <button
                   onClick={() => decrement(menu.id)}
-                  className="text-yellow-500 text-2xl"
+                  className="text-[var(--text-color)] text-2xl"
                 >
                   &minus;
                 </button>
-                <span className="text-white">{itemCounts[menu.id] || 0}</span>
+                <span className="text-[var(--text-color)]">{itemCounts[menu.id] || 0}</span>
                 <button
                   onClick={() => increment(menu.id)}
-                  className="text-yellow-500 text-2xl"
+                  className="text-[var(--text-color)] text-2xl"
                 >
                   &#43;
                 </button>

@@ -36,8 +36,8 @@ const BottomNav = () => {
         onClick={() => navigate("/orders")}
         className={`text-[var(--text-color)] ${
           location.pathname === "/orders"
-            ? "bg-[var(--card-bg)]"
-            : "hover:bg-[var(--card-bg)]"
+            ? "bg[var(--card-bg)]"
+            : "hover:bg[var(--card-bg)]"
         } w-full sm:w-[150px] md:w-[200px] flex items-center justify-center text-sm sm:text-base px-2 sm:px-4 py-2 rounded-[20px] transition-colors duration-200`}
       >
         <IoReorderFour className="inline mr-2 text-lg sm:text-xl" /> Orders
@@ -57,13 +57,13 @@ const BottomNav = () => {
         onClick={() => navigate("/tables")}
         className={`text-[var(--text-color)] ${
           location.pathname === "/tables"
-            ? "bg-[var(--card-bg)]"
-            : "hover:bg-[var(--card-bg)]"
+            ? "bg[var(--card-bg)]"
+            : "hover:bg[var(--card-bg)]"
         } w-full sm:w-[150px] md:w-[200px] flex items-center justify-center text-sm sm:text-base px-2 sm:px-4 py-2 rounded-[20px] transition-colors duration-200`}
       >
         <MdTableBar className="inline mr-2 text-lg sm:text-xl" /> Tables
       </button>
-      <button className="text-[var(--text-color)] w-full sm:w-[150px] md:w-[200px] flex items-center justify-center text-sm sm:text-base px-2 sm:px-4 py-2 hover:bg-[var(--card-bg)] rounded-[20px] transition-colors duration-200">
+      <button className="text-[var(--text-color)] w-full sm:w-[150px] md:w-[200px] flex items-center justify-center text-sm sm:text-base px-2 sm:px-4 py-2 hover:bg[var(--card-bg)] rounded-[20px] transition-colors duration-200">
         <CiCircleMore className="inline mr-2 text-lg sm:text-xl" /> More
       </button>
 
@@ -77,7 +77,7 @@ const BottomNav = () => {
             <input
               type="text"
               placeholder="Enter Customer Name"
-              className="w-full bg-[#333] text-[#f5f5f5] rounded-lg p-2 focus:outline-none"
+              className="w-full bg-[var(--input-bg)] text-[var(--text-color)] rounded-lg p-2 focus:ring-2 focus:ring-[var(--border-color)] focus:outline-none transition-all border border-[var(--border-color)]"
               id=""
             />
           </div>
@@ -90,7 +90,7 @@ const BottomNav = () => {
             <input
               type="number"
               placeholder="Enter Customer Phone Number"
-              className="w-full bg-[#333] text-[#f5f5f5] rounded-lg p-2 focus:outline-none"
+              className="w-full bg-[var(--input-bg)] text-[var(--text-color)] rounded-lg p-2 focus:ring-2 focus:ring-[var(--border-color)] focus:outline-none transition-all border border-[var(--border-color)]"
               id=""
             />
           </div>
@@ -99,18 +99,21 @@ const BottomNav = () => {
           <label className="block mb-2 mt-3 text-sm font-medium text-[#ababab]">
             Guest
           </label>
-          <div className="flex items-center justify-between bg-[#1f1f1f] px-4 py-3 rounded-lg">
-            <button onClick={decrement} className="text-yellow-500 text-2xl">
+          <div className="flex items-center justify-between bg-[var(--input-bg)] px-4 py-3 rounded-lg border border-[var(--border-color)]">
+            <button onClick={decrement} className="text-[var(--text-color)] text-2xl hover:text-[var(--text-color)]/70">
               &minus;
             </button>
-            <span className="text-white">{guestCount} Person</span>
-            <button onClick={increment} className="text-yellow-500 text-2xl">
+            <span className="text-[var(--text-color)]">{guestCount} Person</span>
+            <button onClick={increment} className="text-[var(--text-color)] text-2xl hover:text-[var(--text-color)]/70">
               &#43;
             </button>
           </div>
         </div>
         <button
-          onClick={() => navigate("/tables")}
+          onClick={() => {
+            navigate("/tables");
+            closeModal();
+          }}
           className="bg-[#F6b100] text-white rounded-lg py-3 w-full mt-8 hover:bg-[#F6b100]/90 transition-colors duration-200"
         >
           Create Order

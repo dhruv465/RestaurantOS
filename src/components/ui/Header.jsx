@@ -146,7 +146,7 @@ const Header = () => {
                 ref={searchRef}
                 type="text"
                 placeholder="Search for food, coffee, etc."
-                className="w-full bg-[var(--card-bg)] text-[var(--text-color)] placeholder:text-[var(--text-color)]/50 rounded-lg px-4 py-3 pr-10 outline-none"
+                className="w-full bg-[var(--card-bg)] text-[var(--text-color)] placeholder:text-[var(--text-color)]/50 rounded-lg px-4 py-3 pr-10 outline-none focus:ring-2 focus:ring-[var(--border-color)] transition-all"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -248,7 +248,7 @@ const Header = () => {
           <input
             type="text"
             placeholder="Search for food, coffee, etc."
-            className="bg-transparent outline-none text-[var(--text-color)] placeholder:text-[var(--text-color)]/50 text-sm w-full"
+            className="bg-transparent outline-none text-[var(--text-color)] placeholder:text-[var(--text-color)]/50 text-sm w-full focus:ring-2 focus:ring-[var(--border-color)] transition-all"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search"

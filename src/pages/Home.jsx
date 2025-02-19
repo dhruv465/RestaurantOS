@@ -22,7 +22,7 @@ const Home = () => {
         </div>
 
         {/* Right Div */}
-        <div className="flex-[2]  mt-8 md:mt-0">
+        <div className="flex-[2] bg-[var(--card-bg)] mt-8 md:mt-0 rounded-lg p-4">
           <PopularDishes />
         </div>
       </section>
