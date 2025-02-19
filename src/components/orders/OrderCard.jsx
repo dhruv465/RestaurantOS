@@ -18,7 +18,7 @@ const OrderCard = () => {
             </p>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <p className="text-green-600 bg-[var(--success-bg)] px-2 rounded-lg py-1 text-sm md:text-base">
+            <p className="bg-gray-200 text-green-600 bg-[var(--success-bg)] px-2 rounded-lg py-1 text-sm md:text-base">
               <FaCheckDouble className="inline mr-2" />
               Ready
             </p>

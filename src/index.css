@@ -5,17 +5,21 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #f3f4f6;
-  --color-secondary: #ffffff;
-  --color-text: #1a1a1a;
+  --color-primary: #ffffff;
+  --color-secondary: #f8fafc;
+  --color-text: #1e293b;
   --color-accent: #3b82f6;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
 }
 
 .dark {
-  --color-primary: #1a1a1a;
-  --color-secondary: #1f1f1f;
-  --color-text: #f3f4f6;
+  --color-primary: #0f172a;
+  --color-secondary: #1e293b;
+  --color-text: #f8fafc;
   --color-accent: #60a5fa;
+  --card-bg: #1e293b;
+  --card-border: #334155;
 }
 
 /* Your custom styles here */
@@ -25,4 +29,14 @@ body {
   background-color: var(--color-primary);
   color: var(--color-text);
   transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+}
+
+/* Card styles */
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }

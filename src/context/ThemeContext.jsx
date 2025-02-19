@@ -43,4 +43,7 @@ export const ThemeProvider = ({ children }) => {
   );
 };
 
-export const useTheme = () => useContext(ThemeContext);
+// Custom hook to access theme context
+const useTheme = () => useContext(ThemeContext);
+
+export { useTheme };
