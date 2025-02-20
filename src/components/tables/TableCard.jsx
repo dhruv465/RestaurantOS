@@ -2,19 +2,20 @@ import React from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { getRandomColor } from "../../utils";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { updateTable } from "../../redux/slices/CustomerSlice";
 
-const TableCard = ({ key, name, status, initials, seats }) => {
-
+const TableCard = ({ name, status, initials, seats }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const handleClick = () => {
-    if(status === "Booked") return; {
-      navigate("/menu");
-    }
-  }
+  const handleClick = (name) => {
+    if (status === "Booked") return;
+    dispatch(updateTable({ tableNo: name }));
+    navigate("/menu");
+  };
   return (
     <div
-      onClick={handleClick}
-      key={key}
+      onClick={() => handleClick(name)}
       className="w-full md:w-[300px] bg-[var(--card-bg)] p-4 rounded-lg mb-4 cursor-pointer shadow-lg"
     >
       <div className="flex items-center justify-between px-1">
@@ -39,6 +40,10 @@ const TableCard = ({ key, name, status, initials, seats }) => {
           {initials}
         </h1>
       </div>
+      <p className="text-[var(--text-color)] text-xs opacity-80">
+        {" "}
+        Seats: <span className="text-[var(--text-color)]">{seats}</span>
+      </p>
     </div>
   );
 };

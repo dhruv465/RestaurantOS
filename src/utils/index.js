@@ -7,7 +7,6 @@ const colorPalette = [
   '#6B5B95', // Purple
   '#F25F5C', // Coral
   '#2EC4B6', // Teal
-  '#FFE066', // Yellow
   '#247BA0', // Blue
   '#F25F5C'  // Coral
 ];
@@ -18,3 +17,29 @@ export const getRandomColor = () => {
 };
 
 
+export const getAvatarName = (name) => {
+  if (!name) return "";
+
+  return name.split(" ").map((item) => item[0]).join("").toUpperCase();
+}
+
+export const formatDate = (date) => {
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  return `${months[date.getMonth()]} ${String(date.getDate()).padStart(
+    2,
+    "0"
+  )}, ${date.getFullYear()}`;
+};

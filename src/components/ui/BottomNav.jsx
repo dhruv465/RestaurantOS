@@ -7,21 +7,34 @@ import { MdTableBar } from "react-icons/md";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../../styles/animations.css";
 import Modal from "./Modal";
+import { useDispatch } from "react-redux";
+import { setCustomer } from "../../redux/slices/CustomerSlice";
 
 const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch()
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSpeedDialOpen, setIsSpeedDialOpen] = useState(false);
+  const isActive = (path) => location.pathname === path;
   const [guestCount, setGuestCount] = useState(0);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
   const toggleSpeedDial = () => setIsSpeedDialOpen(!isSpeedDialOpen);
+  const [phone, setPhone] = useState("");
+  const [name , setName] = useState("");
+  
 
   const increment = () => setGuestCount((prev) => prev + 1);
   const decrement = () => {
     if (guestCount > 0) setGuestCount((prev) => prev - 1);
   };
+
+  const handleCreateOrder = () => {
+    //send data to store
+    dispatch(setCustomer({name, phone, guests: guestCount}));
+    navigate("/tables");
+  }
 
   return (
     <div className="fixed bottom-0 left-0 right-0">
@@ -102,6 +115,7 @@ const BottomNav = () => {
         {/* Central Floating Button for Desktop */}
         <div className="hidden sm:block absolute bottom-6 left-1/2 transform -translate-x-1/2">
           <button
+            disabled={isActive("/tables") || isActive("/menu")}
             onClick={openModal}
             className="bg-[#F6b100] text-white rounded-full p-3 sm:p-4 shadow-lg hover:bg-[#F6b100]/90 transition-colors duration-200 animate-glow"
           >
@@ -133,6 +147,8 @@ const BottomNav = () => {
           <div>
             <input
               type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               placeholder="Enter Customer Name"
               className="w-full bg-[var(--input-bg)] text-[var(--text-color)] rounded-lg p-2 focus:ring-2 focus:ring-[var(--border-color)] focus:outline-none transition-all border border-[var(--border-color)]"
               id=""
@@ -146,6 +162,8 @@ const BottomNav = () => {
           <div>
             <input
               type="number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               placeholder="Enter Customer Phone Number"
               className="w-full bg-[var(--input-bg)] text-[var(--text-color)] rounded-lg p-2 focus:ring-2 focus:ring-[var(--border-color)] focus:outline-none transition-all border border-[var(--border-color)]"
               id=""
@@ -175,10 +193,7 @@ const BottomNav = () => {
           </div>
         </div>
         <button
-          onClick={() => {
-            navigate("/tables");
-            closeModal();
-          }}
+          onClick={handleCreateOrder}
           className="bg-[#F6b100] text-white rounded-lg py-3 w-full mt-8 hover:bg-[#F6b100]/90 transition-colors duration-200"
         >
           Create Order
