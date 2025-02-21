@@ -2,7 +2,6 @@
 const colorPalette = [
   '#FF6B6B', // Soft red
   '#4ECDC4', // Turquoise
-  '#C7F464', // Lime green
   '#FF9F1C', // Orange
   '#6B5B95', // Purple
   '#F25F5C', // Coral
