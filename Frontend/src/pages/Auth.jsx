@@ -1,11 +1,19 @@
-import React from 'react'
+import { useState } from 'react';
+import LoginForm from '../components/Auth/LoginForm';
+import RegisterForm from '../components/Auth/RegisterForm';
 
 const Auth = () => {
-  return (
-    <div>
-      Auth
-    </div>
-  )
-}
+  const [isLogin, setIsLogin] = useState(true);
 
-export default Auth
+  return (
+    <>
+      {isLogin ? (
+        <LoginForm onToggleForm={() => setIsLogin(false)} />
+      ) : (
+        <RegisterForm onToggleForm={() => setIsLogin(true)} />
+      )}
+    </>
+  );
+};
+
+export default Auth;
