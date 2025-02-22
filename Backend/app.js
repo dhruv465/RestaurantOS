@@ -4,7 +4,7 @@ const app = express();
 const connectDB = require('./config/database');
 const globalErrorHandler = require('./middlewares/globalErrorHandler');
 const config = require('./config/config');
-const createHttpError = require('http-errors');
+const cookieParser = require('cookie-parser');
 
 
 //Port
@@ -13,6 +13,7 @@ connectDB();
 
 //Middleware
 app.use(express.json());
+app.use(cookieParser());
 
 //Endpoint Root
 app.get('/', (req, res) => {
@@ -22,6 +23,8 @@ app.get('/', (req, res) => {
 
 //Routes
 app.use("/api/user", require('./routes/userRoute'));
+app.use("/api/order", require('./routes/orderRoute'));
+app.use("/api/table", require('./routes/tableRoute'));
 
 //Error Handler
 app.use(globalErrorHandler);
