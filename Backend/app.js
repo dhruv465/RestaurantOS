@@ -5,6 +5,7 @@ const connectDB = require('./config/database');
 const globalErrorHandler = require('./middlewares/globalErrorHandler');
 const config = require('./config/config');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 
 
 //Port
@@ -14,6 +15,10 @@ connectDB();
 //Middleware
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors({
+    credentials: true ,
+    origin: ['http://localhost:5173']
+}))
 
 //Endpoint Root
 app.get('/', (req, res) => {

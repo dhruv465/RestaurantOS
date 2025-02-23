@@ -1,21 +1,28 @@
-import { useState } from 'react';
-import { FaEnvelope, FaLock, FaMoon, FaSun } from 'react-icons/fa';
-import { useTheme } from '../../context/ThemeContext';
+import { useState } from "react";
+import { FaEnvelope, FaLock, FaMoon, FaSun } from "react-icons/fa";
+import { useTheme } from "../../context/ThemeContext";
+import { useMutation } from "@tanstack/react-query";
+import { login } from "../../https/index";
+import { enqueueSnackbar } from "notistack";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../redux/slices/useSlice";
+import { useNavigate } from "react-router-dom";
 
 const hotelQuotes = [
   "Where luxury meets comfort, and service creates memories.",
   "Every guest is a story waiting to be told.",
   "Excellence in hospitality, one guest at a time.",
-  "Creating moments of delight, day and night."
+  "Creating moments of delight, day and night.",
 ];
 
 const Input = ({ icon: Icon, label, ...props }) => (
   <div className="space-y-2">
-    <label className="block text-[#ababab] text-sm font-medium">
-      {label}
-    </label>
+    <label className="block text-[#ababab] text-sm font-medium">{label}</label>
     <div className="relative">
-      <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#ababab]" size={16} />
+      <Icon
+        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#ababab]"
+        size={16}
+      />
       <input
         {...props}
         className="w-full pl-10 pr-4 py-3 rounded-lg bg-[var(--input-bg)] text-[var(--text-color)] border border-[var(--border-color)] focus:ring-2 focus:ring-[var(--border-color)] focus:outline-none transition-all"
@@ -24,21 +31,46 @@ const Input = ({ icon: Icon, label, ...props }) => (
   </div>
 );
 
+
 const LoginForm = ({ onToggleForm }) => {
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [randomQuote] = useState(() => 
-    hotelQuotes[Math.floor(Math.random() * hotelQuotes.length)]
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [randomQuote] = useState(
+    () => hotelQuotes[Math.floor(Math.random() * hotelQuotes.length)]
   );
+
+  const dispatch = useDispatch();
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Login:', formData);
+    loginMutation.mutate(formData);
   };
 
+  const loginMutation = useMutation({
+    mutationFn: (reqData) => login(reqData),
+    onSuccess: (res) => {
+      const { data } = res;
+      console.log("Login Success:", data);
+      const { _id, name, email, phone, role } = data.data;
+      dispatch(setUser({ _id, name, email, phone, role }));
+      navigate("/")
+    },
+    onError: (error) => {
+      const { response } = error;
+      enqueueSnackbar(response.data.message, { variant: "error" });
+    },
+  });
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" 
-      style={{ background: 'var(--main-bg)' }}>
+    <div
+      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
+      style={{ background: "var(--main-bg)" }}
+    >
       {/* Background Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-0 left-0 w-64 h-64 bg-[var(--primary-color)] rounded-full opacity-5 transform -translate-x-1/2 -translate-y-1/2"></div>
@@ -50,15 +82,24 @@ const LoginForm = ({ onToggleForm }) => {
           <button
             onClick={toggleTheme}
             className="absolute top-4 right-4 p-2 rounded-full hover:bg-[var(--input-bg)] transition-colors"
-            style={{ color: 'var(--text-color)' }}
+            style={{ color: "var(--text-color)" }}
           >
-            {theme === 'dark' ? <FaSun size={20} /> : <FaMoon size={20} />}
+            {theme === "dark" ? <FaSun size={20} /> : <FaMoon size={20} />}
           </button>
 
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-color)' }}>RestOS</h1>
-            <p className="text-[#ababab] text-sm mb-4">Sign in to your account</p>
-            <p className="text-sm italic text-[var(--text-color)] opacity-75 px-4">{randomQuote}</p>
+            <h1
+              className="text-4xl font-bold mb-2"
+              style={{ color: "var(--text-color)" }}
+            >
+              RestOS
+            </h1>
+            <p className="text-[#ababab] text-sm mb-4">
+              Sign in to your account
+            </p>
+            <p className="text-sm italic text-[var(--text-color)] opacity-75 px-4">
+              {randomQuote}
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -69,7 +110,9 @@ const LoginForm = ({ onToggleForm }) => {
               name="email"
               placeholder="Enter your email"
               value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, email: e.target.value }))
+              }
             />
             <Input
               icon={FaLock}
@@ -78,7 +121,9 @@ const LoginForm = ({ onToggleForm }) => {
               name="password"
               placeholder="Enter your password"
               value={formData.password}
-              onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, password: e.target.value }))
+              }
             />
 
             <button

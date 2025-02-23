@@ -42,6 +42,23 @@ const RegisterForm = ({ onToggleForm }) => {
     console.log('Register:', formData);
   };
 
+
+  const registerMutation = useMutation({
+    mutationFn: (reqData) => register(reqData),
+    onSuccess: (res) => {
+      const { data } = res;
+      console.log("Login Success:", data);
+      const { _id, name, email, phone, role } = data.data;
+      dispatch(setUser({ _id, name, email, phone, role }));
+      navigate("/")
+    },
+    onError: (error) => {
+      const { response } = error;
+      enqueueSnackbar(response.data.message, { variant: "error" });
+    },
+  });
+
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" 
       style={{ background: 'var(--main-bg)' }}>
