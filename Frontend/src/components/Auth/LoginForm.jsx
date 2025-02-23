@@ -37,7 +37,7 @@ const LoginForm = ({ onToggleForm }) => {
   const [randomQuote] = useState(
     () => hotelQuotes[Math.floor(Math.random() * hotelQuotes.length)]
   );
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleChange = (e) => {
@@ -53,11 +53,10 @@ const navigate = useNavigate();
     mutationFn: (reqData) => login(reqData),
     onSuccess: (res) => {
       const { data } = res;
-      console.log("Login Success:", data);
+      console.log(data);
       const { _id, name, email, phone, role } = data.data;
       dispatch(setUser({ _id, name, email, phone, role }));
       navigate("/");
-      dispatch(login());
     },
     onError: (error) => {
       const { response } = error;

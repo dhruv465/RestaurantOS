@@ -58,7 +58,6 @@ const login = async (req, res, next) => {
         const accessToken = jwt.sign({ _id: isUserPresent._id }, config.accessTokenSecret, {
             expiresIn: '24h'
         });
-
         res.cookie('accessToken', accessToken, {
             maxAge: 1000 * 60 * 60 * 24 * 30,
             httpOnly: true,
@@ -94,16 +93,16 @@ const getUserData = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
 
-    try{
+    try {
         res.clearCookie('accessToken');
         res.status(200).json({
             success: true,
             message: 'User logged out successfully'
-            });
+        });
     }
-    catch(error){
+    catch (error) {
         next(error);
-        }
+    }
 }
 
 
