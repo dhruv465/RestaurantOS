@@ -9,11 +9,13 @@ import { Home, Auth, Orders, Tables, Menu, NotFound } from "./pages";
 import Header from "./components/ui/Header";
 import { ThemeProvider } from "./context/ThemeContext";
 import { useSelector } from "react-redux";
+import useLoadData from "./hooks/useLoadData";
 
 function Layout() {
   const location = useLocation();
+  useLoadData();
   const hideHeaderRoutes = ["/auth"];
-  const { isAuth } = useSelector(state => state.user);
+  const { isAuth } = useSelector((state) => state.user);
 
   return (
     <>
@@ -37,16 +39,22 @@ function Layout() {
             </ProtectedRoutes>
           }
         />
-        <Route path="/tables" element={
-          <ProtectedRoutes>
-<Tables />
-          </ProtectedRoutes>
-          } />
-        <Route path="/menu" element={
-          <ProtectedRoutes>
-            <Menu />
-          </ProtectedRoutes>
-      } />
+        <Route
+          path="/tables"
+          element={
+            <ProtectedRoutes>
+              <Tables />
+            </ProtectedRoutes>
+          }
+        />
+        <Route
+          path="/menu"
+          element={
+            <ProtectedRoutes>
+              <Menu />
+            </ProtectedRoutes>
+          }
+        />
       </Routes>
     </>
   );
