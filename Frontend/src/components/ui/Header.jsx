@@ -10,7 +10,7 @@ import { IoClose, IoMenu, IoSearch } from "react-icons/io5";
 import logo from "../../assets/images/logo.png";
 import { useTheme } from "../../context/ThemeContext";
 import { useDispatch, useSelector } from "react-redux";
-import { removeUser } from "../../redux/slices/useSlice"; // Import removeUser
+import { removeUser } from "../../redux/slices/userSlice"; // Import removeUser
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { logout } from "../../https";

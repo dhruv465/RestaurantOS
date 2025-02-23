@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { login } from "../../https/index";
 import { enqueueSnackbar } from "notistack";
 import { useDispatch } from "react-redux";
-import { setUser } from "../../redux/slices/useSlice";
+import { setUser } from "../../redux/slices/userSlice";
 import { useNavigate } from "react-router-dom";
 
 const hotelQuotes = [
@@ -31,15 +31,13 @@ const Input = ({ icon: Icon, label, ...props }) => (
   </div>
 );
 
-
 const LoginForm = ({ onToggleForm }) => {
-  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [randomQuote] = useState(
     () => hotelQuotes[Math.floor(Math.random() * hotelQuotes.length)]
   );
-
+const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleChange = (e) => {
@@ -58,7 +56,8 @@ const LoginForm = ({ onToggleForm }) => {
       console.log("Login Success:", data);
       const { _id, name, email, phone, role } = data.data;
       dispatch(setUser({ _id, name, email, phone, role }));
-      navigate("/")
+      navigate("/");
+      dispatch(login());
     },
     onError: (error) => {
       const { response } = error;
@@ -108,11 +107,9 @@ const LoginForm = ({ onToggleForm }) => {
               label="Email Address"
               type="email"
               name="email"
-              placeholder="Enter your email"
               value={formData.email}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, email: e.target.value }))
-              }
+              placeholder="Enter your email"
+              onChange={handleChange}
             />
             <Input
               icon={FaLock}
@@ -121,9 +118,7 @@ const LoginForm = ({ onToggleForm }) => {
               name="password"
               placeholder="Enter your password"
               value={formData.password}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, password: e.target.value }))
-              }
+              onChange={handleChange}
             />
 
             <button
