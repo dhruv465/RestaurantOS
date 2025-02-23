@@ -10,12 +10,15 @@ import Header from "./components/ui/Header";
 import { ThemeProvider } from "./context/ThemeContext";
 import { useSelector } from "react-redux";
 import useLoadData from "./hooks/useLoadData";
+import Loader from "./components/ui/Loader";
 
 function Layout() {
   const location = useLocation();
-  useLoadData();
+  const isLoading = useLoadData();
   const hideHeaderRoutes = ["/auth"];
   const { isAuth } = useSelector((state) => state.user);
+
+  if(isLoading) return <Loader />
 
   return (
     <>
