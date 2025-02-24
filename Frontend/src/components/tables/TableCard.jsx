@@ -4,6 +4,7 @@ import { getRandomColor } from "../../utils";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { updateTable } from "../../redux/slices/CustomerSlice";
+import { FaLongArrowAltRight } from "react-icons/fa";
 
 const TableCard = ({ name, status, initials, seats }) => {
   const dispatch = useDispatch();
@@ -20,7 +21,7 @@ const TableCard = ({ name, status, initials, seats }) => {
     >
       <div className="flex items-center justify-between px-1">
         <h1 className="text-[var(--text-color)] text-xl font-semibold">
-          {name}
+         Table <FaLongArrowAltRight className="text-[var(--text-color)] ml-2 inline"/> {name}
         </h1>
         <p
           className={`${
@@ -41,7 +42,7 @@ const TableCard = ({ name, status, initials, seats }) => {
         </h1>
       </div>
       <p className="text-[var(--text-color)] text-xs opacity-80">
-        {" "}
+        
         Seats: <span className="text-[var(--text-color)]">{seats}</span>
       </p>
     </div>

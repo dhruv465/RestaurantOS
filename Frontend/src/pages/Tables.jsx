@@ -4,9 +4,26 @@ import TableCard from "../components/tables/TableCard";
 import BackButton from "../components/ui/BackButton";
 import BottomNav from "../components/ui/BottomNav";
 import { tables } from "../constants";
+import { getTables } from "../https";
+import { keepPreviousData, useQuery} from "@tanstack/react-query"
 
 const Tables = () => {
   const [status, setStatus] = useState("all");
+
+  const { data: resData, isError } = useQuery({
+    queryKey: ["tables"],
+    queryFn: async () => {
+      return await getTables();
+      },
+      placeholderData: keepPreviousData,
+  });
+
+  if(isError) {
+    enqueueSnackbar("Something went wrong!", { variant: "error" });
+
+  }
+
+  console.log(resData);
 
   return (
     <section className="bg-[var(--main-bg)] min-h-screen overflow-auto pb-20">
@@ -39,14 +56,15 @@ const Tables = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 sm:p-6 md:p-8">
-        {tables.map((table) => {
+        {resData?.data.data.map((table) => {
           return (
             <TableCard
-              key={table.id}
-              id={table.id}
-              name={table.name}
+             
+              id={table._id}
+              name={table.tableNo}
               status={table.status}
-              initials={table.initials}
+              initials={"DS"}
+              seats={table.seats}
             />
           );
         })}

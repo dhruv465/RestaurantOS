@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 
 const createTable = async (req, res, next) => {
     try {
-        const { tableNo } = req.body;
+        const { tableNo, seats } = req.body;
 
         if (!tableNo) {
             const error = createHttpError(400, "Table number is required");
@@ -18,7 +18,7 @@ const createTable = async (req, res, next) => {
             return next(error);
         }
 
-        const newTable = new Table({ tableNo });
+        const newTable = new Table({ tableNo, seats });
         await newTable.save();
 
         res.status(201).json({
@@ -38,7 +38,6 @@ const getTables = async (req, res, next) => {
 
         // Removed the line that fetches the updated table
         res.status(200).json({
-            orderId: orderId,
             success: true,
             data: tables
         });
