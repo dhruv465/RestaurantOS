@@ -2,12 +2,12 @@ const Table = require('../models/tableModel');
 const createHttpError = require('http-errors');
 const mongoose = require('mongoose');
 
-const createTable = async (req, res, next) => {
+const addTable = async (req, res, next) => {
     try {
-        const { tableNo, seats } = req.body;
+        const { tableNo } = req.body; //seats
 
         if (!tableNo) {
-            const error = createHttpError(400, "Table number is required");
+            const error = createHttpError(400, "Please provide table No!");
             return next(error);
         }
 
@@ -18,7 +18,7 @@ const createTable = async (req, res, next) => {
             return next(error);
         }
 
-        const newTable = new Table({ tableNo, seats });
+        const newTable = new Table({ tableNo }); //seats
         await newTable.save();
 
         res.status(201).json({
@@ -35,9 +35,8 @@ const getTables = async (req, res, next) => {
     try {
 
         const tables = await Table.find();
-
-        // Removed the line that fetches the updated table
         res.status(200).json({
+            
             success: true,
             data: tables
         });
@@ -52,14 +51,7 @@ const updateTable = async (req, res, next) => {
 
         const { status, orderId } = req.body;
 
-        const { id } = req.params;
-
-        if (!mongoose.Types.objectId.isValid(id)) {
-            const error = createHttpError(400, "Invalid order id");
-            return next(error);
-        }
-
-        const table = await Table.findByIdAndUpdate(id, { status, currentOrder: orderId }, { new: true });
+        const table = await Table.findByIdAndUpdate(req.params.id, { status, currentOrder: orderId }, { new: true });
 
         if (!table) {
             const error = createHttpError(404, "Table not found");
@@ -68,17 +60,18 @@ const updateTable = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            data: table,
-            message: "Table updated successfully"
+            
+            message: "Table updated successfully",
+            data: table
         });
 
     } catch (error) {
-
+            next(error);
     }
 }
 
 module.exports = {
-    createTable,
+    addTable,
     getTables,
     updateTable
 }

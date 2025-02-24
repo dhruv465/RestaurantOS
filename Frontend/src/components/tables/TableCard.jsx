@@ -6,17 +6,24 @@ import { useDispatch } from "react-redux";
 import { updateTable } from "../../redux/slices/CustomerSlice";
 import { FaLongArrowAltRight } from "react-icons/fa";
 
-const TableCard = ({ name, status, initials, seats }) => {
+const TableCard = ({ id, name, status, initials, seats, currentOrders }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const handleClick = (name) => {
-    if (status === "Booked") return;
-    dispatch(updateTable({ tableNo: name }));
-    navigate("/menu");
-  };
+    const handleClick = (table) => {
+        if (status === "Booked") return;
+        dispatch(updateTable({ table: { 
+            _id: table._id,
+            tableNo: table.tableNo,
+            status: table.status,
+            seats: table.seats
+        }}));
+        navigate("/menu");
+    };
+
   return (
     <div
-      onClick={() => handleClick(name)}
+        onClick={() => handleClick({ _id: id, tableNo: name, status, seats })}
+
       className="w-full md:w-[300px] bg-[var(--card-bg)] p-4 rounded-lg mb-4 cursor-pointer shadow-lg"
     >
       <div className="flex items-center justify-between px-1">
@@ -38,12 +45,23 @@ const TableCard = ({ name, status, initials, seats }) => {
           style={{ backgroundColor: getRandomColor() }}
           className="text-white rounded-full p-5 text-xl"
         >
-          {initials}
+          {currentOrders?.customerDetails?.name 
+            ? currentOrders.customerDetails.name.split(' ').map(n => n[0]).join('')
+            : initials}
         </h1>
       </div>
       <p className="text-[var(--text-color)] text-xs opacity-80">
-        
         Seats: <span className="text-[var(--text-color)]">{seats}</span>
+        {currentOrders && (
+          <>
+            <br />
+            Order ID: <span className="text-[var(--text-color)]">{currentOrders._id}</span>
+            <br />
+            Customer: <span className="text-[var(--text-color)]">{currentOrders.customerDetails.name}</span>
+            <br />
+            Phone: <span className="text-[var(--text-color)]">{currentOrders.customerDetails.phone}</span>
+          </>
+        )}
       </p>
     </div>
   );

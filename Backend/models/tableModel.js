@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const { Schema } = mongoose;
-
 
 const tableSchema = new mongoose.Schema({
     tableNo: {
@@ -10,18 +8,16 @@ const tableSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        default: "available"
+        default: "Available"
     },
-    seats: {
-        type: Number,
-        required: true
-    },
+    // seats: {
+    //     type: Number,
+    //     required: true
+    // },
     currentOrder: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Order"
     }
-}, { timestamps: true });
+});
 
-const Table = mongoose.model("Table", tableSchema);
-
-module.exports = Table;
+module.exports = mongoose.model("Table", tableSchema)

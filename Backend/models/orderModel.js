@@ -19,11 +19,12 @@ const orderSchema = new mongoose.Schema({
     },
     orderStatus: {
         type: String,
-        required: true
+        required: true,
+      
     },
     orderDate: {
         type: Date,
-        default: Date.now,
+        default: Date.now()
     },
     bills: {
         total: { type: Number, required: true },
@@ -31,13 +32,7 @@ const orderSchema = new mongoose.Schema({
         grandTotal: { type: Number, required: true }
     },
     items: [],
-    table: {
-        type: Schema.Types.ObjectId,
-        ref: "Table"
-    }
-
+    table: { type: mongoose.Schema.Types.ObjectId, ref: "Table"}
 }, { timestamps: true });
 
-const Order = mongoose.model("Order", orderSchema);
-
-module.exports = Order;
+module.exports = mongoose.model("Order", orderSchema);
