@@ -17,7 +17,7 @@ const useLoadData = () => {
             try {
 
                 const { data } = await getUserData();
-                console.log(data);
+                // console.log(data);
                 const { _id, name, email, phone, role } = data.data;
                 dispatch(setUser({ _id, name, email, phone, role }));
 

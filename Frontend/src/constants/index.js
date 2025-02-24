@@ -11,121 +11,121 @@ import roganJosh from '../assets/images/rogan-josh.jpg';
 // import { color } from 'framer-motion';
 
 export const popularDishes = [
-    {
-      id: 1,
-      image: butterChicken,
-      name: 'Butter Chicken',
-      numberOfOrders: 250,
-    },
-    {
-      id: 2,
-      image: palakPaneer,
-      name: 'Palak Paneer',
-      numberOfOrders: 190,
-    },
-    {
-      id: 3,
-      image: biryani,
-      name: 'Hyderabadi Biryani',
-      numberOfOrders: 300,
-    },
-    {
-      id: 4,
-      image: masalaDosa,
-      name: 'Masala Dosa',
-      numberOfOrders: 220,
-    },
-    {
-      id: 5,
-      image: choleBhature,
-      name: 'Chole Bhature',
-      numberOfOrders: 270,
-    },
-    {
-      id: 6,
-      image: rajmaChawal,
-      name: 'Rajma Chawal',
-      numberOfOrders: 180,
-    },
-    {
-      id: 7,
-      image: paneerTikka,
-      name: 'Paneer Tikka',
-      numberOfOrders: 210,
-    },
-    {
-      id: 8,
-      image: gulabJamun,
-      name: 'Gulab Jamun',
-      numberOfOrders: 310,
-    },
-    {
-      id: 9,
-      image: pooriSabji,
-      name: 'Poori Sabji',
-      numberOfOrders: 140,
-    },
-    {
-      id: 10,
-      image: roganJosh,
-      name: 'Rogan Josh',
-      numberOfOrders: 160,
-    },
-  ];
+  {
+    id: 1,
+    image: butterChicken,
+    name: 'Butter Chicken',
+    numberOfOrders: 250,
+  },
+  {
+    id: 2,
+    image: palakPaneer,
+    name: 'Palak Paneer',
+    numberOfOrders: 190,
+  },
+  {
+    id: 3,
+    image: biryani,
+    name: 'Hyderabadi Biryani',
+    numberOfOrders: 300,
+  },
+  {
+    id: 4,
+    image: masalaDosa,
+    name: 'Masala Dosa',
+    numberOfOrders: 220,
+  },
+  {
+    id: 5,
+    image: choleBhature,
+    name: 'Chole Bhature',
+    numberOfOrders: 270,
+  },
+  {
+    id: 6,
+    image: rajmaChawal,
+    name: 'Rajma Chawal',
+    numberOfOrders: 180,
+  },
+  {
+    id: 7,
+    image: paneerTikka,
+    name: 'Paneer Tikka',
+    numberOfOrders: 210,
+  },
+  {
+    id: 8,
+    image: gulabJamun,
+    name: 'Gulab Jamun',
+    numberOfOrders: 310,
+  },
+  {
+    id: 9,
+    image: pooriSabji,
+    name: 'Poori Sabji',
+    numberOfOrders: 140,
+  },
+  {
+    id: 10,
+    image: roganJosh,
+    name: 'Rogan Josh',
+    numberOfOrders: 160,
+  },
+];
 
 
-  export const tables = [
-    {id:1, name: "Table 1", status: "Booked", initials: "DS"},
-    {id:2, name: "Table 2", status: "Available", initials: "JD"},
-    {id:3, name: "Table 3", status: "Booked", initials: "VT"},
-    {id:4, name: "Table 4", status: "Available", initials: "SD"},
-    {id:5, name: "Table 5", status: "Booked", initials: "PK"},
-    {id:6, name: "Table 6", status: "Available", initials: "TM"},
-    {id:7, name: "Table 7", status: "Booked", initials: "MD"},
-    {id:8, name: "Table 8", status: "Available", initials: "RS"},
-    {id:9, name: "Table 9", status: "Booked", initials:"RM"},
-    {id:10, name: "Table 10", status: "Available", initials: "KM"},
+export const tables = [
+  { id: 1, name: "Table 1", status: "Booked", initials: "DS" },
+  { id: 2, name: "Table 2", status: "Available", initials: "JD" },
+  { id: 3, name: "Table 3", status: "Booked", initials: "VT" },
+  { id: 4, name: "Table 4", status: "Available", initials: "SD" },
+  { id: 5, name: "Table 5", status: "Booked", initials: "PK" },
+  { id: 6, name: "Table 6", status: "Available", initials: "TM" },
+  { id: 7, name: "Table 7", status: "Booked", initials: "MD" },
+  { id: 8, name: "Table 8", status: "Available", initials: "RS" },
+  { id: 9, name: "Table 9", status: "Booked", initials: "RM" },
+  { id: 10, name: "Table 10", status: "Available", initials: "KM" },
 ]
 
 export const startersItem = [
-    {
-      id: 1,
-      name: "Paneer Tikka",
-      price: 250,
-      category: "Vegetarian"
-    },
-    {
-      id: 2,
-      name: "Chicken Tikka",
-      price: 300,
-      category: "Non-Vegetarian"
-    },
-    {
-      id: 3,
-      name: "Tandoori Chicken",
-      price: 350,
-      category: "Non-Vegetarian"
-    },
-    {
-      id: 4,
-      name: "Samosa",
-      price: 100,
-      category: "Vegetarian"
-    },
-    {
-      id: 5,
-      name: "Aloo Tikki",
-      price: 120,
-      category: "Vegetarian"
-    },
-    {
-      id: 6,
-      name: "Hara Bhara Kebab",
-      price: 220,
-      category: "Vegetarian"
-    }
-  ];
-  
+  {
+    id: 1,
+    name: "Paneer Tikka",
+    price: 250,
+    category: "Vegetarian"
+  },
+  {
+    id: 2,
+    name: "Chicken Tikka",
+    price: 300,
+    category: "Non-Vegetarian"
+  },
+  {
+    id: 3,
+    name: "Tandoori Chicken",
+    price: 350,
+    category: "Non-Vegetarian"
+  },
+  {
+    id: 4,
+    name: "Samosa",
+    price: 100,
+    category: "Vegetarian"
+  },
+  {
+    id: 5,
+    name: "Aloo Tikki",
+    price: 120,
+    category: "Vegetarian"
+  },
+  {
+    id: 6,
+    name: "Hara Bhara Kebab",
+    price: 220,
+    category: "Vegetarian"
+  }
+];
+
 export const mainCourse = [
   {
     id: 1,
@@ -359,18 +359,72 @@ export const salads = [
     id: 5,
     name: "Tuna Salad",
     price: 350,
-  
+
   }
 ];
 
 
 export const menus = [
-  { id: 1, name: "Starters", bgColor: "#b73e3e" ,icon: "🍲", items: startersItem },
-  { id: 2, name: "Main Course", bgColor: "#5b45b0" ,icon: "🍛", items: mainCourse },
-  { id: 3, name: "Beverages", bgColor: "#7f167f" ,icon: "🍹", items: beverages },
-  { id: 4, name: "Soups", bgColor: "#735f32" ,icon: "🍜", items: soups },
-  { id: 5, name: "Desserts", bgColor: "#1d2569" ,icon: "🍰", items: desserts },
-  { id: 6, name: "Pizzas", bgColor: "#285430" ,icon: "🍕", items: pizzas },
-  { id: 7, name: "Alcoholic Drinks", bgColor: "#b73e3e" ,icon: "🍺", items: alcoholicDrinks },
-  { id: 8, name: "Salads", bgColor: "#5b45b0" ,icon: "🥗", items: salads }
+  { id: 1, name: "Starters", bgColor: "#b73e3e", icon: "🍲", items: startersItem },
+  { id: 2, name: "Main Course", bgColor: "#5b45b0", icon: "🍛", items: mainCourse },
+  { id: 3, name: "Beverages", bgColor: "#7f167f", icon: "🍹", items: beverages },
+  { id: 4, name: "Soups", bgColor: "#735f32", icon: "🍜", items: soups },
+  { id: 5, name: "Desserts", bgColor: "#1d2569", icon: "🍰", items: desserts },
+  { id: 6, name: "Pizzas", bgColor: "#285430", icon: "🍕", items: pizzas },
+  { id: 7, name: "Alcoholic Drinks", bgColor: "#b73e3e", icon: "🍺", items: alcoholicDrinks },
+  { id: 8, name: "Salads", bgColor: "#5b45b0", icon: "🥗", items: salads }
 ]
+
+
+export const metricsData = [
+  { title: "Revenue", value: "₹50,846.90", percentage: "12%", color: "#025cca", isIncrease: false },
+  { title: "Outbound Clicks", value: "10,342", percentage: "16%", color: "#02ca3a", isIncrease: true },
+  { title: "Total Customer", value: "19,720", percentage: "10%", color: "#f6b100", isIncrease: true },
+  { title: "Event Count", value: "20,000", percentage: "10%", color: "#be3e3f", isIncrease: false },
+];
+
+export const itemsData = [
+  { title: "Total Categories", value: "8", percentage: "12%", color: "#5b45b0", isIncrease: false },
+  { title: "Total Dishes", value: "50", percentage: "12%", color: "#285430", isIncrease: true },
+  { title: "Active Orders", value: "12", percentage: "12%", color: "#735f32", isIncrease: true },
+  { title: "Total Tables", value: "10", color: "#7f167f" }
+];
+
+export const orders = [
+  {
+    id: "101",
+    customer: "Dhruv Sathe",
+    status: "Ready",
+    dateTime: "January 18, 2025 08:32 PM",
+    items: 8,
+    tableNo: 3,
+    total: 250.0,
+  },
+  {
+    id: "102",
+    customer: "John Doe",
+    status: "In Progress",
+    dateTime: "January 18, 2025 08:45 PM",
+    items: 5,
+    tableNo: 4,
+    total: 180.0,
+  },
+  {
+    id: "103",
+    customer: "Emma Smith",
+    status: "Ready",
+    dateTime: "January 18, 2025 09:00 PM",
+    items: 3,
+    tableNo: 5,
+    total: 120.0,
+  },
+  {
+    id: "104",
+    customer: "Chris Brown",
+    status: "In Progress",
+    dateTime: "January 18, 2025 09:15 PM",
+    items: 6,
+    tableNo: 6,
+    total: 220.0,
+  },
+];

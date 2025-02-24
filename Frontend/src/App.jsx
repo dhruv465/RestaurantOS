@@ -5,7 +5,7 @@ import {
   useLocation,
   Navigate,
 } from "react-router-dom";
-import { Home, Auth, Orders, Tables, Menu, NotFound } from "./pages";
+import { Home, Auth, Orders, Tables, Menu, NotFound, Dashboard } from "./pages";
 import Header from "./components/ui/Header";
 import { ThemeProvider } from "./context/ThemeContext";
 import { useSelector } from "react-redux";
@@ -18,7 +18,7 @@ function Layout() {
   const hideHeaderRoutes = ["/auth"];
   const { isAuth } = useSelector((state) => state.user);
 
-  if(isLoading) return <Loader />
+  if (isLoading) return <Loader />;
 
   return (
     <>
@@ -55,6 +55,14 @@ function Layout() {
           element={
             <ProtectedRoutes>
               <Menu />
+            </ProtectedRoutes>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoutes>
+              <Dashboard />
             </ProtectedRoutes>
           }
         />

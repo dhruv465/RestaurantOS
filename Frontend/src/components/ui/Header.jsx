@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { TbLayoutDashboardFilled } from "react-icons/tb";
 import {
   FaBell,
   FaMoon,
@@ -23,7 +24,10 @@ const Header = () => {
   const searchRef = useRef(null);
   const menuRef = useRef(null);
 
-  const isDarkMode = theme === "dark" || (theme === "light" && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const isDarkMode =
+    theme === "dark" ||
+    (theme === "light" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches);
   const userData = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -126,7 +130,7 @@ const Header = () => {
     >
       {/* Mobile Header (below 834px) */}
       <div className="md:hidden flex items-center justify-between p-4">
-        <div className="logo flex items-center gap-2">
+        <div onClick={() => navigate("/")} className="logo flex items-center gap-2 cursor-pointer">
           <img src={logo} className="h-8 w-8" alt="RestOS logo" />
           <h1 className="text-xl font-semibold text-[var(--text-color)]">
             RestOS
@@ -222,7 +226,9 @@ const Header = () => {
             <button
               onClick={toggleTheme}
               className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
-              aria-label={isDarkMode ? "Switch to light theme" : "Switch to dark theme"}
+              aria-label={
+                isDarkMode ? "Switch to light theme" : "Switch to dark theme"
+              }
             >
               {isDarkMode ? (
                 <FaSun
@@ -240,6 +246,18 @@ const Header = () => {
               </span>
             </button>
 
+            {userData.role === "Admin" && (
+              <button onClick={()=> navigate("/dashboard")}
+                className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
+                aria-label="Dashboard"
+              >
+                <TbLayoutDashboardFilled
+                  className="text-xl text-[var(--text-color)]"
+                  aria-hidden="true"
+                />
+                <span className="text-[var(--text-color)]">Dashboard</span>
+              </button>
+            )}
             <button
               className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
               aria-label="Notifications"
@@ -270,7 +288,7 @@ const Header = () => {
 
       {/* Desktop Header (above 834px) */}
       <div className="hidden md:flex flex-col md:flex-row justify-between items-center py-2 px-4 sm:px-6 md:px-8 gap-4 md:gap-0">
-        <div className="logo flex items-center gap-2">
+        <div onClick={() => navigate("/")} className="logo flex items-center gap-2 cursor-pointer">
           <img src={logo} className="h-8 w-8" alt="RestOS logo" />
           <h1 className="text-2xl font-bold text-[var(--text-color)]">
             RestOS
@@ -299,6 +317,14 @@ const Header = () => {
         </form>
 
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+          {userData.role === "Admin" && (
+            <button onClick={()=> navigate("/dashboard")}
+              className="flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
+              aria-label="Dashboard"
+            >
+              <TbLayoutDashboardFilled className="text-xl" />
+            </button>
+          )}
           <button
             onClick={toggleTheme}
             className="p-2 rounded-full hover:bg-[var(--card-bg)] transition-colors"
