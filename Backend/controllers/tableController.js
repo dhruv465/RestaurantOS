@@ -34,9 +34,12 @@ const addTable = async (req, res, next) => {
 const getTables = async (req, res, next) => {
     try {
 
-        const tables = await Table.find();
+        const tables = await Table.find().populate({
+            path: "currentOrder",
+            select: "customerDetails"
+        });
         res.status(200).json({
-            
+
             success: true,
             data: tables
         });
@@ -48,27 +51,32 @@ const getTables = async (req, res, next) => {
 
 const updateTable = async (req, res, next) => {
     try {
+        const { status, orderId } = req.body; // Ensure lowercase 'orderId' is used
 
-        const { status, orderId } = req.body;
+        if (!mongoose.Types.ObjectId.isValid(orderId)) {
+            return next(createHttpError(400, "Invalid Order ID format"));
+        }
 
-        const table = await Table.findByIdAndUpdate(req.params.id, { status, currentOrder: orderId }, { new: true });
+        const table = await Table.findByIdAndUpdate(
+            req.params.id,
+            { status, currentOrder: orderId }, // Ensure correct field name
+            { new: true, runValidators: true }
+        );
 
         if (!table) {
-            const error = createHttpError(404, "Table not found");
-            return next(error);
+            return next(createHttpError(404, "Table not found"));
         }
 
         res.status(200).json({
             success: true,
-            
             message: "Table updated successfully",
             data: table
         });
 
     } catch (error) {
-            next(error);
+        next(error);
     }
-}
+};
 
 module.exports = {
     addTable,

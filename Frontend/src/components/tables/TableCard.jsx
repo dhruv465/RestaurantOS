@@ -1,29 +1,22 @@
 import React from "react";
 import { useTheme } from "../../context/ThemeContext";
-import { getRandomColor } from "../../utils";
+import { getAvatarName, getRandomColor } from "../../utils";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { updateTable } from "../../redux/slices/CustomerSlice";
 import { FaLongArrowAltRight } from "react-icons/fa";
 
-const TableCard = ({ id, name, status, initials, seats, currentOrders }) => {
+const TableCard = ({ name, status, initials, seats }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
     const handleClick = (table) => {
-        if (status === "Booked") return;
-        dispatch(updateTable({ table: { 
-            _id: table._id,
-            tableNo: table.tableNo,
-            status: table.status,
-            seats: table.seats
-        }}));
-        navigate("/menu");
-    };
-
+    if (status === "Booked") return;
+    dispatch(updateTable({ tableNo: name }));
+    navigate("/menu");
+  };
   return (
     <div
-        onClick={() => handleClick({ _id: id, tableNo: name, status, seats })}
-
+      onClick={() => handleClick(name)}
       className="w-full md:w-[300px] bg-[var(--card-bg)] p-4 rounded-lg mb-4 cursor-pointer shadow-lg"
     >
       <div className="flex items-center justify-between px-1">
@@ -42,26 +35,15 @@ const TableCard = ({ id, name, status, initials, seats, currentOrders }) => {
       </div>
       <div className="flex items-center justify-center mt-5 mb-7">
         <h1
-          style={{ backgroundColor: getRandomColor() }}
-          className="text-white rounded-full p-5 text-xl"
+          style={{ backgroundColor:initials ? getRandomColor() : "var(--main-bg)" }}
+          className="text-[var(--text-color)] rounded-full p-5 text-xl"
         >
-          {currentOrders?.customerDetails?.name 
-            ? currentOrders.customerDetails.name.split(' ').map(n => n[0]).join('')
-            : initials}
+         {getAvatarName(initials) || "N/A"}
         </h1>
       </div>
       <p className="text-[var(--text-color)] text-xs opacity-80">
+        
         Seats: <span className="text-[var(--text-color)]">{seats}</span>
-        {currentOrders && (
-          <>
-            <br />
-            Order ID: <span className="text-[var(--text-color)]">{currentOrders._id}</span>
-            <br />
-            Customer: <span className="text-[var(--text-color)]">{currentOrders.customerDetails.name}</span>
-            <br />
-            Phone: <span className="text-[var(--text-color)]">{currentOrders.customerDetails.phone}</span>
-          </>
-        )}
       </p>
     </div>
   );
