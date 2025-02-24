@@ -96,7 +96,7 @@ const LoginForm = ({ onToggleForm }) => {
               Sign in to your account
             </p>
             <p className="text-sm italic text-[var(--text-color)] opacity-75 px-4">
-              {randomQuote}
+              "{randomQuote}"
             </p>
           </div>
 
