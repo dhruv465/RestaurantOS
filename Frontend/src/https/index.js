@@ -24,3 +24,4 @@ export const getTables = () => api.get('/api/table');
 // Payment API endpoints
 
 export const createOrderRazorpay = (data) => api.post('/api/payment/create-order', data);
+export const verifyPaymentRazorpay = (data) => api.post('/api/payment/verify-payment', data);

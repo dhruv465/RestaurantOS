@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { getTotalPrice } from "../../redux/slices/CartSlice";
 import { useSelector } from "react-redux";
-import { createOrderRazorpay } from "../../https";
+import { createOrderRazorpay, verifyPaymentRazorpay } from "../../https";
 import { enqueueSnackbar } from "notistack";
 
 
@@ -63,6 +63,8 @@ const Bill = () => {
           const verification = await verifyPaymentRazorpay(response);
           console.log(verification);
           enqueueSnackbar(verification.data.message, { variant: "success" });
+
+          //Place Order
         },
         prefill: {
           name: customerData.name,
