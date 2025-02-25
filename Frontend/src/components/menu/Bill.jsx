@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import { getTotalPrice, removeAllItems } from "../../redux/slices/cartSlice";
 import { useSelector } from "react-redux";
-import { addOrder, createOrderRazorpay, updateTable, verifyPaymentRazorpay } from "../../https";
+import {
+  addOrder,
+  createOrderRazorpay,
+  updateTable,
+  verifyPaymentRazorpay,
+} from "../../https";
 import { enqueueSnackbar } from "notistack";
 import { useMutation } from "@tanstack/react-query";
 import { removeCustomer } from "../../redux/slices/customerSlice";
