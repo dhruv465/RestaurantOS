@@ -1,11 +1,9 @@
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { useTheme } from "../context/ThemeContext";
 import TableCard from "../components/tables/TableCard";
 import BackButton from "../components/ui/BackButton";
 import BottomNav from "../components/ui/BottomNav";
-import { tables } from "../constants";
 import { getTables } from "../https";
-import { keepPreviousData, useQuery} from "@tanstack/react-query"
 
 const Tables = () => {
   const [status, setStatus] = useState("all");
@@ -14,13 +12,12 @@ const Tables = () => {
     queryKey: ["tables"],
     queryFn: async () => {
       return await getTables();
-      },
-      placeholderData: keepPreviousData,
+    },
+    placeholderData: keepPreviousData,
   });
 
-  if(isError) {
+  if (isError) {
     enqueueSnackbar("Something went wrong!", { variant: "error" });
-
   }
 
   console.log(resData);
