@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from "react";
 import { MdDeleteForever } from "react-icons/md";
 import { FaNotesMedical } from "react-icons/fa6";
 import { useSelector, useDispatch } from "react-redux";
-import { removeItems } from "../../redux/slices/CartSlice";
+import { removeItems } from "../../redux/slices/cartSlice";
 const CartInfo = () => {
   const cartData = useSelector((state) => state.cart);
   const scrollRef = useRef();

@@ -4,7 +4,7 @@ import { menus } from "../../constants";
 import { GrRadialSelected } from "react-icons/gr";
 import { IoMdCart } from "react-icons/io";
 import { useDispatch } from "react-redux";
-import { addItems } from "../../redux/slices/CartSlice";
+import { addItems } from "../../redux/slices/cartSlice";
 
 const MenuContainer = () => {
   const [selected, setSelected] = useState(menus[0]);

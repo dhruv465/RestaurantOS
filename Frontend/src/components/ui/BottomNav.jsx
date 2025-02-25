@@ -8,7 +8,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "../../styles/animations.css";
 import Modal from "./Modal";
 import { useDispatch } from "react-redux";
-import { setCustomer } from "../../redux/slices/CustomerSlice";
+import { setCustomer } from "../../redux/slices/customerSlice";
 
 const BottomNav = () => {
   const navigate = useNavigate();

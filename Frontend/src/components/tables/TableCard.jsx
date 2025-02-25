@@ -3,20 +3,22 @@ import { useTheme } from "../../context/ThemeContext";
 import { getAvatarName, getRandomColor } from "../../utils";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { updateTable } from "../../redux/slices/CustomerSlice";
+import { updateTable } from "../../redux/slices/customerSlice";
 import { FaLongArrowAltRight } from "react-icons/fa";
 
-const TableCard = ({ name, status, initials, seats }) => {
+const TableCard = ({ id, name, status, initials, seats }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-    const handleClick = (table) => {
+    const handleClick = (name) => {
     if (status === "Booked") return;
-    dispatch(updateTable({ tableNo: name }));
+
+    const table = { tableId: id, tableNo: name}
+    dispatch(updateTable({ table }));
     navigate("/menu");
   };
   return (
     <div
-      onClick={() => handleClick(name)}
+      onClick={() => handleClick(name)} key={id}
       className="w-full md:w-[300px] bg-[var(--card-bg)] p-4 rounded-lg mb-4 cursor-pointer shadow-lg"
     >
       <div className="flex items-center justify-between px-1">

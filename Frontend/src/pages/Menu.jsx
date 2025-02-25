@@ -34,7 +34,7 @@ const Menu = () => {
                   {customerData.customerName || "Customer Name"}
                 </h2>
                 <p className="text-xs text-[var(--text-color)]/70 font-medium">
-                  {customerData.tableNo || "N/A"}
+                  Table: {customerData.table?.tableNo || "N/A"}
                 </p>
               </div>
             </button>
