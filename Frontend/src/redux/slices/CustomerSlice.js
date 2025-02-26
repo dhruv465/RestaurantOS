@@ -5,7 +5,7 @@ const initialState = {
     customerName: "",
     customerPhone: "",
     guests: 0,
-    table: null // Changed from tableNo to store full table object
+    table: null 
 }
 
 const customerSlice = createSlice({
@@ -28,7 +28,7 @@ const customerSlice = createSlice({
         },
 
         updateTable: (state, action) => {
-            state.table = action.payload.table; // Changed to store full table object
+            state.table = action.payload.table; 
         }
     }
 })
