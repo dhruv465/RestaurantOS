@@ -3,7 +3,7 @@ import { FaCheckDouble, FaCircle, FaLongArrowAltRight } from "react-icons/fa";
 import { formatDateAndTime, getAvatarName } from "../../utils/index";
 
 const OrderCard = ({ key, order }) => {
-  console.log(order);
+  // console.log(order);
   return (
     <div className="w-full bg-[var(--card-bg)] p-4 rounded-lg shadow-lg mb-4">
       <div className="flex items-center gap-4">
@@ -19,7 +19,9 @@ const OrderCard = ({ key, order }) => {
               #{Math.floor(new Date(order.orderDate).getTime())}/ Dine in
             </p>
             <p className="text-[var(--text-color)] text-xs md:text-sm opacity-80">
-             Table <FaLongArrowAltRight className="text-[#ababab] ml-1 inline content-center"/> {order.table.tableNo}
+              Table{" "}
+              <FaLongArrowAltRight className="text-[#ababab] ml-1 inline content-center" />{" "}
+              {order.table.tableNo}
             </p>
           </div>
           <div className="flex flex-col items-end gap-2">

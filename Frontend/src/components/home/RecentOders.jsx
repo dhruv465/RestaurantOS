@@ -1,8 +1,23 @@
 import React from "react";
 import { IoSearch } from "react-icons/io5";
 import OrderList from "./OrderList";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { enqueueSnackbar } from "notistack";
+import { getOrders } from "../../https";
 
 const RecentOders = () => {
+  const { data: resData, isError } = useQuery({
+    queryKey: ["orders"],
+    queryFn: async () => {
+      return await getOrders();
+    },
+    placeholderData: keepPreviousData,
+  });
+
+  if (isError) {
+    enqueueSnackbar("Something went wrong!", { variant: "error" });
+  }
+
   return (
     <div className="recent-orders px-4 md:px-8 mt-6">
       <div className="bg-[var(--card-bg)] w-full rounded-lg">
@@ -25,13 +40,14 @@ const RecentOders = () => {
 
         {/* Recent Orders */}
         <div className="mt-4 px-4 md:px-6 overflow-y-scroll h-[300px] scrollbar-hide">
-          <OrderList />
-          <OrderList />
-          <OrderList />
-          <OrderList />
-          <OrderList />
-          <OrderList />
-          <OrderList />
+          
+          {resData?.data.data.length > 0 ? (
+          resData.data.data.map((order) => {
+            return <OrderList key={order._id} order={order} />;
+          })
+        ) : (
+          <p className="col-span-3">No orders available</p>
+        )}
         </div>
       </div>
     </div>

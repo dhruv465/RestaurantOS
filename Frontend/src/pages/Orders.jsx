@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BottomNav from "../components/ui/BottomNav";
 import OrderCard from "../components/orders/OrderCard";
 import BackButton from "../components/ui/BackButton";
@@ -7,6 +7,10 @@ import { enqueueSnackbar } from "notistack";
 import { getOrders } from "../https/index";
 const Orders = () => {
   const [status, setStatus] = useState("all");
+
+  useEffect(() => {
+    document.title = "POS | Orders";
+  }, []);
 
   const { data: resData, isError } = useQuery({
     queryKey: ["orders"],

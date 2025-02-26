@@ -21,7 +21,7 @@ const getOrderById = async (req, res, next) => {
             return next(createHttpError(404, "Order not found"));
         }
 
-        res.status(200).json({success: true, data: order});
+        res.status(200).json({ success: true, data: order });
     } catch (error) {
         next(error);
     }
@@ -30,7 +30,7 @@ const getOrderById = async (req, res, next) => {
 const getOrders = async (req, res, next) => {
     try {
         const orders = await Order.find().populate("table");
-        res.status(200).json({data: orders});
+        res.status(200).json({ data: orders });
 
     } catch (error) {
         next(error);
@@ -41,6 +41,11 @@ const updateOrder = async (req, res, next) => {
     try {
 
         const { orderStatus } = req.body;
+        const { id } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+
+            return next(createHttpError(404, "Invalid order id"));
+        }
 
         const order = await Order.findByIdAndUpdate(req.params.id, { orderStatus }, { new: true });
 
