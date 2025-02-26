@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const Order = require('../models/orderModel');
 const Table = require('../models/tableModel');
 const createHttpError = require('http-errors');

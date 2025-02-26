@@ -3,7 +3,7 @@ import React from "react";
 import { GrUpdate } from "react-icons/gr";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
-import { getOrders } from "../../https/index";
+import { getOrders, updateOrderStatus } from "../../https/index";
 import { formatDateAndTime } from "../../utils/index";
 import { FaLongArrowAltRight } from "react-icons/fa";
 
