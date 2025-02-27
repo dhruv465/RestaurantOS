@@ -14,7 +14,7 @@ const Metrics = () => {
             error.
           </p>
         </div>
-        <button className="flex items-center gap-1 px-4 py-2 rounded-md text-[var(--text-color)] bg-[var(--card-bg)]">
+        <button className="flex items-center gap-1 px-4 md:px-6 py-2 rounded-md text-[var(--text-color)] bg-[var(--card-bg)] text-sm md:text-md">
           Last 1 Month
           <svg
             className="w-3 h-3"
@@ -27,7 +27,7 @@ const Metrics = () => {
         </button>
       </div>
 
-      <div className="mt-6 grid grid-cols-4 gap-4">
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
         {metricsData.map((metric, index) => {
           return (
             <div
@@ -79,27 +79,23 @@ const Metrics = () => {
           </p>
         </div>
 
-        <div className="mt-6 grid grid-cols-4 gap-4">
-
-            {
-                itemsData.map((item, index) => {
-                    return (
-                        <div key={index} className="shadow-sm rounded-lg p-4" style={{ backgroundColor: item.color }}>
-                        <div className="flex justify-between items-center">
-                          <p className="font-medium text-xs text-[#f5f5f5]">{item.title}</p>
-                          <div className="flex items-center gap-1">
-                            <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4" fill="none">
-                              <path d="M5 15l7-7 7 7" />
-                            </svg>
-                            <p className="font-medium text-xs text-[#f5f5f5]">{item.percentage}</p>
-                          </div>
-                        </div>
-                        <p className="mt-1 font-semibold text-2xl text-[#f5f5f5]">{item.value}</p>
-                      </div>
-                    )
-                })
-            }
-
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+          {itemsData.map((item, index) => {
+            return (
+              <div key={index} className="shadow-sm rounded-lg p-4" style={{ backgroundColor: item.color }}>
+                <div className="flex justify-between items-center">
+                  <p className="font-medium text-xs text-[#f5f5f5]">{item.title}</p>
+                  <div className="flex items-center gap-1">
+                    <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4" fill="none">
+                      <path d="M5 15l7-7 7 7" />
+                    </svg>
+                    <p className="font-medium text-xs text-[#f5f5f5]">{item.percentage}</p>
+                  </div>
+                </div>
+                <p className="mt-1 font-semibold text-2xl text-[#f5f5f5]">{item.value}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

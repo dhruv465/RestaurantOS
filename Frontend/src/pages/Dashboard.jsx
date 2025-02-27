@@ -22,11 +22,11 @@ const Dashboard = () => {
 
   return (
     <section className="bg-[var(--main-bg)] min-h-screen ">
-      <div className="container mx-auto flex items-center justify-between py-14 px-6 md:px-4">
+      <div className="container mx-auto flex flex-col md:flex-row items-center justify-between py-14 px-4 md:px-8">
         <div className="flex items-center gap-3">
           {buttons.map(({ label, icon, action }) => {
             return (
-              <button onClick={() => handleOpenModal(action)} className="text-[var(--text-color)] bg-[var(--card-bg)] hover:bg-[var(--main-bg)] px-8 py-3 rounded-lg text-[#f5f5f5] font-semibold text-md flex items-center gap-2">
+              <button onClick={() => handleOpenModal(action)} className="text-[var(--text-color)] bg-[var(--card-bg)] hover:bg-[var(--main-bg)] px-4 md:px-8 py-3 rounded-lg text-[#f5f5f5] font-semibold text-sm md:text-md flex items-center gap-2">
                 {label} {icon}
               </button>
             );
@@ -37,7 +37,7 @@ const Dashboard = () => {
           {tabs.map((tab) => {
             return (
               <button 
-                className={` px-8 py-3 rounded-lg text-[#f5f5f5] font-semibold text-md flex items-center gap-2 ${
+                className={` px-4 md:px-8 py-3 rounded-lg text-[#f5f5f5] font-semibold text-sm md:text-md flex items-center gap-2 ${
                   activeTab === tab
                     ? "text-[var(--text-color)] bg-[var(--main-bg)] "
                     : "text-[var(--text-color)] bg-[var(--card-bg)] hover:bg-[var(--main-bg)]"
