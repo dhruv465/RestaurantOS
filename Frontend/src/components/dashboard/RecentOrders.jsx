@@ -36,13 +36,13 @@ const RecentOrders = () => {
 
   return (
     <div className="flex flex-col w-full p-4">
-    <div className="container mx-auto bg-[#262626] p-4 rounded-lg overflow-x-auto">
-      <h2 className="text-[#f5f5f5] text-xl font-semibold mb-4">
+    <div className="container mx-auto bg-[var(--card-bg)] text-[var(--text-color)] p-4 rounded-lg overflow-x-auto">
+      <h2 className="text-[var(--text-color)] text-xl font-semibold mb-4">
         Recent Orders
       </h2>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-[#f5f5f5]">
-          <thead className="bg-[#333] text-[#ababab]">
+          <thead className="bg-[var(--main-bg)] text-[#ababab]">
             <tr>
               <th className="p-3">Order ID</th>
               <th className="p-3">Customer</th>
@@ -56,12 +56,12 @@ const RecentOrders = () => {
           </thead>
           <tbody>
             {resData?.data.data.map((order, index) => (
-              <tr key={index} className="border-b border-gray-600 hover:bg-[#333]">
+              <tr key={index} className="border-b border-gray-600  text-[var(--text-color)] cursor-pointer">
                 <td className="p-4">#{Math.floor(new Date(order.orderDate).getTime())}</td>
                 <td className="p-4">{order.customerDetails.name}</td>
                 <td className="p-4">
                   <select
-                    className={`bg-[#1a1a1a] text-[#f5f5f5] border border-gray-500 p-2 rounded-lg focus:outline-none ${
+                    className={`bg-[#1a1a1a] text-[#f5f5f5] border border-gray-500 p-2 rounded-lg focus:outline-none cursor-pointer ${
                       order.orderStatus === "Ready" ? "text-green-500" : "text-yellow-500"
                     }`}
                     value={order.orderStatus}
