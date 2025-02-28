@@ -49,14 +49,14 @@ const Modal = ({ setIsTableModalOpen }) => {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="bg-[#262626] p-4 rounded-md shadow-md w-96 h-96"
+        className="bg-[var(--card-bg)] p-4 rounded-md shadow-md w-96 h-96"
       >
         <div className="flex justify-between item-center mb-4">
-          <h2 className="text-lg font-bold text-white">Add Table</h2>
+          <h2 className="text-lg font-bold text-[var(--text-color)]">Add Table</h2>
 
           <button
             onClick={handleCloseModal}
-            className="text-[#f5f5f5] hover:text-red-500"
+            className="text-[var(--text-color)]"
           >
             <IoMdClose size={24} />
           </button>

@@ -3,7 +3,7 @@ import { popularDishes } from "../../constants/index.js";
 
 const PopularDishes = () => {
   return (
-    <div className="mt-6 pr-6">
+    <div className="mt-6 pr-6 px-4">
         <div className="bg-[var(--card-bg)] w-full rounded-lg">
 
         <div className="flex justify-between items-center px-6 py-4">

@@ -17,8 +17,8 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("Metrics");
 
   const handleOpenModal = (action) => {
-    if(action === "table") setIsTableModalOpen(true)
-  }
+    if (action === "table") setIsTableModalOpen(true);
+  };
 
   return (
     <section className="bg-[var(--main-bg)] min-h-screen ">
@@ -26,7 +26,10 @@ const Dashboard = () => {
         <div className="flex items-center gap-3">
           {buttons.map(({ label, icon, action }) => {
             return (
-              <button onClick={() => handleOpenModal(action)} className="text-[var(--text-color)] bg-[var(--card-bg)] hover:bg-[var(--main-bg)] px-4 md:px-8 py-3 rounded-lg text-[#f5f5f5] font-semibold text-sm md:text-md flex items-center gap-2">
+              <button
+                onClick={() => handleOpenModal(action)}
+                className="text-[var(--text-color)] bg-[var(--card-bg)] hover:bg-[var(--main-bg)] px-4 md:px-8 py-3 rounded-lg text-[#f5f5f5] font-semibold text-sm md:text-md flex items-center gap-2"
+              >
                 {label} {icon}
               </button>
             );
@@ -36,7 +39,7 @@ const Dashboard = () => {
         <div className="flex items-center gap-3">
           {tabs.map((tab) => {
             return (
-              <button 
+              <button
                 className={`px-4 md:px-6 py-2 rounded-lg text-[#f5f5f5] font-semibold text-sm md:text-md flex items-center gap-2 ${
                   activeTab === tab
                     ? "text-[var(--text-color)] bg-[var(--main-bg)] "
