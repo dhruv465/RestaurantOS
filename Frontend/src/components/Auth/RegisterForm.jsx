@@ -11,6 +11,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useMutation } from "@tanstack/react-query";
 import { register } from "../../https";
 import { enqueueSnackbar } from "notistack";
+import logo from "../../assets/images/logo.png";
 
 const hotelQuotes = [
   "Join our team of hospitality excellence.",
@@ -85,7 +86,7 @@ const RegisterForm = ({ onToggleForm }) => {
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: "var(--main-bg)" }}
+      style={{ background: `url('/src/assets/images/restaurant-img.jpg') no-repeat center center fixed`, backgroundSize: 'cover' }}
     >
       {/* Background Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -108,6 +109,7 @@ const RegisterForm = ({ onToggleForm }) => {
               className="text-4xl font-bold mb-2"
               style={{ color: "var(--text-color)" }}
             >
+              
               RestOS
             </h1>
             <p className="text-[#ababab] text-sm mb-4">Create your account</p>

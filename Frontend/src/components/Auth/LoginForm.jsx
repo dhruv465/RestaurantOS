@@ -67,7 +67,7 @@ const LoginForm = ({ onToggleForm }) => {
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: "var(--main-bg)" }}
+      style={{ background: `url('/src/assets/images/restaurant-img.jpg') no-repeat center center fixed`, backgroundSize: 'cover' }}
     >
       {/* Background Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -141,5 +141,4 @@ const LoginForm = ({ onToggleForm }) => {
     </div>
   );
 };
-
 export default LoginForm;
