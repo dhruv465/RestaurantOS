@@ -57,9 +57,14 @@ const updateTable = async (req, res, next) => {
             return next(createHttpError(400, "Invalid Order ID format"));
         }
 
+        // If status is "Available", clear the currentOrder field
+        const updateData = status === "Available" 
+            ? { status, currentOrder: null } 
+            : { status, currentOrder: orderId };
+
         const table = await Table.findByIdAndUpdate(
             req.params.id,
-            { status, currentOrder: orderId }, // Ensure correct field name
+            updateData,
             { new: true, runValidators: true }
         );
 

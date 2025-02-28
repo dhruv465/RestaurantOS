@@ -18,6 +18,9 @@ const RecentOders = () => {
     enqueueSnackbar("Something went wrong!", { variant: "error" });
   }
 
+  // Filter out orders where the table status is "Available"
+  const filteredOrders = resData?.data.data.filter(order => order.table.status !== "Available");
+
   return (
     <div className="recent-orders px-4 md:px-8 mt-6">
       <div className="bg-[var(--card-bg)] w-full rounded-lg">
@@ -40,14 +43,13 @@ const RecentOders = () => {
 
         {/* Recent Orders */}
         <div className="mt-4 px-4 md:px-6 overflow-y-scroll h-[300px] scrollbar-hide">
-          
-          {resData?.data.data.length > 0 ? (
-          resData.data.data.map((order) => {
-            return <OrderList key={order._id} order={order} />;
-          })
-        ) : (
-          <p className="col-span-3">No orders available</p>
-        )}
+          {filteredOrders?.length > 0 ? (
+            filteredOrders.map((order) => {
+              return <OrderList key={order._id} order={order} />;
+            })
+          ) : (
+            <p className="col-span-3">No orders available</p>
+          )}
         </div>
       </div>
     </div>

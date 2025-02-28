@@ -5,6 +5,7 @@ import BackButton from "../components/ui/BackButton";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 import { getOrders } from "../https/index";
+
 const Orders = () => {
   const [status, setStatus] = useState("all");
 
@@ -23,6 +24,10 @@ const Orders = () => {
   if (isError) {
     enqueueSnackbar("Something went wrong!", { variant: "error" });
   }
+
+  // Filter out orders where the table status is "Available"
+  const filteredOrders = resData?.data.data.filter(order => order.table.status !== "Available");
+
   return (
     <section className="bg-[var(--main-bg)] min-h-screen">
       <div className="flex flex-col md:flex-row items-center justify-between px-4 md:px-8 lg:px-10 py-4 gap-4">
@@ -44,7 +49,7 @@ const Orders = () => {
           <button
             onClick={() => setStatus("progress")}
             className={`text-[var(--text-color)] text-sm md:text-base ${
-              status === "progress" && "bg-[var(--card-bg)]"
+              status === "progress" && "bg[var(--card-bg)]"
             } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
           >
             In Progress
@@ -70,8 +75,8 @@ const Orders = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 px-4 md:px-8 lg:px-16 py-4 overflow-y-auto h-[calc(100vh-5rem-7rem)] scrollbar-hide">
         {" "}
         {/* h-[calc(100vh-5rem-7rem)] */}
-        {resData?.data.data.length > 0 ? (
-          resData.data.data.map((order) => {
+        {filteredOrders?.length > 0 ? (
+          filteredOrders.map((order) => {
             return <OrderCard key={order._id} order={order} />;
           })
         ) : (
