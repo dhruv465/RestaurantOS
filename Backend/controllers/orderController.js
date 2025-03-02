@@ -68,7 +68,16 @@ const updateOrder = async (req, res, next) => {
 
 
 
+const deleteOrdersByTableId = async (tableId) => {
+    try {
+        await Order.deleteMany({ table: tableId });
+    } catch (error) {
+        throw error;
+    }
+};
+
 module.exports = {
+    deleteOrdersByTableId,
     addOrder,
     getOrders,
     updateOrder,

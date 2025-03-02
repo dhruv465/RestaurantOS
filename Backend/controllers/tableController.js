@@ -1,10 +1,11 @@
 const Table = require('../models/tableModel');
 const createHttpError = require('http-errors');
+const { deleteOrdersByTableId } = require('./orderController');
 const mongoose = require('mongoose');
 
 const addTable = async (req, res, next) => {
     try {
-        const { tableNo, seats } = req.body; //seats
+        const { tableNo, seats } = req.body;
 
         if (!tableNo) {
             const error = createHttpError(400, "Please provide table No!");
@@ -18,7 +19,7 @@ const addTable = async (req, res, next) => {
             return next(error);
         }
 
-        const newTable = new Table({ tableNo, seats }); //seats
+        const newTable = new Table({ tableNo, seats });
         await newTable.save();
 
         res.status(201).json({
@@ -33,17 +34,14 @@ const addTable = async (req, res, next) => {
 
 const getTables = async (req, res, next) => {
     try {
-
         const tables = await Table.find().populate({
             path: "currentOrder",
             select: "customerDetails"
         });
         res.status(200).json({
-
             success: true,
             data: tables
         });
-
     } catch (error) {
         next(error);
     }
@@ -51,16 +49,19 @@ const getTables = async (req, res, next) => {
 
 const updateTable = async (req, res, next) => {
     try {
-        const { status, orderId } = req.body; // Ensure lowercase 'orderId' is used
+        const { status, orderId } = req.body;
 
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
             return next(createHttpError(400, "Invalid Order ID format"));
         }
 
-        // If status is "Available", clear the currentOrder field
-        const updateData = status === "Available" 
-            ? { status, currentOrder: null } 
-            : { status, currentOrder: orderId };
+        if (status === "Available") {
+            await deleteOrdersByTableId(req.params.id);
+        }
+        const updateData = {
+            status,
+            currentOrder: orderId
+        };
 
         const table = await Table.findByIdAndUpdate(
             req.params.id,
