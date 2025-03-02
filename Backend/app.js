@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
     credentials: true ,
-    origin: ['https://restos.onrender.com']
+    origin: ['http://localhost:5173']
 }))
 
 //Endpoint Root
