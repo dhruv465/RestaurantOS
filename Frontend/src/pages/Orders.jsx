@@ -1,3 +1,4 @@
+"use client"
 import React, { useEffect, useState } from "react";
 import BottomNav from "../components/ui/BottomNav";
 import OrderCard from "../components/orders/OrderCard";
@@ -5,6 +6,7 @@ import BackButton from "../components/ui/BackButton";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 import { getOrders } from "../https/index";
+import { PackageX } from "lucide-react";
 
 const Orders = () => {
   const [status, setStatus] = useState("all");
@@ -55,7 +57,7 @@ const Orders = () => {
           <button
             onClick={() => setStatus("progress")}
             className={`text-[var(--text-color)] text-sm md:text-base ${
-              status === "progress" && "bg[var(--card-bg)]"
+              status === "progress" && "bg-[var(--card-bg)]"
             } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
           >
             In Progress
@@ -84,7 +86,27 @@ const Orders = () => {
             return <OrderCard key={order._id} order={order} />;
           })
         ) : (
-          <p className="col-span-3">No orders available</p>
+          <div className="col-span-1 sm:col-span-2 xl:col-span-3 flex justify-center items-center">
+            <div className="mx-auto max-w-md text-center bg-[var(--main-bg)] overflow-hidden">
+              {/* Card Header */}
+              <div className="p-6 pb-2">
+                <div className="flex justify-center">
+                  <div className="rounded-full bg-[var(--card-bg)] p-3">
+                    <PackageX className="h-10 w-10 text-[var(--text-color)] opacity-50" />
+                  </div>
+                </div>
+                <h2 className="mt-4 text-xl font-semibold text-[var(--text-color)]">No Orders Available</h2>
+              </div>
+              
+              {/* Card Content */}
+              <div className="px-6 py-4">
+                <p className="text-[var(--text-color)] opacity-50">
+                  You don&apos;t have any {status !== "all" ? status : ""} orders yet. 
+                  {status === "all" ? " Start processing sales to see orders here." : ""}
+                </p>
+              </div>
+            </div>
+          </div>
         )}
       </div>
       <BottomNav />

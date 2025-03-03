@@ -4,6 +4,7 @@ import OrderList from "./OrderList";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 import { getOrders } from "../../https";
+import { PackageX } from "lucide-react";
 
 const RecentOders = () => {
   const { data: resData, isError } = useQuery({
@@ -48,7 +49,27 @@ const RecentOders = () => {
               return <OrderList key={order._id} order={order} />;
             })
           ) : (
-            <p className="col-span-3">No orders available</p>
+            <div className="col-span-1 sm:col-span-2 xl:col-span-3 flex justify-center items-center">
+            <div className="mx-auto max-w-md text-center bg-[var(--card-bg)] overflow-hidden">
+              {/* Card Header */}
+              <div className="p-6 pb-2">
+                <div className="flex justify-center">
+                  <div className="rounded-full bg-[var(--main-bg)] p-3">
+                    <PackageX className="h-10 w-10 text-[var(--text-color)] opacity-50" />
+                  </div>
+                </div>
+                <h2 className="mt-4 text-xl font-semibold text-[var(--text-color)]">No Orders Available</h2>
+              </div>
+              
+              {/* Card Content */}
+              <div className="px-6 py-4">
+                <p className="text-[var(--text-color)] opacity-50">
+                  You don&apos;t have any {status !== "all" ? status : ""} orders yet. 
+                  {status === "all" ? " Start processing sales to see orders here." : ""}
+                </p>
+              </div>
+            </div>
+          </div>
           )}
         </div>
       </div>
