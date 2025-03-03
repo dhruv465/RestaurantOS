@@ -7,7 +7,6 @@ import { getTables } from "../https";
 
 const Tables = () => {
   const [status, setStatus] = useState("all");
-
   const { data: resData, isError } = useQuery({
     queryKey: ["tables"],
     queryFn: async () => {

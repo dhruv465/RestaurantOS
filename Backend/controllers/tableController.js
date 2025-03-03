@@ -47,6 +47,25 @@ const getTables = async (req, res, next) => {
     }
 }
 
+const deleteTable = async (req, res, next) => {
+    try {
+        const table = await Table.findById(req.params.id);
+        if (!table) {
+            return next(createHttpError(404, "Table not found"));
+        }
+        
+        if (table.status === "Booked") {
+            return next(createHttpError(400, "Cannot delete a booked table"));
+        }
+
+        await Table.findByIdAndDelete(req.params.id);
+        res.status(200).json({ success: true, message: "Table deleted successfully" });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
 const updateTable = async (req, res, next) => {
     try {
         const { status, orderId } = req.body;
@@ -87,5 +106,6 @@ const updateTable = async (req, res, next) => {
 module.exports = {
     addTable,
     getTables,
-    updateTable
+    updateTable,
+    deleteTable
 }

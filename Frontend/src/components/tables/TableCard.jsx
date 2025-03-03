@@ -4,43 +4,71 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { updateTable } from "../../redux/slices/customerSlice";
 import { FaLongArrowAltRight } from "react-icons/fa";
-import { Trash2 } from 'lucide-react';
+import { Trash2 } from "lucide-react";
+import { deleteTable } from "../../https";
+import { enqueueSnackbar } from "notistack";
 
-const TableCard = ({ id, name, status, initials, seats, isAdmin, onDelete }) => {
+const TableCard = ({
+  id,
+  name,
+  status,
+  initials,
+  seats,
+  isAdmin,
+  onDelete,
+}) => {
   const userData = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  
+
   const handleClick = (name) => {
     if (status === "Booked" || showDeleteConfirm) return;
 
-    const table = { tableId: id, tableNo: name }
+    const table = { tableId: id, tableNo: name };
     dispatch(updateTable({ table }));
     navigate("/menu");
   };
-  
+
   const handleDeleteClick = (e) => {
     e.stopPropagation();
+
+    if (status === "Booked") {
+      enqueueSnackbar("Cannot delete a booked table!", { variant: "warning" });
+      return;
+    }
+
     setShowDeleteConfirm(true);
   };
-  
-  const handleConfirmDelete = (e) => {
+
+  const handleConfirmDelete = async (e) => {
     e.stopPropagation();
-    if (onDelete) {
-      onDelete(id);
+
+    try {
+      await deleteTable(id);
+      enqueueSnackbar(`Table ${name} deleted successfully!`, {
+        variant: "success",
+      });
+
+      if (onDelete) {
+        onDelete(id);
+      }
+    } catch (error) {
+      enqueueSnackbar("Failed to delete the table.", { variant: "error" });
     }
+
     setShowDeleteConfirm(false);
   };
-  
+
   const handleCancelDelete = (e) => {
     e.stopPropagation();
     setShowDeleteConfirm(false);
   };
-  
+
   return (
     <div
-      onClick={() => handleClick(name)} key={id}
+      onClick={() => handleClick(name)}
+      key={id}
       className="w-full md:w-[300px] bg-[var(--card-bg)] p-4 rounded-lg mb-4 cursor-pointer shadow-lg relative"
     >
       {showDeleteConfirm ? (
@@ -66,7 +94,11 @@ const TableCard = ({ id, name, status, initials, seats, isAdmin, onDelete }) => 
       ) : (
         <>
           <div className="flex items-center justify-between px-1">
-          <h1 className="text-[var(--text-color)] text-xl font-semibold">Table <FaLongArrowAltRight className="text-[#ababab] ml-2 inline" /> {name}</h1>
+            <h1 className="text-[var(--text-color)] text-xl font-semibold">
+              Table{" "}
+              <FaLongArrowAltRight className="text-[#ababab] ml-2 inline" />{" "}
+              {name}
+            </h1>
             <p
               className={`${
                 status === "Booked"
@@ -79,7 +111,9 @@ const TableCard = ({ id, name, status, initials, seats, isAdmin, onDelete }) => 
           </div>
           <div className="flex items-center justify-center mt-5 mb-7">
             <h1
-              style={{ backgroundColor: initials ? getRandomColor() : "var(--main-bg)" }}
+              style={{
+                backgroundColor: initials ? getRandomColor() : "var(--main-bg)",
+              }}
               className="text-[var(--text-color)] rounded-full p-5 text-xl"
             >
               {getAvatarName(initials) || "N/A"}
@@ -90,9 +124,9 @@ const TableCard = ({ id, name, status, initials, seats, isAdmin, onDelete }) => 
             <span className="ml-1">{seats}</span>
             <div className="flex-grow"></div>
             {userData.role === "Admin" ? (
-              <Trash2 
-                onClick={handleDeleteClick} 
-                className="cursor-pointer hover:bg-[var(--main-bg)] rounded p-1" 
+              <Trash2
+                onClick={handleDeleteClick}
+                className="cursor-pointer hover:bg-[var(--main-bg)] rounded p-1 text-red-500"
               />
             ) : null}
           </div>
