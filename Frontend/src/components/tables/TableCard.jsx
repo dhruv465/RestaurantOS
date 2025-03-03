@@ -23,11 +23,11 @@ const TableCard = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleClick = (name) => {
-    if (status === "Booked" || showDeleteConfirm) return;
-
+    if (showDeleteConfirm) return; // Only block clicks if delete is being confirmed
+    
     const table = { tableId: id, tableNo: name };
     dispatch(updateTable({ table }));
-    navigate("/menu");
+    navigate("/menu"); // Allow navigation regardless of booking status
   };
 
   const handleDeleteClick = (e) => {
