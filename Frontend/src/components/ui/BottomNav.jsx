@@ -13,7 +13,7 @@ import { setCustomer } from "../../redux/slices/customerSlice";
 const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSpeedDialOpen, setIsSpeedDialOpen] = useState(false);
   const isActive = (path) => location.pathname === path;
@@ -22,8 +22,7 @@ const BottomNav = () => {
   const closeModal = () => setIsModalOpen(false);
   const toggleSpeedDial = () => setIsSpeedDialOpen(!isSpeedDialOpen);
   const [phone, setPhone] = useState("");
-  const [name , setName] = useState("");
-  
+  const [name, setName] = useState("");
 
   const increment = () => setGuestCount((prev) => prev + 1);
   const decrement = () => {
@@ -32,9 +31,9 @@ const BottomNav = () => {
 
   const handleCreateOrder = () => {
     //send data to store
-    dispatch(setCustomer({name, phone, guests: guestCount}));
+    dispatch(setCustomer({ name, phone, guests: guestCount }));
     navigate("/tables");
-  }
+  };
 
   return (
     <div className="fixed bottom-0 left-0 right-0">

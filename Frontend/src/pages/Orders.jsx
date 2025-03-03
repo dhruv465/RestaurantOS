@@ -70,14 +70,6 @@ const Orders = () => {
           >
             Ready
           </button>
-          {/* <button
-            onClick={() => setStatus("completed")}
-            className={`text-[var(--text-color)] text-sm md:text-base ${
-              status === "completed" && "bg-[var(--card-bg)]"
-            } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
-          >
-            Completed
-          </button> */}
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 px-4 md:px-8 lg:px-16 py-4 overflow-y-auto h-[calc(100vh-5rem-7rem)] scrollbar-hide">
