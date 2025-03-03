@@ -20,7 +20,9 @@ const RecentOders = () => {
   }
 
   // Filter out orders where the table status is "Available"
-  const filteredOrders = resData?.data.data.filter(order => order.table.status !== "Available");
+  const filteredOrders = resData?.data.data.filter(
+    (order) => order.table.status !== "Available"
+  );
 
   return (
     <div className="recent-orders px-4 md:px-8 mt-6">
@@ -50,26 +52,27 @@ const RecentOders = () => {
             })
           ) : (
             <div className="col-span-1 sm:col-span-2 xl:col-span-3 flex justify-center items-center">
-            <div className="mx-auto max-w-md text-center bg-[var(--card-bg)] overflow-hidden">
-              {/* Card Header */}
-              <div className="p-6 pb-2">
-                <div className="flex justify-center">
-                  <div className="rounded-full bg-[var(--main-bg)] p-3">
-                    <PackageX className="h-10 w-10 text-[var(--text-color)] opacity-50" />
+              <div className="mx-auto max-w-md text-center bg-[var(--card-bg)] overflow-hidden">
+                {/* Card Header */}
+                <div className="p-6 pb-2">
+                  <div className="flex justify-center">
+                    <div className="rounded-full bg-[var(--main-bg)] p-3">
+                      <PackageX className="h-10 w-10 text-[var(--text-color)] opacity-50" />
+                    </div>
                   </div>
+                  <h2 className="mt-4 text-xl font-semibold text-[var(--text-color)]">
+                    No Orders Available
+                  </h2>
                 </div>
-                <h2 className="mt-4 text-xl font-semibold text-[var(--text-color)]">No Orders Available</h2>
-              </div>
-              
-              {/* Card Content */}
-              <div className="px-6 py-4">
-                <p className="text-[var(--text-color)] opacity-50">
-                  You don&apos;t have any {status !== "all" ? status : ""} orders yet. 
-                  {status === "all" ? " Start processing sales to see orders here." : ""}
-                </p>
+
+                {/* Card Content */}
+                <div className="px-6">
+                  <p className="text-[var(--text-color)] opacity-50">
+                    You don&apos;t have any orders yet.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
           )}
         </div>
       </div>
