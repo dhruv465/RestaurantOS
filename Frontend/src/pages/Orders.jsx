@@ -25,8 +25,14 @@ const Orders = () => {
     enqueueSnackbar("Something went wrong!", { variant: "error" });
   }
 
-  // Filter out orders where the table status is "Available"
-  const filteredOrders = resData?.data.data.filter(order => order.table.status !== "Available");
+  // Filter orders based on the selected status
+  const filteredOrders = resData?.data.data.filter(order => 
+    status === "all" || 
+    (status === "progress" && order.orderStatus.toLowerCase() === "in progress") || 
+    (status === "ready" && order.orderStatus.toLowerCase() === "ready")
+  );
+
+  console.log(filteredOrders); // Debugging line to check filtered orders
 
   return (
     <section className="bg-[var(--main-bg)] min-h-screen">
@@ -62,19 +68,17 @@ const Orders = () => {
           >
             Ready
           </button>
-          <button
+          {/* <button
             onClick={() => setStatus("completed")}
             className={`text-[var(--text-color)] text-sm md:text-base ${
               status === "completed" && "bg-[var(--card-bg)]"
             } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
           >
             Completed
-          </button>
+          </button> */}
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 px-4 md:px-8 lg:px-16 py-4 overflow-y-auto h-[calc(100vh-5rem-7rem)] scrollbar-hide">
-        {" "}
-        {/* h-[calc(100vh-5rem-7rem)] */}
         {filteredOrders?.length > 0 ? (
           filteredOrders.map((order) => {
             return <OrderCard key={order._id} order={order} />;
