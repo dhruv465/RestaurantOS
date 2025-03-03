@@ -52,7 +52,9 @@ const Tables = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 sm:p-6 md:p-8">
-        {resData?.data.data.map((table) => {
+        {resData?.data.data
+          .filter(table => status === "all" || table.status === "Booked")
+          .map((table) => {
           return (
             <TableCard
               id={table._id}
