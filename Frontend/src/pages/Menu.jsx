@@ -1,4 +1,3 @@
-import React from "react";
 import BottomNav from "../components/ui/BottomNav";
 import BackButton from "../components/ui/BackButton";
 import { IoRestaurant } from "react-icons/io5";
@@ -8,7 +7,12 @@ import CartInfo from "../components/menu/CartInfo";
 import Bill from "../components/menu/Bill";
 import { useSelector } from "react-redux";
 
+import React, { useEffect } from "react";
+
 const Menu = () => {
+  useEffect(() => {
+    document.title = "RestOS | Menu";
+  }, []);
   const customerData = useSelector(state => state.customer);
   return (
     <section className="bg-[var(--main-bg)] min-h-screen pb-20 overflow-auto flex flex-col md:flex-row gap-3 px-2 sm:px-4">

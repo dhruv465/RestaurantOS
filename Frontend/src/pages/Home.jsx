@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import BottomNav from "../components/ui/BottomNav";
 import Greetings from "../components/home/Greetings";
 import MiniCard from "../components/home/MiniCard";
@@ -8,6 +8,10 @@ import RecentOders from "../components/home/RecentOders";
 import PopularDishes from "../components/home/PopularDishes";
 
 const Home = () => {
+  useEffect(() => {
+    document.title = "RestOS | Home";
+  }, []);
+
   return (
     <div className="flex flex-col ">
       <section className="bg-[var(--main-bg)] flex-1 overflow-auto flex flex-col md:flex-row min-h-screen pb-20">

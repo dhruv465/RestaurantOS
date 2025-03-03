@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BiSolidDish } from "react-icons/bi";
 import { MdCategory, MdTableBar } from "react-icons/md";
 import Metrics from "../components/dashboard/Metrics";
@@ -12,7 +12,11 @@ const buttons = [
 ];
 
 const tabs = ["Metrics", "Orders", "Payment"];
+
 const Dashboard = () => {
+  useEffect(() => {
+    document.title = "RestOS | Dashboard";
+  }, []);
   const [isTableModalOpen, setIsTableModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Metrics");
 

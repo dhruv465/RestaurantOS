@@ -1,11 +1,15 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
 import TableCard from "../components/tables/TableCard";
 import BackButton from "../components/ui/BackButton";
 import BottomNav from "../components/ui/BottomNav";
 import { getTables } from "../https";
 
+import React, { useEffect, useState } from "react";
+
 const Tables = () => {
+  useEffect(() => {
+    document.title = "RestOS | Tables";
+  }, []);
   const [status, setStatus] = useState("all");
   const { data: resData, isError } = useQuery({
     queryKey: ["tables"],

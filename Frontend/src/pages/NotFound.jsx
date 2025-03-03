@@ -2,20 +2,17 @@ import { useTheme } from "../context/ThemeContext";
 import { Link } from "react-router-dom";
 import { LuMoveLeft } from "react-icons/lu";
 
+import React, { useEffect } from "react";
+
 const NotFound = () => {
+  useEffect(() => {
+    document.title = "RestOS | Not Found";
+  }, []);
   const { theme } = useTheme();
 
   return (
-    <main className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center p-4 text-center">
-      <div
-        style={{
-          backgroundColor:
-            theme === "light" ? "var(--card-bg)" : "var(--nav-bg)",
-          borderColor: "var(--border-color)",
-          color: "var(--text-color)",
-        }}
-        className="rounded-lg border p-8 shadow-lg max-w-md w-full"
-      >
+    <main className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center p-4 text-center bg-[var(--main-bg)] text-[var(--text-color)]">
+      <div className="rounded-lg p-8 max-w-md w-full">
         <h1 className="mb-2 text-6xl font-bold">404</h1>
         <h2 className="mb-4 text-2xl font-semibold">Page Not Found</h2>
 
