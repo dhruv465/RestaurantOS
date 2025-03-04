@@ -24,6 +24,7 @@ function Layout() {
     <>
       {hideHeaderRoutes.includes(location.pathname) ? null : <Header />}
       <Routes>
+    <Route path="/menu/:id" element={<Menu />} />
         <Route path="*" element={<NotFound />} />
         <Route
           path="/"
