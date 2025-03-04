@@ -20,7 +20,9 @@ const Modal = ({ setIsTableModalOpen }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log(tableData)
+
         tableMutation.mutate(tableData);
+
     }
 
   const handleCloseModal = () => {
@@ -30,7 +32,7 @@ const Modal = ({ setIsTableModalOpen }) => {
   const tableMutation = useMutation({
     mutationFn: (reqData) => addTable(reqData),
     onSuccess: (res) => {
-        setIsTableModalOpen(flase);
+        setIsTableModalOpen(false);
         const { data } = res;
         enqueueSnackbar(data.message, { variant: "success" });
 
