@@ -66,6 +66,7 @@ const Tables = () => {
               status={table.status}
               initials={table?.currentOrder?.customerDetails.name}
               seats={table.seats}
+            key={table._id}
             />
           );
         })}

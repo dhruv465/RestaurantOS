@@ -171,8 +171,8 @@ const Bill = () => {
     mutationFn: (reqData) => updateTable(reqData),
     onSuccess: (resData) => {
       console.log(resData);
-      dispatch(removeCustomer());
-      dispatch(removeAllItems());
+      // dispatch(removeCustomer());
+      // dispatch(removeAllItems());
     },
     onError: (error) => {
       console.log(error);

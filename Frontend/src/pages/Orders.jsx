@@ -6,7 +6,7 @@ import BackButton from "../components/ui/BackButton";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 import { getOrders } from "../https/index";
-import { PackageX } from "lucide-react";
+import { FaKitchenSet } from "react-icons/fa6";
 
 const Orders = () => {
   const [status, setStatus] = useState("all");
@@ -84,7 +84,7 @@ const Orders = () => {
               <div className="p-6 pb-2">
                 <div className="flex justify-center">
                   <div className="rounded-full bg-[var(--card-bg)] p-3">
-                    <PackageX className="h-10 w-10 text-[var(--text-color)] opacity-50" />
+                    <FaKitchenSet className="h-10 w-10 text-[var(--text-color)] opacity-50" />
                   </div>
                 </div>
                 <h2 className="mt-4 text-xl font-semibold text-[var(--text-color)]">No Orders Available</h2>
