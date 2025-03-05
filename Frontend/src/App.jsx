@@ -52,7 +52,7 @@ function Layout() {
           }
         />
         <Route
-          path="/menu"
+          path="/menu/:tableId"
           element={
             <ProtectedRoutes>
               <Menu />
