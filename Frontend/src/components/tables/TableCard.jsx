@@ -16,6 +16,8 @@ const TableCard = ({
   seats,
   isAdmin,
   onDelete,
+  onClick // Add onClick prop
+
 }) => {
   const userData = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -25,6 +27,9 @@ const TableCard = ({
   const handleClick = (name) => {
     console.log(id);
     if (showDeleteConfirm) return; // Only block clicks if delete is being confirmed
+
+    // Call the onClick prop (this will dispatch customer data in Tables.jsx)
+    onClick();
     
     const table = { tableId: id, tableNo: name };
     dispatch(updateTable({ table }));

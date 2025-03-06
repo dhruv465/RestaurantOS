@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { getTotalPrice, removeAllItems } from "../../redux/slices/cartSlice";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   addOrder,
   createOrderRazorpay,
@@ -10,7 +10,6 @@ import {
 import { enqueueSnackbar } from "notistack";
 import { useMutation } from "@tanstack/react-query";
 import { removeCustomer } from "../../redux/slices/customerSlice";
-import { useDispatch } from "react-redux";
 import Invoice from "../invoice/Invoice";
 
 function loadScript(src) {
@@ -27,9 +26,9 @@ function loadScript(src) {
   });
 }
 
-const Bill = () => {
+const Bill = ({ orderData }) => {
   const dispatch = useDispatch();
-  const cartData = useSelector((state) => state.cart);
+  const cartData = useSelector((state) => state.cart.items);
   const customerData = useSelector((state) => state.customer);
   const total = useSelector(getTotalPrice);
   const taxRate = 5.25;
@@ -40,9 +39,32 @@ const Bill = () => {
   const [showInvoice, setShowInvoice] = useState(false);
   const [orderInfo, setOrderInfo] = useState();
 
+  const orderMutation = useMutation({
+    mutationFn: (reqData) => addOrder(reqData),
+    onSuccess: (resData) => {
+      const { data } = resData.data;
+      console.log(data);
+      setOrderInfo(data);
+      setShowInvoice(true); 
+    },
+  });
+
+  const tableUpdateMutation = useMutation({
+    mutationFn: (reqData) => updateTable(reqData),
+    onSuccess: (resData) => {
+      console.log(resData);
+      dispatch(removeCustomer());
+      dispatch(removeAllItems());
+    },
+    onError: (error) => {
+      console.error("Error updating table:", error);
+      enqueueSnackbar("Failed to update the table.", { variant: "error" });
+    },
+  });
+
   const handlePlaceOrder = async () => {
     if (!paymentMethod) {
-      enqueueSnackbar("Plase select a payment method!", { variant: "warning" });
+      enqueueSnackbar('Please select a payment method!', { variant: 'warning' });
       return;
     }
 
@@ -58,8 +80,6 @@ const Bill = () => {
           });
           return;
         }
-
-        //create order
 
         const reqData = {
           amount: grandTotal.toFixed(2),
@@ -78,7 +98,6 @@ const Bill = () => {
             console.log(verification);
             enqueueSnackbar(verification.data.message, { variant: "success" });
 
-            //Place Order
             const orderData = {
               customerDetails: {
                 name: customerData.customerName,
@@ -134,78 +153,87 @@ const Bill = () => {
         table: customerData.table.tableId,
         paymentMethod: paymentMethod,
       };
-      orderMutation.mutate(orderData);
+
+      try{
+        await orderMutation.mutateAsync(orderData);
+
+        const tableData = {
+          status: "Booked", 
+          orderId: orderInfo._id, 
+        };
+        await tableUpdateMutation.mutateAsync({ tableId: customerData.table.tableId, ...tableData });
+
+      } catch (error) {
+        console.error("Error placing order:", error);
+        enqueueSnackbar("Failed to place the order.", { variant: "error" });
+      }
     }
   };
 
-  const orderMutation = useMutation({
-    mutationFn: (reqData) => addOrder(reqData),
-    onSuccess: (resData) => {
-      const { data } = resData.data;
-      console.log(data);
-
-      setOrderInfo(data);
-
-      // Update Table
-      const tableData = {
-        status: "Booked",
-        orderId: data._id,
-        tableId: data.table,
-      };
-
-      setTimeout(() => {
-        tableUpdateMutation.mutate(tableData);
-      }, 1500);
-
-      enqueueSnackbar("Order Placed!", {
-        variant: "success",
-      });
-      setShowInvoice(true);
-    },
-    onError: (error) => {
-      console.log(error);
-    },
-  });
-
-  const tableUpdateMutation = useMutation({
-    mutationFn: (reqData) => updateTable(reqData),
-    onSuccess: (resData) => {
-      console.log(resData);
-      // dispatch(removeCustomer());
-      // dispatch(removeAllItems());
-    },
-    onError: (error) => {
-      console.log(error);
-    },
-  });
-
-
   return (
     <div>
-      <div className="flex items-center justify-between px-5 mt-2">
-        <p className="text-xs text-[var(--text-color)] font-medium mt-2">
-          Items({cartData.length})
-        </p>
-        <h1 className="text-[var(--text-color)] text-md font-bold">
-          ₹{total.toFixed(2)}
-        </h1>
-      </div>
-      <div className="flex items-center justify-between px-5 mt-2">
-        <p className="text-xs text-[var(--text-color)] font-medium mt-2">
-          Tax(5.25%)
-        </p>
-        <h1 className="text-[var(--text-color)] text-md font-bold">
-          ₹{tax.toFixed(2)}
-        </h1>
-      </div>
-      <div className="flex items-center justify-between px-5 mt-2">
-        <p className="text-xs text-[var(--text-color)] font-medium mt-2">
-          Grand Total
-        </p>
-        <h1 className="text-[var(--text-color)] text-md font-bold">
-          ₹{grandTotal.toFixed(2)}
-        </h1>
-      </div>
+      {orderData ? ( 
+        <div className="mt-4 border border-[var(--border-color)] rounded-lg p-4">
+          <h1 className="text-md text-[var(--text-color)] font-medium">
+            Bill Details
+          </h1>
+          <div className="flex items-center justify-between px-5 mt-2">
+            <p className="text-xs text-[var(--text-color)] font-medium mt-2">
+              Items ({orderData.bills.items.length})
+            </p>
+            <h1 className="text-[var(--text-color)] text-md font-bold">
+              ₹{orderData.bills.total.toFixed(2)}
+            </h1>
+          </div>
+          <div className="flex items-center justify-between px-5 mt-2">
+            <p className="text-xs text-[var(--text-color)] font-medium mt-2">
+              Tax
+            </p>
+            <h1 className="text-[var(--text-color)] text-md font-bold">
+              ₹{orderData.bills.tax.toFixed(2)}
+            </h1>
+          </div>
+          <hr className="border-t-2 border-[var(--border-color)] my-2" />
+          <div className="flex items-center justify-between px-5 mt-2">
+            <p className="text-xs text-[var(--text-color)] font-medium mt-2">
+              Total
+            </p>
+            <h1 className="text-[var(--text-color)] text-md font-bold">
+              ₹{orderData.bills.grandTotal.toFixed(2)}
+            </h1>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4 border border-[var(--border-color)] rounded-lg p-4">
+          <h1 className="text-md text-[var(--text-color)] font-medium">
+            Bill Details
+          </h1>
+          <div className="flex items-center justify-between px-5 mt-2">
+            <p className="text-xs text-[var(--text-color)] font-medium mt-2">
+              Items ({cartData.length})
+            </p>
+            <h1 className="text-[var(--text-color)] text-md font-bold">
+              ₹{total.toFixed(2)}
+            </h1>
+          </div>
+          <div className="flex items-center justify-between px-5 mt-2">
+            <p className="text-xs text-[var(--text-color)] font-medium mt-2">
+              Tax(5.25%)
+            </p>
+            <h1 className="text-[var(--text-color)] text-md font-bold">
+              ₹{tax.toFixed(2)}
+            </h1>
+          </div>
+          <div className="flex items-center justify-between px-5 mt-2">
+            <p className="text-xs text-[var(--text-color)] font-medium mt-2">
+              Grand Total
+            </p>
+            <h1 className="text-[var(--text-color)] text-md font-bold">
+              ₹{grandTotal.toFixed(2)}
+            </h1>
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-3 px-5 mt-4">
         <button
           onClick={() => setPaymentMethod("Cash")}
