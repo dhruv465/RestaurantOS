@@ -1,29 +1,30 @@
-import { configureStore } from "@reduxjs/toolkit";
-import storage from "redux-persist/lib/storage";
-import { persistReducer, persistStore } from "redux-persist";
-import { combineReducers } from "redux";
-import customerSlice from "./slices/customerSlice.js";
-import cartSlice from "./slices/cartSlice";
-import userSlice from "./slices/userSlice";
+import { configureStore } from '@reduxjs/toolkit';
+import { combineReducers } from 'redux';
+import { persistStore, persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
+
+import userReducer from './slices/userSlice';
+import customerReducer from './slices/customerSlice'; // Import your customer slice
 
 const persistConfig = {
-    key: "root",
-    storage,
-    whitelist: ["customer", "cart"], // Persist only customer and cart
+  key: 'root',
+  storage,
 };
 
 const rootReducer = combineReducers({
-    customer: customerSlice,
-    cart: cartSlice,
-    user: userSlice,
+  user: userReducer,
+  customer: customerReducer, // Add your customer reducer
+  
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-const store = configureStore({
-    reducer: persistedReducer,
-    devTools: import.meta.env.NODE_ENV !== "production",
+export const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
 });
 
 export const persistor = persistStore(store);
-export default store;
