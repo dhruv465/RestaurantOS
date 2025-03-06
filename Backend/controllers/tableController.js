@@ -36,7 +36,8 @@ const getTables = async (req, res, next) => {
     try {
         const tables = await Table.find().populate({
             path: "currentOrder",
-            select: "customerDetails"
+            select: "customerDetails",
+            match: { table: { $exists: true } } // Only populate if a table exists in the Order
         });
         res.status(200).json({
             success: true,
@@ -46,6 +47,7 @@ const getTables = async (req, res, next) => {
         next(error);
     }
 }
+
 
 const deleteTable = async (req, res, next) => {
     try {
