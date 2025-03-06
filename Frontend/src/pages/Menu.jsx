@@ -6,10 +6,26 @@ import CustomerInfo from "../components/menu/CustomerInfo";
 import CartInfo from "../components/menu/CartInfo";
 import Bill from "../components/menu/Bill";
 import { useSelector } from "react-redux";
-
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from 'react'; // Import useRef
+import { useParams } from "react-router-dom";
+import { useQuery } from '@tanstack/react-query'; // Add this import
 
 const Menu = () => {
+
+  const { tableId } = useParams();
+  const { data: orderData, isLoading, isError } = useQuery({
+    queryKey: ["order", tableId],
+    queryFn: () => getOrderByTable(tableId),
+    enabled: !!tableId, 
+  });
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, []);
   useEffect(() => {
     document.title = "RestOS | Menu";
   }, []);
@@ -52,9 +68,9 @@ const Menu = () => {
         <CustomerInfo />
         <hr className="border-t-2 border-[var(--border-color)] m-2" />
         {/* Order Items */}
-        <CartInfo />
+        <CartInfo orderData={orderData?.data.data} />
         {/* Bill */}
-        <Bill />
+        <Bill orderData={orderData?.data.data} />
       </div>
       <div className="fixed bottom-0 left-0 right-0">
         <BottomNav />

@@ -3,14 +3,17 @@ import TableCard from "../components/tables/TableCard";
 import BackButton from "../components/ui/BackButton";
 import BottomNav from "../components/ui/BottomNav";
 import { getTables } from "../https";
-
 import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { setCustomer } from "../redux/slices/customerSlice";
+import { enqueueSnackbar } from "notistack"; // Import enqueueSnackbar
 
 const Tables = () => {
   useEffect(() => {
     document.title = "RestOS | Tables";
   }, []);
   const [status, setStatus] = useState("all");
+  const dispatch = useDispatch();
   const { data: resData, isError } = useQuery({
     queryKey: ["tables"],
     queryFn: async () => {
@@ -23,7 +26,17 @@ const Tables = () => {
     enqueueSnackbar("Something went wrong!", { variant: "error" });
   }
 
-  console.log(resData);
+  const handleTableClick = (table) => {
+    if (table.status === "Booked" && table.currentOrder) {
+      const { customerDetails } = table.currentOrder;
+      dispatch(setCustomer({
+        name: customerDetails.name,
+        phone: customerDetails.phone,
+        guests: customerDetails.guests,
+        table: { tableNo: table.tableNo, tableId: table._id }
+      }));
+    }
+  };
 
   return (
     <section className="bg-[var(--main-bg)] min-h-screen overflow-auto pb-20">
@@ -56,20 +69,19 @@ const Tables = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 sm:p-6 md:p-8">
-        {resData?.data.data
+      {resData?.data.data
           .filter(table => status === "all" || table.status === "Booked")
-          .map((table) => {
-          return (
+          .map((table) => (
             <TableCard
+              key={table._id}
               id={table._id}
               name={table.tableNo}
               status={table.status}
               initials={table?.currentOrder?.customerDetails.name}
               seats={table.seats}
-            key={table._id}
+              onClick={() => handleTableClick(table)} 
             />
-          );
-        })}
+          ))}
       </div>
 
       <BottomNav />
