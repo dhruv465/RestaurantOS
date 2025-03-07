@@ -12,6 +12,7 @@ const Tables = () => {
   useEffect(() => {
     document.title = "RestOS | Tables";
   }, []);
+  
   const [status, setStatus] = useState("all");
   const dispatch = useDispatch();
   const { data: resData, isError } = useQuery({
