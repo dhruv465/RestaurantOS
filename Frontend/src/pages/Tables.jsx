@@ -26,6 +26,8 @@ const Tables = () => {
     enqueueSnackbar("Something went wrong!", { variant: "error" });
   }
 
+  console.log(resData);
+  
   const handleTableClick = (table) => {
     if (table.status === "Booked" && table.currentOrder) {
       const { customerDetails } = table.currentOrder;
