@@ -13,6 +13,8 @@ import { useQuery } from '@tanstack/react-query'; // Add this import
 const Menu = () => {
 
   const { tableId } = useParams();
+  const order = useSelector(state => state.customer.order); // Access order from Redux store
+
   const { data: orderData, isLoading, isError } = useQuery({
     queryKey: ["order", tableId],
     queryFn: () => getOrderByTable(tableId),
@@ -68,9 +70,9 @@ const Menu = () => {
         <CustomerInfo />
         <hr className="border-t-2 border-[var(--border-color)] m-2" />
         {/* Order Items */}
-        <CartInfo orderData={orderData?.data.data} />
+        <CartInfo orderData={order} />
         {/* Bill */}
-        <Bill orderData={orderData?.data.data} />
+        <Bill orderData={order} />
       </div>
       <div className="fixed bottom-0 left-0 right-0">
         <BottomNav />

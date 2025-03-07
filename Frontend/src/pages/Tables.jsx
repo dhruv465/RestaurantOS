@@ -30,12 +30,16 @@ const Tables = () => {
   
   const handleTableClick = (table) => {
     if (table.status === "Booked" && table.currentOrder) {
-      const { customerDetails } = table.currentOrder;
+      const { customerDetails, bills, items } = table.currentOrder;
       dispatch(setCustomer({
         name: customerDetails.name,
         phone: customerDetails.phone,
         guests: customerDetails.guests,
-        table: { tableNo: table.tableNo, tableId: table._id }
+        table: { tableNo: table.tableNo, tableId: table._id },
+        order: { // Add the order details here
+          bills,
+          items
+        }
       }));
     }
   };
