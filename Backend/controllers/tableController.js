@@ -35,8 +35,12 @@ const addTable = async (req, res, next) => {
 const getTables = async (req, res, next) => {
     try {
         const tables = await Table.find().populate({
-            path: "currentOrder",
-            select: "customerDetails",
+            path: "currentOrder", // Populate the currentOrder field
+            populate: [
+              { path: "bills" }, // Populate the bills in currentOrder 
+              { path: "items" }  // Populate the items in currentOrder
+            ],
+            select: "customerDetails bills items", // Select the required fields
             match: { table: { $exists: true } } // Only populate if a table exists in the Order
         });
         res.status(200).json({
