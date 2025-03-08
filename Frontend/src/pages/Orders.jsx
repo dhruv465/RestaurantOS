@@ -1,4 +1,3 @@
-"use client"
 import React, { useEffect, useState } from "react";
 import BottomNav from "../components/ui/BottomNav";
 import OrderCard from "../components/orders/OrderCard";

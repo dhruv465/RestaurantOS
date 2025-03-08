@@ -16,7 +16,6 @@ const TableCard = ({
   seats,
   isAdmin,
   onDelete,
-  onClick // Add onClick prop
 
 }) => {
   const userData = useSelector((state) => state.user);
@@ -26,50 +25,55 @@ const TableCard = ({
 
   const handleClick = (name) => {
     console.log(id);
-    if (showDeleteConfirm) return; // Only block clicks if delete is being confirmed
-
-    // Call the onClick prop (this will dispatch customer data in Tables.jsx)
-    onClick();
+    // if (showDeleteConfirm) return; 
+    // onClick();
     
-    const table = { tableId: id, tableNo: name };
-    dispatch(updateTable({ table }));
-    navigate(`/menu/${id}`); // Pass the table ID as a parameter to the menu page
+    // const table = { tableId: id, tableNo: name }
+    // dispatch(updateTable({table}))
+    // navigate(`/menu`);
+    if(status === "Booked") return;
+
+    const table = { tableId: id, tableNo: name }
+    dispatch(updateTable({table}))
+    navigate(`/menu`);
   };
 
-  const handleDeleteClick = (e) => {
-    e.stopPropagation();
 
-    if (status === "Booked") {
-      enqueueSnackbar("Cannot delete a booked table!", { variant: "warning" });
-      return;
-    }
+  // const handleDeleteClick = (e) => {
+  //   e.stopPropagation();
 
-    setShowDeleteConfirm(true);
-  };
+  //   if (status === "Booked") {
+  //     enqueueSnackbar("Cannot delete a booked table!", { variant: "warning" });
+  //     return;
+  //   }
 
-  const handleConfirmDelete = async (e) => {
-    e.stopPropagation();
+  //   setShowDeleteConfirm(true);
+  // };
 
-    try {
-      await deleteTable(id);
-      enqueueSnackbar(`Table ${name} deleted successfully!`, {
-        variant: "success",
-      });
 
-      if (onDelete) {
-        onDelete(id);
-      }
-    } catch (error) {
-      enqueueSnackbar("Failed to delete the table.", { variant: "error" });
-    }
+  // const handleConfirmDelete = async (e) => {
+  //   e.stopPropagation();
 
-    setShowDeleteConfirm(false);
-  };
+  //   try {
+  //     await deleteTable(id);
+  //     enqueueSnackbar(`Table ${name} deleted successfully!`, {
+  //       variant: "success",
+  //     });
 
-  const handleCancelDelete = (e) => {
-    e.stopPropagation();
-    setShowDeleteConfirm(false);
-  };
+  //     if (onDelete) {
+  //       onDelete(id);
+  //     }
+  //   } catch (error) {
+  //     enqueueSnackbar("Failed to delete the table.", { variant: "error" });
+  //   }
+
+  //   setShowDeleteConfirm(false);
+  // };
+
+  // const handleCancelDelete = (e) => {
+  //   e.stopPropagation();
+  //   setShowDeleteConfirm(false);
+  // };
 
   return (
     <div
@@ -129,12 +133,12 @@ const TableCard = ({
             <span>Seats:</span>
             <span className="ml-1">{seats}</span>
             <div className="flex-grow"></div>
-            {userData.role === "Admin" ? (
+            {/* {userData.role === "Admin" ? (
               <Trash2
                 onClick={handleDeleteClick}
                 className="cursor-pointer hover:bg-[var(--main-bg)] rounded p-1 text-red-500"
               />
-            ) : null}
+            ) : null} */}
           </div>
         </>
       )}
