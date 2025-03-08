@@ -1,6 +1,5 @@
 const { default: mongoose } = require('mongoose');
 const Order = require('../models/orderModel');
-const Table = require('../models/tableModel');
 const createHttpError = require('http-errors');
 
 const addOrder = async (req, res, next) => {
@@ -16,17 +15,24 @@ const addOrder = async (req, res, next) => {
 
 const getOrderById = async (req, res, next) => {
     try {
-
-        const order = await Order.findById(req.params.id);
-        if (!order) {
-            return next(createHttpError(404, "Order not found"));
-        }
-
-        res.status(200).json({ success: true, data: order });
+      const { id } = req.params;
+  
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        const error = createHttpError(404, "Invalid id!");
+        return next(error);
+      }
+  
+      const order = await Order.findById(id);
+      if (!order) {
+        const error = createHttpError(404, "Order not found!");
+        return next(error);
+      }
+  
+      res.status(200).json({ success: true, data: order });
     } catch (error) {
-        next(error);
+      next(error);
     }
-}
+  };
 
 const getOrders = async (req, res, next) => {
     try {
@@ -40,31 +46,32 @@ const getOrders = async (req, res, next) => {
 
 const updateOrder = async (req, res, next) => {
     try {
-
-        const { orderStatus } = req.body;
-        const { id } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-
-            return next(createHttpError(404, "Invalid order id"));
-        }
-
-        const order = await Order.findByIdAndUpdate(req.params.id, { orderStatus }, { new: true });
-
-        if (!order) {
-            const error = createHttpError(404, "Order not found");
-            return next(error);
-        }
-
-        res.status(200).json({
-            success: true,
-            data: order,
-            message: "Order updated successfully"
-        })
-
+      const { orderStatus } = req.body;
+      const { id } = req.params;
+  
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        const error = createHttpError(404, "Invalid id!");
+        return next(error);
+      }
+  
+      const order = await Order.findByIdAndUpdate(
+        id,
+        { orderStatus },
+        { new: true }
+      );
+  
+      if (!order) {
+        const error = createHttpError(404, "Order not found!");
+        return next(error);
+      }
+  
+      res
+        .status(200)
+        .json({ success: true, message: "Order updated", data: order });
     } catch (error) {
-        next(error);
+      next(error);
     }
-}
+  };
 
 
 

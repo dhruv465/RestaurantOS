@@ -5,52 +5,41 @@ const mongoose = require('mongoose');
 
 const addTable = async (req, res, next) => {
     try {
-        const { tableNo, seats } = req.body;
-
-        if (!tableNo) {
-            const error = createHttpError(400, "Please provide table No!");
-            return next(error);
-        }
-
-        const isTablePresent = await Table.findOne({ tableNo });
-
-        if (isTablePresent) {
-            const error = createHttpError(400, "Table already exists");
-            return next(error);
-        }
-
-        const newTable = new Table({ tableNo, seats });
-        await newTable.save();
-
-        res.status(201).json({
-            success: true,
-            data: newTable,
-            message: "Table created successfully"
-        });
+      const { tableNo, seats } = req.body;
+      if (!tableNo) {
+        const error = createHttpError(400, "Please provide table No!");
+        return next(error);
+      }
+      const isTablePresent = await Table.findOne({ tableNo });
+  
+      if (isTablePresent) {
+        const error = createHttpError(400, "Table already exist!");
+        return next(error);
+      }
+  
+      const newTable = new Table({ tableNo, seats });
+      await newTable.save();
+      res
+        .status(201)
+        .json({ success: true, message: "Table added!", data: newTable });
     } catch (error) {
-        next(error);
+      next(error);
     }
-}
+  };
+  
 
-const getTables = async (req, res, next) => {
+  const getTables = async (req, res, next) => {
     try {
-        const tables = await Table.find().populate({
-            path: "currentOrder", // Populate the currentOrder field
-            populate: [
-              { path: "bills" }, // Populate the bills in currentOrder 
-              { path: "items" }  // Populate the items in currentOrder
-            ],
-            select: "customerDetails bills items", // Select the required fields
-            match: { table: { $exists: true } } // Only populate if a table exists in the Order
-        });
-        res.status(200).json({
-            success: true,
-            data: tables
-        });
+      const tables = await Table.find().populate({
+        path: "currentOrder",
+        select: "customerDetails bills items"
+      });
+      res.status(200).json({ success: true, data: tables });
     } catch (error) {
-        next(error);
+      next(error);
     }
-}
+  };
+  
 
 
 const deleteTable = async (req, res, next) => {
@@ -74,40 +63,32 @@ const deleteTable = async (req, res, next) => {
 
 const updateTable = async (req, res, next) => {
     try {
-        const { status, orderId } = req.body;
-
-        if (!mongoose.Types.ObjectId.isValid(orderId)) {
-            return next(createHttpError(400, "Invalid Order ID format"));
-        }
-
-        if (status === "Available") {
-            await deleteOrdersByTableId(req.params.id);
-        }
-        const updateData = {
-            status,
-            currentOrder: orderId
-        };
-
-        const table = await Table.findByIdAndUpdate(
-            req.params.id,
-            updateData,
-            { new: true, runValidators: true }
-        );
-
-        if (!table) {
-            return next(createHttpError(404, "Table not found"));
-        }
-
-        res.status(200).json({
-            success: true,
-            message: "Table updated successfully",
-            data: table
-        });
-
+      const { status, orderId } = req.body;
+  
+      const { id } = req.params;
+  
+      if(!mongoose.Types.ObjectId.isValid(id)){
+          const error = createHttpError(404, "Invalid id!");
+          return next(error);
+      }
+  
+      const table = await Table.findByIdAndUpdate(
+          id,
+        { status, currentOrder: orderId },
+        { new: true }
+      );
+  
+      if (!table) {
+        const error = createHttpError(404, "Table not found!");
+        return error;
+      }
+  
+      res.status(200).json({success: true, message: "Table updated!", data: table});
+  
     } catch (error) {
-        next(error);
+      next(error);
     }
-};
+  };
 
 module.exports = {
     addTable,
