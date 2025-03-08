@@ -1,13 +1,13 @@
 import React from "react";
-import { FaCheckDouble, FaCircle, FaLongArrowAltRight } from "react-icons/fa";
+import { FaCheckDouble } from "react-icons/fa";
 import { formatDateAndTime, getAvatarName } from "../../utils/index";
 
 const OrderCard = ({ key, order }) => {
-  // console.log(order);
+ console.log(order);
   return (
     <div className="w-full bg-[var(--card-bg)] p-4 rounded-lg shadow-lg mb-4">
-      <div className="flex items-center gap-4">
-        <button className="bg-yellow-500 p-3 md:p-4 text-lg md:text-xl font-bold text-white rounded-lg">
+      <div className="flex items-center gap-4 p-4">
+        <button className="bg-amber-400  md:p-4 text-lg md:text-xl font-bold text-white rounded-full items-center justify-center">
           {getAvatarName(order.customerDetails.name)}
         </button>
         <div className="flex items-center justify-between w-full gap-4">
@@ -15,37 +15,31 @@ const OrderCard = ({ key, order }) => {
             <h1 className="text-[var(--text-color)] text-base md:text-lg font-semibold tracking-wide">
               {order.customerDetails.name}
             </h1>
-            <p className="text-[var(--text-color)] text-xs md:text-sm opacity-80">
+            <p className="text-[var(--text-color)] text-xs md:text-sm opacity-80 mb-2">
               #{Math.floor(new Date(order.orderDate).getTime())}/ Dine in
             </p>
-            <p className="text-[var(--text-color)] text-xs md:text-sm opacity-80">
-              Table{" "}
-              <FaLongArrowAltRight className="text-[#ababab] ml-1 inline content-center" />{" "}
-              {order.table.tableNo}
-            </p>
+            <div className="text-sm text-[var(--text-color)] ">
+              <span className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold">
+                Table No → {order.table.tableNo}
+              </span>
+            </div>
           </div>
           <div className="flex flex-col items-end gap-2">
             {order.orderStatus === "Ready" ? (
               <>
-                <p className="bg-gray-200 text-green-600 bg-[var(--success-bg)] px-2 rounded-lg py-1 text-sm md:text-base">
+                <div className="flex items-center gap-1 rounded-full bg-gray-200 text-green-600 bg-[var(--success-bg)] px-2.5 py-0.5 text-xs font-semibold">
                   <FaCheckDouble className="inline mr-2" />
                   {order.orderStatus}
-                </p>
-                <p className="text-[var(--text-color)] text-xs md:text-sm opacity-80">
-                  <FaCircle className="inline mr-2 text-green-600" />
-                  Ready to serve
-                </p>
+                </div>
+               
               </>
             ) : (
               <>
-                <p className="bg-gray-200 text-yellow-600 bg-[var(--success-bg)] px-2 rounded-lg py-1 text-sm md:text-base">
-                  <FaCircle className="inline mr-2" />
+                <div className="flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
                   {order.orderStatus}
-                </p>
-                <p className="text-[var(--text-color)] text-xs md:text-sm opacity-80">
-                  <FaCircle className="inline mr-2 text-yellow-600" />
-                  Preparing your order
-                </p>
+                </div>
+                
               </>
             )}
           </div>

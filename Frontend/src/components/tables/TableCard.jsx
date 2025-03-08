@@ -105,8 +105,7 @@ const TableCard = ({
         <>
           <div className="flex items-center justify-between px-1">
             <h1 className="text-[var(--text-color)] text-xl font-semibold">
-              Table{" "}
-              <FaLongArrowAltRight className="text-[#ababab] ml-2 inline" />{" "}
+              Table → 
               {name}
             </h1>
             <p
