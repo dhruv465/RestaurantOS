@@ -1,16 +1,15 @@
+import { useMutation } from "@tanstack/react-query";
+import { enqueueSnackbar } from "notistack";
 import React, { useState } from "react";
-import { getTotalPrice, removeAllItems } from "../../redux/slices/cartSlice";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   addOrder,
   createOrderRazorpay,
   updateTable,
   verifyPaymentRazorpay,
 } from "../../https";
-import { enqueueSnackbar } from "notistack";
-import { useMutation } from "@tanstack/react-query";
+import { getTotalPrice, removeAllItems } from "../../redux/slices/cartSlice";
 import { removeCustomer } from "../../redux/slices/customerSlice";
-import { useDispatch } from "react-redux";
 import Invoice from "../invoice/Invoice";
 
 function loadScript(src) {
@@ -27,7 +26,8 @@ function loadScript(src) {
   });
 }
 
-const Bill = ({orderData}) => {
+
+const Bill = () => {
   const dispatch = useDispatch();
   const cartData = useSelector((state) => state.cart);
   const customerData = useSelector((state) => state.customer);
@@ -39,6 +39,8 @@ const Bill = ({orderData}) => {
   const [paymentMethod, setPaymentMethod] = useState();
   const [showInvoice, setShowInvoice] = useState(false);
   const [orderInfo, setOrderInfo] = useState();
+
+
 const handlePlaceOrder = async () => {
     if (!paymentMethod) {
       enqueueSnackbar("Plase select a payment method!", { variant: "warning" });
@@ -110,6 +112,7 @@ const handlePlaceOrder = async () => {
           },
           theme: { color: "#025cca" },
         };
+
         const rzp = new window.Razorpay(options);
         rzp.open();
       } catch (error) {
@@ -170,8 +173,8 @@ const handlePlaceOrder = async () => {
     mutationFn: (reqData) => updateTable(reqData),
     onSuccess: (resData) => {
       console.log(resData);
-      // dispatch(removeCustomer());
-      // dispatch(removeAllItems());
+      dispatch(removeCustomer());
+      dispatch(removeAllItems());
     },
     onError: (error) => {
       console.log(error);

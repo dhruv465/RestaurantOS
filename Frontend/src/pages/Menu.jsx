@@ -1,33 +1,15 @@
-import BottomNav from "../components/ui/BottomNav";
-import BackButton from "../components/ui/BackButton";
+import React, { useEffect } from 'react'; // Import useRef
 import { IoRestaurant } from "react-icons/io5";
-import MenuContainer from "../components/menu/MenuContainer";
-import CustomerInfo from "../components/menu/CustomerInfo";
-import CartInfo from "../components/menu/CartInfo";
-import Bill from "../components/menu/Bill";
 import { useSelector } from "react-redux";
-import React, { useEffect, useRef } from 'react'; // Import useRef
-import { useParams } from "react-router-dom";
-import { useQuery } from '@tanstack/react-query'; // Add this import
+import Bill from "../components/menu/Bill";
+import CartInfo from "../components/menu/CartInfo";
+import CustomerInfo from "../components/menu/CustomerInfo";
+import MenuContainer from "../components/menu/MenuContainer";
+import BackButton from "../components/ui/BackButton";
+import BottomNav from "../components/ui/BottomNav";
 
 const Menu = () => {
 
-  const { tableId } = useParams();
-  const order = useSelector(state => state.customer.order); // Access order from Redux store
-
-  const { data: orderData, isLoading, isError } = useQuery({
-    queryKey: ["order", tableId],
-    queryFn: () => getOrderByTable(tableId),
-    enabled: !!tableId, 
-  });
-  const scrollRef = useRef(null);
-
-  useEffect(() => {
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  }, []);
   useEffect(() => {
     document.title = "RestOS | Menu";
   }, []);
@@ -70,9 +52,9 @@ const Menu = () => {
         <CustomerInfo />
         <hr className="border-t-2 border-[var(--border-color)] m-2" />
         {/* Order Items */}
-        <CartInfo orderData={order} />
+        <CartInfo />
         {/* Bill */}
-        <Bill orderData={order} />
+        <Bill/>
       </div>
       <div className="fixed bottom-0 left-0 right-0">
         <BottomNav />
