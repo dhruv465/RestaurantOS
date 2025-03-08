@@ -6,10 +6,10 @@ const initialState = {
     customerPhone: "",
     guests: 0,
     table: null,
-    order: { // Add order property to the initial state
-        bills: null,
-        items: []
-    }  
+    // order: { // Add order property to the initial state
+    //     bills: null,
+    //     items: []
+    // }  
 }
 
 const customerSlice = createSlice({
@@ -22,7 +22,7 @@ const customerSlice = createSlice({
             state.customerName = name;
             state.customerPhone = phone;
             state.guests = guests;
-            state.order = order; // Set the order details in the state
+            // state.order = order; 
 
         },
 
@@ -31,6 +31,7 @@ const customerSlice = createSlice({
             state.customerPhone = "";
             state.guests = 0;
             state.table = null;
+            // state.order = null;
         },
 
         updateTable: (state, action) => {
