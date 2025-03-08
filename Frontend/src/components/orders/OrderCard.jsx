@@ -6,8 +6,8 @@ const OrderCard = ({ key, order }) => {
  console.log(order);
   return (
     <div className="w-full bg-[var(--card-bg)] p-4 rounded-lg shadow-lg mb-4">
-      <div className="flex items-center gap-4 p-4">
-        <button className="bg-amber-400  md:p-4 text-lg md:text-xl font-bold text-white rounded-full items-center justify-center">
+      <div className="flex items-center gap-4">
+        <button className="bg-amber-400 p-3 md:p-4 text-lg md:text-xl font-bold text-white rounded-full">
           {getAvatarName(order.customerDetails.name)}
         </button>
         <div className="flex items-center justify-between w-full gap-4">
@@ -51,7 +51,7 @@ const OrderCard = ({ key, order }) => {
       </div>
       <hr className="text-[var(--border-color)] mt-4 border-t-1 w-full" />
 
-      <div className="flex items-center justify-between mt-4 mb-2">
+      <div className="flex items-center justify-between mt-4 mb-2 ">
         <h1 className="text-[var(--text-color)] text-lg md:text-xl font-semibold">
           Total
         </h1>
