@@ -12,7 +12,7 @@ const Tables = () => {
   useEffect(() => {
     document.title = "RestOS | Tables";
   }, []);
-  
+
   const [status, setStatus] = useState("all");
   const dispatch = useDispatch();
   const { data: resData, isError } = useQuery({
@@ -27,7 +27,7 @@ const Tables = () => {
     enqueueSnackbar("Something went wrong!", { variant: "error" });
   }
 
-  console.log(resData);
+  // console.log(resData);
 
   return (
     <section className="bg-[var(--main-bg)] min-h-screen overflow-auto pb-20">
@@ -60,7 +60,7 @@ const Tables = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 sm:p-6 md:p-8">
-      {resData?.data.data.map((table) => {
+        {resData?.data.data.map((table) => {
           return (
             <TableCard
               id={table._id}
@@ -68,10 +68,11 @@ const Tables = () => {
               status={table.status}
               initials={table?.currentOrder?.customerDetails.name}
               seats={table.seats}
+              key={table._id}
+              currentOrder={table.currentOrder} // Pass currentOrder ID to TableCard
             />
           );
         })}
-
       </div>
 
       <BottomNav />

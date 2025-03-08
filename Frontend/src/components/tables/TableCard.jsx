@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateTable } from "../../redux/slices/customerSlice";
 import { FaLongArrowAltRight } from "react-icons/fa";
 import { Trash2 } from "lucide-react";
-import { deleteTable } from "../../https";
+import { deleteTable, getOrderById } from "../../https";
 import { enqueueSnackbar } from "notistack";
 
 const TableCard = ({
@@ -14,66 +14,39 @@ const TableCard = ({
   status,
   initials,
   seats,
+  currentOrder, // Add currentOrder as a prop
   isAdmin,
   onDelete,
-
 }) => {
   const userData = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const handleClick = (name) => {
-    console.log(id);
-    // if (showDeleteConfirm) return; 
-    // onClick();
-    
-    // const table = { tableId: id, tableNo: name }
-    // dispatch(updateTable({table}))
-    // navigate(`/menu`);
-    if(status === "Booked") return;
-
-    const table = { tableId: id, tableNo: name }
-    dispatch(updateTable({table}))
-    navigate(`/menu`);
+  const handleClick = async (name) => {
+    let orderDetails = null;
+  
+    if (currentOrder) {
+      try {
+        const response = await getOrderById(currentOrder._id); // Fetch full order details
+        orderDetails = response.data; 
+      } catch (error) {
+        console.error("Error fetching order details:", error);
+        return;
+      }
+    }
+  
+    const table = {
+      tableId: id,
+      tableNo: name,
+      currentOrder: orderDetails,  // Pass full order details, not just the ID
+    };
+  
+    console.log("Navigating with full order data:", table);
+  
+    dispatch(updateTable({ table }));
+    navigate("/menu", { state: { table } }); // Pass complete table data
   };
-
-
-  // const handleDeleteClick = (e) => {
-  //   e.stopPropagation();
-
-  //   if (status === "Booked") {
-  //     enqueueSnackbar("Cannot delete a booked table!", { variant: "warning" });
-  //     return;
-  //   }
-
-  //   setShowDeleteConfirm(true);
-  // };
-
-
-  // const handleConfirmDelete = async (e) => {
-  //   e.stopPropagation();
-
-  //   try {
-  //     await deleteTable(id);
-  //     enqueueSnackbar(`Table ${name} deleted successfully!`, {
-  //       variant: "success",
-  //     });
-
-  //     if (onDelete) {
-  //       onDelete(id);
-  //     }
-  //   } catch (error) {
-  //     enqueueSnackbar("Failed to delete the table.", { variant: "error" });
-  //   }
-
-  //   setShowDeleteConfirm(false);
-  // };
-
-  // const handleCancelDelete = (e) => {
-  //   e.stopPropagation();
-  //   setShowDeleteConfirm(false);
-  // };
 
   return (
     <div
@@ -105,8 +78,7 @@ const TableCard = ({
         <>
           <div className="flex items-center justify-between px-1">
             <h1 className="text-[var(--text-color)] text-xl font-semibold">
-              Table → 
-              {name}
+              Table →{name}
             </h1>
             <p
               className={`${
@@ -131,18 +103,12 @@ const TableCard = ({
           <div className="flex items-center text-[var(--text-color)] text-xs opacity-80">
             <span>Seats:</span>
             <span className="ml-1">{seats}</span>
-            <div className="flex-grow"></div>
-            {/* {userData.role === "Admin" ? (
-              <Trash2
-                onClick={handleDeleteClick}
-                className="cursor-pointer hover:bg-[var(--main-bg)] rounded p-1 text-red-500"
-              />
-            ) : null} */}
           </div>
         </>
       )}
     </div>
   );
 };
+
 
 export default TableCard;
