@@ -22,13 +22,13 @@ export const addTable = (data) => api.post('/api/table', data);
 export const getTables = () => api.get('/api/table');
 export const updateTable = ({tableId, ...tableData}) => api.put(`/api/table/${tableId}`, tableData);
 export const deleteTable = (tableId) => api.delete(`/api/table/${tableId}`);
-// Payment API endpoints
 
-export const createOrderRazorpay = (data) => api.post('/api/payment/create-order', data);
-export const verifyPaymentRazorpay = (data) => api.post('/api/payment/verify-payment', data);
-
-//Order API endpoints
-
+// Order API endpoints
 export const addOrder = (data) => api.post('/api/order/', data);
 export const getOrders = () => api.get('/api/order');
-export const updateOrderStatus = ({orderId, orderStatus}) => api.put(`/api/order/${orderId }`, {orderStatus});
+export const updateOrderStatus = ({orderId, orderStatus}) => api.put(`/api/order/${orderId}`, {orderStatus});
+export const getOrderById = (orderId) => api.get(`/api/order/${orderId}`); // Added getOrderById function
+
+// Payment API endpoints
+export const createOrderRazorpay = (data) => api.post('/api/payment/create-order', data);
+export const verifyPaymentRazorpay = (data) => api.post('/api/payment/verify-payment', data);
