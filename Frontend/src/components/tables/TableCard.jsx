@@ -27,6 +27,7 @@ const TableCard = ({
 
   const handleClick = async (name) => {
     // Clear previous cart and customer data when selecting a new table
+    dispatch(removeCustomer());
     dispatch(removeAllItems());
     
     let orderDetails = null;
