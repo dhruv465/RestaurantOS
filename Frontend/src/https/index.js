@@ -28,7 +28,8 @@ export const addOrder = (data) => api.post('/api/order/', data);
 export const getOrders = () => api.get('/api/order');
 export const updateOrderStatus = ({orderId, orderStatus}) => api.put(`/api/order/${orderId}`, {orderStatus});
 export const getOrderById = (orderId) => api.get(`/api/order/${orderId}`); // Added getOrderById function
-
-// Payment API endpoints
+export const updateOrder = (reqData) => {
+    return api.put(`api/orders/${reqData.orderId}`, reqData);
+}; // Payment API endpoints
 export const createOrderRazorpay = (data) => api.post('/api/payment/create-order', data);
 export const verifyPaymentRazorpay = (data) => api.post('/api/payment/verify-payment', data);

@@ -30,8 +30,12 @@ const BottomNav = () => {
   };
 
   const handleCreateOrder = () => {
-    //send data to store
-    dispatch(setCustomer({ name, phone, guests: guestCount }));
+    // Send data to store with proper field names
+    dispatch(setCustomer({ 
+      customerName: name, 
+      customerPhone: phone, 
+      guests: guestCount 
+    }));
     navigate("/tables");
   };
 
