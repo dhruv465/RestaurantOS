@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { getAvatarName, getRandomColor } from "../../utils";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { updateTable } from "../../redux/slices/customerSlice";
+import { updateTable, removeCustomer } from "../../redux/slices/customerSlice";
+import { removeAllItems } from "../../redux/slices/cartSlice";
 import { FaLongArrowAltRight } from "react-icons/fa";
 import { Trash2 } from "lucide-react";
 import { deleteTable, getOrderById } from "../../https";
@@ -14,24 +15,40 @@ const TableCard = ({
   status,
   initials,
   seats,
-  currentOrder, // Add currentOrder as a prop
+  currentOrder,
   isAdmin,
   onDelete,
 }) => {
   const userData = useSelector((state) => state.user);
+  const customerData = useSelector((state) => state.customer);  // Add this line to get customer data
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleClick = async (name) => {
+    // Clear previous cart and customer data when selecting a new table
+    dispatch(removeAllItems());
+    
     let orderDetails = null;
   
-    if (currentOrder) {
+    if (currentOrder && currentOrder._id) {
       try {
-        const response = await getOrderById(currentOrder._id); // Fetch full order details
-        orderDetails = response.data; 
+        console.log("Fetching order details for order ID:", currentOrder._id);
+        const response = await getOrderById(currentOrder._id);
+        console.log("Order details response:", response);
+        
+        // Make sure we're getting the full data structure we expect
+        orderDetails = {
+          _id: response.data.data._id,
+          customerDetails: response.data.data.customerDetails,
+          items: response.data.data.items,
+          bills: response.data.data.bills,
+          paymentMethod: response.data.data.paymentMethod,
+          orderStatus: response.data.data.orderStatus
+        };
       } catch (error) {
         console.error("Error fetching order details:", error);
+        enqueueSnackbar("Error loading order details", { variant: "error" });
         return;
       }
     }
@@ -39,15 +56,39 @@ const TableCard = ({
     const table = {
       tableId: id,
       tableNo: name,
-      currentOrder: orderDetails,  // Pass full order details, not just the ID
+      currentOrder: orderDetails ? { data: orderDetails } : null,
+      // Add current customer info to table object if available
+      customerName: customerData.customerName || null,
+      customerPhone: customerData.customerPhone || null,
+      guests: customerData.guests || null
     };
   
     console.log("Navigating with full order data:", table);
-  
+    
+    // Using removeCustomer to ensure we start with a clean state
+    dispatch(removeCustomer());
+    
+    // Then update with the new table data
     dispatch(updateTable({ table }));
-    navigate("/menu", { state: { table } }); // Pass complete table data
+    
+    navigate("/menu", { state: { table } });
+  };
+  
+  const handleConfirmDelete = async (e) => {
+    e.stopPropagation();
+    try {
+      await onDelete(id);
+      setShowDeleteConfirm(false);
+    } catch (error) {
+      console.error("Error deleting table:", error);
+    }
   };
 
+  const handleCancelDelete = (e) => {
+    e.stopPropagation();
+    setShowDeleteConfirm(false);
+  };
+  
   return (
     <div
       onClick={() => handleClick(name)}
@@ -91,15 +132,15 @@ const TableCard = ({
             </p>
           </div>
           <div className="flex items-center justify-center mt-5 mb-7">
-            <h1
-              style={{
-                backgroundColor: initials ? getRandomColor() : "var(--main-bg)",
-              }}
-              className="text-[var(--text-color)] rounded-full p-5 text-xl"
-            >
-              {getAvatarName(initials) || "N/A"}
-            </h1>
-          </div>
+  <h1
+    style={{
+      backgroundColor: initials ? getRandomColor() : "var(--main-bg)",
+    }}
+    className="text-[var(--text-color)] rounded-full p-5 text-xl"
+  >
+    {getAvatarName(initials) || "N/A"}
+  </h1>
+</div>
           <div className="flex items-center text-[var(--text-color)] text-xs opacity-80">
             <span>Seats:</span>
             <span className="ml-1">{seats}</span>
@@ -109,6 +150,5 @@ const TableCard = ({
     </div>
   );
 };
-
 
 export default TableCard;

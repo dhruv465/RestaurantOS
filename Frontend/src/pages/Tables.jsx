@@ -27,7 +27,7 @@ const Tables = () => {
     enqueueSnackbar("Something went wrong!", { variant: "error" });
   }
 
-  // console.log(resData);
+   console.log(resData);
 
   return (
     <section className="bg-[var(--main-bg)] min-h-screen overflow-auto pb-20">
