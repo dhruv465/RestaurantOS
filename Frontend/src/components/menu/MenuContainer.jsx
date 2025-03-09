@@ -35,10 +35,11 @@ const MenuContainer = () => {
   };
 
   const handleAddToCart = (menu) => {
-    if (itemCount === 0) return;
-
-    const { name, price } = menu;
     const quantity = itemCount[menu.id] || 0;
+    
+    if (quantity === 0) return; // Don't add items with zero quantity
+    
+    const { name, price } = menu;
     const newObj = {
       id: Date.now(),
       name,
@@ -48,8 +49,14 @@ const MenuContainer = () => {
     };
 
     dispatch(addItems(newObj));
-    setItemCount(0);
+    
+    // Reset only this item's count, not all counts
+    setItemCount(prev => ({
+      ...prev,
+      [menu.id]: 0
+    }));
   };
+  
   return (
     <>
       <div className="w-full px-4 py-4">

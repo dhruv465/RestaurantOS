@@ -7,6 +7,7 @@ import {
   createOrderRazorpay,
   updateTable,
   verifyPaymentRazorpay,
+  updateOrder
 } from "../../https";
 import { getTotalPrice, removeAllItems } from "../../redux/slices/cartSlice";
 import { removeCustomer } from "../../redux/slices/customerSlice";
@@ -31,7 +32,8 @@ const Bill = () => {
   const dispatch = useDispatch();
   const cartData = useSelector((state) => state.cart);
   const customerData = useSelector((state) => state.customer);
-  const total = useSelector(getTotalPrice); // Make sure this is how you're using the selector
+  console.log("Customer data from Redux store:", customerData);
+  const total = useSelector(getTotalPrice); 
   const taxRate = 5.25;
   const tax = (total * taxRate) / 100;
   const grandTotal = total + tax;
@@ -41,12 +43,15 @@ const Bill = () => {
   const [orderInfo, setOrderInfo] = useState();
 
 
-const handlePlaceOrder = async () => {
+  const handlePlaceOrder = async () => {
     if (!paymentMethod) {
-      enqueueSnackbar("Plase select a payment method!", { variant: "warning" });
+      enqueueSnackbar("Please select a payment method!", { variant: "warning" });
       return;
     }
-
+    
+    // Check if we're updating an existing order
+    const isExistingOrder = !!customerData.orderId;
+    
     if (paymentMethod === "Online") {
       try {
         const res = await loadScript(
@@ -61,7 +66,6 @@ const handlePlaceOrder = async () => {
         }
 
         //create order
-
         const reqData = {
           amount: grandTotal.toFixed(2),
         };
@@ -79,7 +83,7 @@ const handlePlaceOrder = async () => {
             console.log(verification);
             enqueueSnackbar(verification.data.message, { variant: "success" });
 
-            //Place Order
+            // Prepare orderData for create/update
             const orderData = {
               customerDetails: {
                 name: customerData.customerName,
@@ -101,8 +105,13 @@ const handlePlaceOrder = async () => {
               },
             };
 
+            // If updating an existing order, include the orderId
+            if (isExistingOrder) {
+              orderData.orderId = customerData.orderId;
+            }
+
             setTimeout(() => {
-              orderMutation.mutate(orderData);
+              isExistingOrder ? updateOrderMutation.mutate(orderData) : orderMutation.mutate(orderData);
             }, 1500);
           },
           prefill: {
@@ -120,6 +129,7 @@ const handlePlaceOrder = async () => {
         enqueueSnackbar("Payment Failed!", { variant: "error" });
       }
     } else {
+      // Cash payment
       const orderData = {
         customerDetails: {
           name: customerData.customerName,
@@ -136,7 +146,13 @@ const handlePlaceOrder = async () => {
         table: customerData.table.tableId,
         paymentMethod: paymentMethod,
       };
-      orderMutation.mutate(orderData);
+      
+      // If updating an existing order, include the orderId
+      if (isExistingOrder) {
+        orderData.orderId = customerData.orderId;
+      }
+      
+      isExistingOrder ? updateOrderMutation.mutate(orderData) : orderMutation.mutate(orderData);
     }
   };
 
@@ -144,7 +160,7 @@ const handlePlaceOrder = async () => {
     mutationFn: (reqData) => addOrder(reqData),
     onSuccess: (resData) => {
       const { data } = resData.data;
-      console.log(data);
+      console.log("Order created:", data);
 
       setOrderInfo(data);
 
@@ -166,6 +182,25 @@ const handlePlaceOrder = async () => {
     },
     onError: (error) => {
       console.log(error);
+      enqueueSnackbar("Failed to create order!", { variant: "error" });
+    },
+  });
+
+  const updateOrderMutation = useMutation({
+    mutationFn: (reqData) => updateOrder(reqData),
+    onSuccess: (resData) => {
+      const { data } = resData.data;
+      console.log("Order updated:", data);
+
+      setOrderInfo(data);
+      enqueueSnackbar("Order Updated!", {
+        variant: "success",
+      });
+      setShowInvoice(true);
+    },
+    onError: (error) => {
+      console.log(error);
+      enqueueSnackbar("Failed to update order!", { variant: "error" });
     },
   });
 
@@ -235,7 +270,7 @@ const handlePlaceOrder = async () => {
           onClick={handlePlaceOrder}
           className="bg-[var(--card-bg)] px-4 py-3 w-full rounded-lg text-[var(--text-color)] font-semibold border border-[var(--border-color)] hover:bg-[var(--card-bg)]/90 transition-colors duration-200"
         >
-          Place Order
+          {customerData.orderId ? "Update Order" : "Place Order"}
         </button>
       </div>
       {showInvoice && (
@@ -246,4 +281,3 @@ const handlePlaceOrder = async () => {
 };
 
 export default Bill;
-

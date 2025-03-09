@@ -42,8 +42,8 @@ const CartInfo = ({ orderData }) => {
           // If cartData has items, display them
           cartData.map((item) => (
             <div
-              // key={item.id}
-              className="rounded-lg px-4 py-4 mb-2  bg-[var(--main-bg)]"
+              key={item.id}
+              className="rounded-lg px-4 py-4 mb-2 bg-[var(--main-bg)]"
             >
               <div className="flex items-center justify-between">
                 <h1 className="text-[var(--text-color)] font-semibold tracking-wide text-md">

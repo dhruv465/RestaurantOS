@@ -13,7 +13,7 @@ const CustomerInfo = () => {
           {customerData.customerName || "Customer Name"}
         </h1>
         <p className="text-xs text-[var(--text-color)] font-medium mt-1">
-          {customerData.orderId || "N/A"   } / Dine in
+          #{customerData.orderId || "N/A"   } / Dine in
         </p>
         <p className="text-xs text-[var(--text-color)] font-medium mt-2">
           {" "}
