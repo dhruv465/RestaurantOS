@@ -91,6 +91,7 @@ const RecentOrders = () => {
                     >
                       <option className="text-yellow-500" value="In Progress">In Progress</option>
                       <option className="text-green-500" value="Ready">Ready</option>
+                      <option className="text-gray-500" value="Completed">Completed</option>
                     </select>
                   </td>
                   <td className="p-4">
@@ -103,6 +104,7 @@ const RecentOrders = () => {
                     >
                       <option className="text-green-500" value="Available">Available</option>
                       <option className="text-red-500" value="Booked">Booked</option>
+                     
                     </select>
                   </td>
                   <td className="p-4">{formatDateAndTime(order.createdAt)}</td>

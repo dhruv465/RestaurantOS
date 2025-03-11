@@ -61,34 +61,38 @@ const deleteTable = async (req, res, next) => {
     }
 };
 
+// tableController.js
+
 const updateTable = async (req, res, next) => {
-    try {
-      const { status, orderId } = req.body;
-  
-      const { id } = req.params;
-  
-      if(!mongoose.Types.ObjectId.isValid(id)){
-          const error = createHttpError(404, "Invalid id!");
-          return next(error);
-      }
-  
-      const table = await Table.findByIdAndUpdate(
-          id,
-        { status, currentOrder: orderId },
-        { new: true }
-      );
-  
-      if (!table) {
-        const error = createHttpError(404, "Table not found!");
-        return error;
-      }
-  
-      res.status(200).json({success: true, message: "Table updated!", data: table});
-  
-    } catch (error) {
-      next(error);
+  try {
+    const { status, orderId } = req.body;
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(createHttpError(404, "Invalid id!"));
     }
-  };
+
+    // Set currentOrder to null when status is "Available"
+    const updatedOrder = status === "Available" ? null : orderId;
+
+    const table = await Table.findByIdAndUpdate(
+      id,
+      { status, currentOrder: updatedOrder }, // Update currentOrder here
+      { new: true }
+    );
+
+    if (!table) {
+      return next(createHttpError(404, "Table not found!"));
+    }
+
+    res.status(200).json({ success: true, message: "Table updated!", data: table });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 
 module.exports = {
     addTable,
