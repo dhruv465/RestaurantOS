@@ -1,6 +1,6 @@
 const Table = require('../models/tableModel');
 const createHttpError = require('http-errors');
-const { deleteOrdersByTableId } = require('./orderController');
+const { deleteOrdersByTableId, updateOrder } = require('./orderController');
 const mongoose = require('mongoose');
 
 const addTable = async (req, res, next) => {
@@ -28,7 +28,7 @@ const addTable = async (req, res, next) => {
   };
   
 
-  const getTables = async (req, res, next) => {
+const getTables = async (req, res, next) => {
     try {
       const tables = await Table.find().populate({
         path: "currentOrder",
@@ -75,6 +75,11 @@ const updateTable = async (req, res, next) => {
     // Set currentOrder to null when status is "Available"
     const updatedOrder = status === "Available" ? null : orderId;
 
+    // Update order status to "Completed" if the table is set to Available
+    if (status === "Available" && orderId) {
+      await updateOrder({ params: { id: orderId }, body: { orderStatus: "Completed" } }, res, next); // Pass correct parameters to updateOrder
+  }
+
     const table = await Table.findByIdAndUpdate(
       id,
       { status, currentOrder: updatedOrder }, // Update currentOrder here
@@ -91,8 +96,6 @@ const updateTable = async (req, res, next) => {
     next(error);
   }
 };
-
-
 
 module.exports = {
     addTable,

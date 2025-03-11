@@ -12,7 +12,6 @@ const addOrder = async (req, res, next) => {
     }
 }
 
-
 const getOrderById = async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -32,13 +31,12 @@ const getOrderById = async (req, res, next) => {
     } catch (error) {
       next(error);
     }
-  };
+};
 
 const getOrders = async (req, res, next) => {
     try {
         const orders = await Order.find().populate("table");
         res.status(200).json({ data: orders });
-
     } catch (error) {
         next(error);
     }
@@ -71,9 +69,7 @@ const updateOrder = async (req, res, next) => {
     } catch (error) {
       next(error);
     }
-  };
-
-
+};
 
 const deleteOrdersByTableId = async (tableId) => {
     try {
@@ -96,7 +92,7 @@ const getOrderByTable = async (req, res, next) => {
     } catch (error) {
       next(error);
     }
-  };
+};
 
 module.exports = {
     deleteOrdersByTableId,
