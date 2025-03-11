@@ -85,7 +85,7 @@ const Orders = () => {
           <button
             onClick={() => setStatus("completed")}
             className={`text-[var(--text-color)] text-sm md:text-base ${
-              status === "ready" && "bg-[var(--card-bg)]"
+              status === "completed" && "bg-[var(--card-bg)]"
             } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
           >
             Completed

@@ -1,5 +1,5 @@
 import React from "react";
-import { FaCheckDouble, FaCircle, FaLongArrowAltRight } from "react-icons/fa";
+import { FaCheckDouble, FaCircle, FaCheckCircle } from "react-icons/fa";
 import { getAvatarName } from "../../utils";
 
 const OrderList = ({ order }) => {
