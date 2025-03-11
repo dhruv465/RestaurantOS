@@ -1,11 +1,19 @@
 import React from "react";
-import { FaCheckDouble } from "react-icons/fa";
+import { FaCheckDouble, FaCheckCircle } from "react-icons/fa"; // Import FaCheckCircle
 import { formatDateAndTime, getAvatarName } from "../../utils/index";
 
 const OrderCard = ({ key, order }) => {
- console.log(order);
+  console.log(order);
+
+  const cardClass =
+    order.orderStatus === "Completed"
+      ? "opacity-80 blur-sm" // Add opacity and blur for completed orders
+      : "";
+
   return (
-    <div className="w-full bg-[var(--card-bg)] p-4 rounded-lg shadow-lg mb-4">
+    <div
+      className={`w-full bg-[var(--card-bg)] p-4 rounded-lg shadow-lg mb-4 ${cardClass}`}
+    >
       <div className="flex items-center gap-4">
         <button className="bg-amber-400 p-3 md:p-4 text-lg md:text-xl font-bold text-white rounded-full">
           {getAvatarName(order.customerDetails.name)}
@@ -26,21 +34,21 @@ const OrderCard = ({ key, order }) => {
           </div>
           <div className="flex flex-col items-end gap-2">
             {order.orderStatus === "Ready" ? (
-              <>
-                <div className="flex items-center gap-1 rounded-full bg-gray-200 text-green-600 bg-[var(--success-bg)] px-2.5 py-0.5 text-xs font-semibold">
-                  <FaCheckDouble className="inline mr-2" />
-                  {order.orderStatus}
-                </div>
-               
-              </>
+              <div className="flex items-center gap-1 rounded-full bg-gray-200 text-green-600 bg-[var(--success-bg)] px-2.5 py-0.5 text-xs font-semibold">
+                <FaCheckDouble className="inline mr-2" />
+                {order.orderStatus}
+              </div>
+            ) : order.orderStatus === "Completed" ? ( // New condition for "Completed"
+              <div className="flex items-center gap-1 rounded-full bg-gray-300 text-gray-600 px-2.5 py-0.5 text-xs font-semibold">
+                <FaCheckCircle className="inline mr-2" />{" "}
+                {/* Use FaCheckCircle */}
+                {order.orderStatus}
+              </div>
             ) : (
-              <>
-                <div className="flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                  {order.orderStatus}
-                </div>
-                
-              </>
+              <div className="flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                {order.orderStatus}
+              </div>
             )}
           </div>
         </div>
