@@ -53,7 +53,7 @@ const RecentOrders = () => {
   }
 
   // Filter out orders where the table status is "Available"
-  const filteredOrders = resData?.data.data.filter(order => order.table.status !== "Available");
+  const filteredOrders = resData?.data.data.filter(order => order.table.status !== "Available" && order.orderStatus !== "Completed");
 
   return (
     <div className="flex flex-col w-full p-4">
