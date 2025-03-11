@@ -35,7 +35,7 @@ const getOrderById = async (req, res, next) => {
 
 const getOrders = async (req, res, next) => {
     try {
-        const orders = await Order.find().populate("table");
+        const orders = await Order.find({ orderStatus: { $ne: 'completed' } }).populate("table");
         res.status(200).json({ data: orders });
     } catch (error) {
         next(error);
@@ -82,7 +82,7 @@ const deleteOrdersByTableId = async (tableId) => {
 const getOrderByTable = async (req, res, next) => {
     try {
       const orderId = req.params.tableId; // Assuming tableId is passed as a parameter
-      const order = await Order.findOne({ table: orderId }).populate('items'); // Populate items if needed
+      const order = await Order.findOne({ table: orderId, orderStatus: { $ne: 'completed' } }).populate('items'); // Populate items if needed
   
       if (!order) {
         return next(createHttpError(404, 'Order not found'));
