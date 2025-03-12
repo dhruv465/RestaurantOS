@@ -134,19 +134,21 @@ const Header = () => {
     }
   };
 
-
-  return ( 
+  return (
     <header
       className="bg-[var(--header-bg)] border-b border-[var(--border-color)]"
       role="banner"
     >
       {/* Mobile Header (below 834px) */}
       <div className="md:hidden flex items-center justify-between p-4">
-        <div 
-          onClick={() => handleNavigation("/")} 
+        <div
+          onClick={() => handleNavigation("/")}
           className="logo flex items-center gap-2 cursor-pointer"
         >
-          <FaKitchenSet className="h-8 w-8 text-[var(--text-color)]" aria-hidden="true" />
+          <FaKitchenSet
+            className="h-8 w-8 text-[var(--text-color)]"
+            aria-hidden="true"
+          />
           <h1 className="text-xl font-semibold text-[var(--text-color)]">
             RestOS
           </h1>
@@ -161,7 +163,7 @@ const Header = () => {
           >
             <IoSearch className="text-xl" />
           </button>
-          
+
           <button
             onClick={toggleMenu}
             className="p-1 text-[var(--text-color)]"
@@ -262,7 +264,7 @@ const Header = () => {
             </button>
 
             {userData.role === "Admin" && (
-              <button 
+              <button
                 onClick={() => handleNavigation("/dashboard")}
                 className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
                 aria-label="Dashboard"
@@ -304,12 +306,16 @@ const Header = () => {
 
       {/* Desktop Header (above 834px) */}
       <div className="hidden md:flex flex-col md:flex-row justify-between items-center py-2 px-4 sm:px-6 md:px-8 gap-4 md:gap-0">
-        <div 
-          onClick={() => navigate("/")} 
+        <div
+          onClick={() => navigate("/")}
           className="logo flex items-center gap-2 cursor-pointer"
         >
           {/* <img src={logo} className="h-8 w-8" alt="RestOS logo" /> */}
-          <FaKitchenSet className="h-8 w-8 text-[var(--text-color)]" alt="RestOS logo" /> <h1 className="text-2xl font-bold text-[var(--text-color)]">
+          <FaKitchenSet
+            className="h-8 w-8 text-[var(--text-color)]"
+            alt="RestOS logo"
+          />{" "}
+          <h1 className="text-2xl font-bold text-[var(--text-color)]">
             RestOS
           </h1>
         </div>
@@ -337,7 +343,7 @@ const Header = () => {
 
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
           {userData.role === "Admin" && (
-            <button 
+            <button
               onClick={() => navigate("/dashboard")}
               className="flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
               aria-label="Dashboard"

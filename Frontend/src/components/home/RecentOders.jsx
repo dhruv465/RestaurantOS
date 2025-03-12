@@ -21,10 +21,10 @@ const RecentOders = () => {
 
   // Filter out orders where the table status is "Available"
   const filteredOrders = resData?.data.data.filter(
-    (order) => 
-      order.orderStatus !== "Completed" && 
-      order.table && // Check if order.table exists 
-      order.table.status !== "Available" 
+    (order) =>
+      order.orderStatus !== "Completed" &&
+      order.table && // Check if order.table exists
+      order.table.status !== "Available"
   );
 
   return (
