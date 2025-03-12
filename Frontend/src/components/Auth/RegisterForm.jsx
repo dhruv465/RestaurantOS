@@ -86,7 +86,10 @@ const RegisterForm = ({ onToggleForm }) => {
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: `url('/src/assets/images/restaurant-img.jpg') no-repeat center center fixed`, backgroundSize: 'cover' }}
+      style={{
+        background: `url('/src/assets/images/restaurant-img.jpg') no-repeat center center fixed`,
+        backgroundSize: "cover",
+      }}
     >
       {/* Background Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -109,7 +112,6 @@ const RegisterForm = ({ onToggleForm }) => {
               className="text-4xl font-bold mb-2"
               style={{ color: "var(--text-color)" }}
             >
-              
               RestOS
             </h1>
             <p className="text-[#ababab] text-sm mb-4">Create your account</p>
@@ -161,13 +163,17 @@ const RegisterForm = ({ onToggleForm }) => {
                 Role
               </label>
               <div className="flex item-center gap-3 mt-4">
-                {["Waiter", "Cashier", "Admin"].map((role) => {
+              {["Waiter", "Cashier", "Admin"].map((role) => {
+                  const isSelected = formData.role === role;
                   return (
                     <button
                       key={role}
                       type="button"
                       onClick={() => hadleRoleSelection(role)}
-                      className="bg-[var(--main-bg)] px-4 py-3 w-full rounded-lg text-[var(--text-color)]"
+                      className={`px-4 py-3 w-full rounded-lg text-[var(--text-color)] transition-all duration-200 
+                        ${isSelected 
+                          ? 'bg-[#F6b100] text-white font-medium' 
+                          : 'bg-[var(--main-bg)] hover:bg-[var(--input-bg)]'}`}
                     >
                       {role}
                     </button>

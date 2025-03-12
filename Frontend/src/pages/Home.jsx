@@ -18,10 +18,10 @@ const Home = () => {
         {/* Main Content */}
         <div className="flex flex-col md:flex-[3]">
           <Greetings />
-          <div className="flex flex-col md:flex-row items-center w-full gap-3 px-4 md:px-8 mt-8">
+          {/* <div className="flex flex-col md:flex-row items-center w-full gap-3 px-4 md:px-8 mt-8">
             <MiniCard title="Total Earnings" icon={<BsCashCoin />} number="512" footerNum={1.6} />
             <MiniCard title="In Progress" icon={<GrInProgress />} number="16" footerNum={3.6} />
-          </div>
+          </div> */}
           <RecentOders />
         </div>
 
