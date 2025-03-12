@@ -264,7 +264,7 @@ const Bill = () => {
 
       <div className="flex items-center gap-3 px-5 mt-4 mb-4">
         <button className="bg-[var(--card-bg)] px-4 py-3 w-full rounded-lg text-[var(--text-color)] font-semibold border border-[var(--border-color)] hover:bg-[var(--card-bg)]/90 transition-colors duration-200">
-          Print Receipt
+         Book Table
         </button>
         <button
           onClick={handlePlaceOrder}
