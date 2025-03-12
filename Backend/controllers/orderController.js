@@ -81,8 +81,8 @@ const deleteOrdersByTableId = async (tableId) => {
 
 const getOrderByTable = async (req, res, next) => {
     try {
-      const orderId = req.params.tableId; // Assuming tableId is passed as a parameter
-      const order = await Order.findOne({ table: orderId, orderStatus: { $ne: 'completed' } }).populate('items'); // Populate items if needed
+      const orderId = req.params.tableId; 
+      const order = await Order.findOne({ table: orderId, orderStatus: { $ne: 'completed' } }).populate('items'); 
   
       if (!order) {
         return next(createHttpError(404, 'Order not found'));

@@ -134,10 +134,6 @@ const Header = () => {
     }
   };
 
-const handleBookTable = () => {
-    // Logic to handle booking a table
-    console.log("Table booked!");
-  };
 
   return ( 
     <header
@@ -164,14 +160,6 @@ const handleBookTable = () => {
             aria-label="Open search"
           >
             <IoSearch className="text-xl" />
-          </button>
-
-          <button
-            onClick={handleBookTable} // Change to handleBookTable function
-            className="p-1 text-[var(--text-color)]"
-            aria-label="Book Table"
-          >
-            Book Table // Change button text to "Book Table"
           </button>
           
           <button
