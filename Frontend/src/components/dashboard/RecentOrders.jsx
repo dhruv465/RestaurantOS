@@ -53,7 +53,11 @@ const RecentOrders = () => {
   }
 
   // Filter out orders where the table status is "Available"
-  const filteredOrders = resData?.data.data.filter(order => order.table.status !== "Available" && order.orderStatus !== "Completed");
+// RecentOrders.jsx
+const filteredOrders = resData?.data.data.filter(order => 
+  order.orderStatus !== "Completed" && 
+  order.table?.status !== "Available" // Optional chaining here
+);
 
   return (
     <div className="flex flex-col w-full p-4">
@@ -91,7 +95,6 @@ const RecentOrders = () => {
                     >
                       <option className="text-yellow-500" value="In Progress">In Progress</option>
                       <option className="text-green-500" value="Ready">Ready</option>
-                      <option className="text-gray-500" value="Completed">Completed</option>
                     </select>
                   </td>
                   <td className="p-4">

@@ -28,7 +28,7 @@ const OrderCard = ({ key, order }) => {
             </p>
             <div className="text-sm text-[var(--text-color)] ">
               <span className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold">
-                Table No → {order.table.tableNo}
+                Table No → {order.table?.tableNo}
               </span>
             </div>
           </div>
