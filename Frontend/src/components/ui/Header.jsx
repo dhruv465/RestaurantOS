@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
+import { FaKitchenSet } from "react-icons/fa6";
 import {
   FaBell,
   FaMoon,
@@ -37,6 +38,7 @@ const Header = () => {
     onSuccess: (data) => {
       console.log(data);
       dispatch(removeUser());
+      setIsMenuOpen(false); // Close menu on logout
       navigate("/auth");
     },
     onError: (error) => {
@@ -51,6 +53,12 @@ const Header = () => {
       return;
     }
     logoutMutation.mutate();
+  };
+
+  // Navigate and close menu
+  const handleNavigation = (path) => {
+    setIsMenuOpen(false); // Close the menu
+    navigate(path); // Navigate to the path
   };
 
   // All existing useEffect hooks remain the same
@@ -95,6 +103,9 @@ const Header = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     console.log("Searching for:", searchQuery);
+    if (isSearchExpanded) {
+      setIsSearchExpanded(false); // Close search on submit
+    }
   };
 
   const toggleMenu = () => {
@@ -123,15 +134,23 @@ const Header = () => {
     }
   };
 
-  return (
+const handleBookTable = () => {
+    // Logic to handle booking a table
+    console.log("Table booked!");
+  };
+
+  return ( 
     <header
       className="bg-[var(--header-bg)] border-b border-[var(--border-color)]"
       role="banner"
     >
       {/* Mobile Header (below 834px) */}
       <div className="md:hidden flex items-center justify-between p-4">
-        <div onClick={() => navigate("/")} className="logo flex items-center gap-2 cursor-pointer">
-          <img src={logo} className="h-8 w-8" alt="RestOS logo" />
+        <div 
+          onClick={() => handleNavigation("/")} 
+          className="logo flex items-center gap-2 cursor-pointer"
+        >
+          <FaKitchenSet className="h-8 w-8 text-[var(--text-color)]" aria-hidden="true" />
           <h1 className="text-xl font-semibold text-[var(--text-color)]">
             RestOS
           </h1>
@@ -147,6 +166,14 @@ const Header = () => {
             <IoSearch className="text-xl" />
           </button>
 
+          <button
+            onClick={handleBookTable} // Change to handleBookTable function
+            className="p-1 text-[var(--text-color)]"
+            aria-label="Book Table"
+          >
+            Book Table // Change button text to "Book Table"
+          </button>
+          
           <button
             onClick={toggleMenu}
             className="p-1 text-[var(--text-color)]"
@@ -247,7 +274,8 @@ const Header = () => {
             </button>
 
             {userData.role === "Admin" && (
-              <button onClick={()=> navigate("/dashboard")}
+              <button 
+                onClick={() => handleNavigation("/dashboard")}
                 className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
                 aria-label="Dashboard"
               >
@@ -261,6 +289,7 @@ const Header = () => {
             <button
               className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
               aria-label="Notifications"
+              onClick={() => handleNavigation("/notifications")}
             >
               <FaBell
                 className="text-xl text-[var(--text-color)]"
@@ -269,14 +298,13 @@ const Header = () => {
               <span className="text-[var(--text-color)]">Notifications</span>
             </button>
 
-            {/* Added Logout Button to Mobile Menu */}
+            {/* Logout Button to Mobile Menu */}
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
               aria-label="Logout"
             >
               <FaSignOutAlt
-                onClick={handleLogout}
                 className="text-xl text-[var(--text-color)]"
                 aria-hidden="true"
               />
@@ -288,9 +316,12 @@ const Header = () => {
 
       {/* Desktop Header (above 834px) */}
       <div className="hidden md:flex flex-col md:flex-row justify-between items-center py-2 px-4 sm:px-6 md:px-8 gap-4 md:gap-0">
-        <div onClick={() => navigate("/")} className="logo flex items-center gap-2 cursor-pointer">
-          <img src={logo} className="h-8 w-8" alt="RestOS logo" />
-          <h1 className="text-2xl font-bold text-[var(--text-color)]">
+        <div 
+          onClick={() => navigate("/")} 
+          className="logo flex items-center gap-2 cursor-pointer"
+        >
+          {/* <img src={logo} className="h-8 w-8" alt="RestOS logo" /> */}
+          <FaKitchenSet className="h-8 w-8 text-[var(--text-color)]" alt="RestOS logo" /> <h1 className="text-2xl font-bold text-[var(--text-color)]">
             RestOS
           </h1>
         </div>
@@ -318,7 +349,8 @@ const Header = () => {
 
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
           {userData.role === "Admin" && (
-            <button onClick={()=> navigate("/dashboard")}
+            <button 
+              onClick={() => navigate("/dashboard")}
               className="flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
               aria-label="Dashboard"
             >
@@ -347,6 +379,7 @@ const Header = () => {
           <button
             className="bell flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer"
             aria-label="Notifications"
+            onClick={() => navigate("/notifications")}
           >
             <FaBell
               className="text-2xl text-[var(--text-color)]"
@@ -370,13 +403,13 @@ const Header = () => {
               </p>
             </div>
           </button>
-          {/* Added Logout Button to Desktop Header */}
+          {/* Logout Button to Desktop Header */}
           <button
             onClick={handleLogout}
             className="flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
             aria-label="Logout"
           >
-            <FaSignOutAlt onClick={handleLogout} className="text-xl" />
+            <FaSignOutAlt className="text-xl" />
           </button>
         </div>
       </div>

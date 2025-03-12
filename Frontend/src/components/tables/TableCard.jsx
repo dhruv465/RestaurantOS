@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateTable, removeCustomer } from "../../redux/slices/customerSlice";
 import { removeAllItems } from "../../redux/slices/cartSlice";
 import { FaLongArrowAltRight } from "react-icons/fa";
-import { Trash2 } from "lucide-react";
+import { Trash2, Users } from "lucide-react";
 import { deleteTable, getOrderById } from "../../https";
 import { enqueueSnackbar } from "notistack";
 
@@ -122,6 +122,7 @@ const TableCard = ({
             <h1 className="text-[var(--text-color)] text-xl font-semibold">
               Table →{name}
             </h1>
+
             <p
               className={`${
                 status === "Booked"
@@ -142,7 +143,8 @@ const TableCard = ({
               {getAvatarName(initials) || "N/A"}
             </h1>
           </div>
-          <div className="flex items-center text-[var(--text-color)] text-xs opacity-80">
+          <div className="flex items-center text-[var(--text-color)] text-xs opacity-80 gap-2">
+            <Users className="h-4 w-4" />
             <span>Seats:</span>
             <span className="ml-1">{seats}</span>
           </div>
