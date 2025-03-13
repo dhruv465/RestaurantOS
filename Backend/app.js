@@ -31,6 +31,8 @@ app.use("/api/user", require('./routes/userRoute'));
 app.use("/api/order", require('./routes/orderRoute'));
 app.use("/api/table", require('./routes/tableRoute'));
 app.use("/api/payment", require('./routes/paymentRoute'));
+app.use("/api/categories", require('./routes/categoryRoutes')); 
+app.use("/api/items", require('./routes/itemRoutes'));
 
 //Error Handler
 app.use(globalErrorHandler);
