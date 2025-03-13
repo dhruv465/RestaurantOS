@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { additemAsync, selectItemStatus } from '../../redux/slices/itemSlice';
-import { enqueueSnackbar } from 'notistack'; 
-import Modal from '../dashboard/Modal';
-import { selectCategories } from '../../redux/slices/categorySlice';
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { additemAsync, selectItemStatus } from "../../redux/slices/itemSlice";
+import { enqueueSnackbar } from "notistack";
+import Modal from "../dashboard/Modal";
+import { selectCategories } from "../../redux/slices/categorySlice";
 
 const AdditemModal = ({ isOpen, onClose, initialItem = {} }) => {
   const dispatch = useDispatch();
@@ -11,14 +11,22 @@ const AdditemModal = ({ isOpen, onClose, initialItem = {} }) => {
   const itemStatus = useSelector(selectItemStatus);
   const isEditing = initialItem && !!initialItem._id;
 
-  const [itemName, setItemName] = useState(initialItem && initialItem.name ? initialItem.name : '');
-  const [itemPrice, setItemPrice] = useState(initialItem && initialItem.price ? initialItem.price : '');
-  const [selectedCategory, setSelectedCategory] = useState(initialItem && initialItem.category ? initialItem.category : '');
+  const [itemName, setItemName] = useState(
+    initialItem && initialItem.name ? initialItem.name : ""
+  );
+  const [itemPrice, setItemPrice] = useState(
+    initialItem && initialItem.price ? initialItem.price : ""
+  );
+  const [selectedCategory, setSelectedCategory] = useState(
+    initialItem && initialItem.category ? initialItem.category : ""
+  );
 
   useEffect(() => {
-    setItemName(initialItem && initialItem.name ? initialItem.name : '');
-    setItemPrice(initialItem && initialItem.price ? initialItem.price : '');
-    setSelectedCategory(initialItem && initialItem.category ? initialItem.category : '');
+    setItemName(initialItem && initialItem.name ? initialItem.name : "");
+    setItemPrice(initialItem && initialItem.price ? initialItem.price : "");
+    setSelectedCategory(
+      initialItem && initialItem.category ? initialItem.category : ""
+    );
   }, [isOpen, initialItem]);
 
   const handleSubmit = async () => {
@@ -29,18 +37,28 @@ const AdditemModal = ({ isOpen, onClose, initialItem = {} }) => {
         category: selectedCategory,
       };
 
-      const response = await dispatch(isEditing ? additemAsync({ id: initialItem._id, data: newItem }) : additemAsync(newItem));
-      if (response.meta.requestStatus === 'fulfilled') {
-        enqueueSnackbar('Item added/updated successfully!', { variant: 'success' });
+      const response = await dispatch(
+        isEditing
+          ? additemAsync({ id: initialItem._id, data: newItem })
+          : additemAsync(newItem)
+      );
+      if (response.meta.requestStatus === "fulfilled") {
+        enqueueSnackbar("Item added/updated successfully!", {
+          variant: "success",
+        });
       } else {
-        enqueueSnackbar('Failed to add/update item.', { variant: 'error' });
+        enqueueSnackbar("Failed to add/update item.", { variant: "error" });
       }
       onClose();
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? 'Edit Item' : 'Add Item'}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isEditing ? "Edit Item" : "Add Item"}
+    >
       <div className="mb-4">
         <input
           type="text"
@@ -76,9 +94,9 @@ const AdditemModal = ({ isOpen, onClose, initialItem = {} }) => {
       <button
         onClick={handleSubmit}
         className="px-4 py-2 rounded-md bg-blue-500 text-white font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
-        disabled={itemStatus === 'loading'}
+        disabled={itemStatus === "loading"}
       >
-        {isEditing ? 'Save Changes' : 'Add Item'}
+        {isEditing ? "Save Changes" : "Add Item"}
       </button>
     </Modal>
   );

@@ -1,19 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { addCategory, getCategories, updateCategory, deleteCategory } from '../../https'; 
+import { addCategory, getCategories, updateCategory, deleteCategory } from '../../https';
 
 export const fetchCategories = createAsyncThunk('category/fetchCategories', async () => {
   const response = await getCategories();
-  return response.data.data; 
+  return response.data.data;
 });
 
 export const addCategoryAsync = createAsyncThunk('category/addCategory', async (category) => {
   const response = await addCategory(category);
-  return response.data.data; 
+  return response.data.data;
 });
 
 export const updateCategoryAsync = createAsyncThunk('category/updateCategory', async ({ id, data }) => {
   const response = await updateCategory(id, data);
-  return response.data.data; 
+  return response.data.data;
 });
 
 export const deleteCategoryAsync = createAsyncThunk('category/deleteCategory', async (id) => {
@@ -25,7 +25,7 @@ const categorySlice = createSlice({
   name: 'category',
   initialState: {
     categories: [],
-    status: 'idle', 
+    status: 'idle',
     error: null,
   },
   reducers: {},
@@ -84,7 +84,7 @@ const categorySlice = createSlice({
 
 // categorySlice.js
 export const selectCategories = (state) => state.category?.categories || [];
-export const selectCategoryStatus = (state) => state.category?.status; 
+export const selectCategoryStatus = (state) => state.category?.status;
 export const selectCategoryError = (state) => state.category.error;
 
 export default categorySlice.reducer;

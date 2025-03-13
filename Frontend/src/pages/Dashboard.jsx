@@ -12,8 +12,11 @@ import RecentOrders from "../components/dashboard/RecentOrders";
 import Modal from "../components/dashboard/Modal";
 import AddItemModal from "../components/ui/AddItemModal";
 import CategoryModal from "../components/ui/CategoryModal";
-import { addCategoryAsync, selectCategoryStatus } from '../redux/slices/categorySlice';
-import { additemAsync, selectItemStatus } from '../redux/slices/itemSlice';
+import {
+  addCategoryAsync,
+  selectCategoryStatus,
+} from "../redux/slices/categorySlice";
+import { additemAsync, selectItemStatus } from "../redux/slices/itemSlice";
 import AdditemModal from "../components/ui/AddItemModal";
 
 const buttons = [
@@ -29,7 +32,6 @@ const Dashboard = () => {
   const categories = useSelector(selectCategories);
   const categoryStatus = useSelector(selectCategoryStatus);
   const itemStatus = useSelector(selectItemStatus);
-
 
   useEffect(() => {
     document.title = "RestOS | Dashboard";
@@ -55,7 +57,7 @@ const Dashboard = () => {
     }
   };
 
-  //Handlers for closing the modals 
+  //Handlers for closing the modals
   const handleCloseTableModal = () => setIsTableModalOpen(false);
   const handleCloseCategoryModal = () => setIsCategoryModalOpen(false);
   const handleCloseItemModal = () => setIsItemModalOpen(false);
@@ -105,12 +107,9 @@ const Dashboard = () => {
 
       {/* Table Modal with updated props */}
       {isTableModalOpen && (
-        <Modal 
-          isOpen={isTableModalOpen} 
-          onClose={handleCloseTableModal} 
-        />
+        <Modal isOpen={isTableModalOpen} onClose={handleCloseTableModal} />
       )}
-      
+
       {/* Category Modal */}
       <CategoryModal
         isOpen={isCategoryModalOpen}

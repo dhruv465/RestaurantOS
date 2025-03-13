@@ -16,8 +16,8 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    credentials: true ,
-    origin: ['http://localhost:5173' , 'https://restaurantos.onrender.com']
+    credentials: true,
+    origin: ['http://localhost:5173', 'https://restaurantos.onrender.com']
 }))
 
 //Endpoint Root
@@ -31,7 +31,7 @@ app.use("/api/user", require('./routes/userRoute'));
 app.use("/api/order", require('./routes/orderRoute'));
 app.use("/api/table", require('./routes/tableRoute'));
 app.use("/api/payment", require('./routes/paymentRoute'));
-app.use("/api/categories", require('./routes/categoryRoutes')); 
+app.use("/api/categories", require('./routes/categoryRoutes'));
 app.use("/api/items", require('./routes/itemRoutes'));
 
 //Error Handler
