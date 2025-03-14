@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { addCategory, getCategories, updateCategory, deleteCategory } from '../../https';
+import { createCategory, getCategories, updateCategory, deleteCategory } from '../../https';
 
 export const fetchCategories = createAsyncThunk('category/fetchCategories', async () => {
   const response = await getCategories();
@@ -7,7 +7,7 @@ export const fetchCategories = createAsyncThunk('category/fetchCategories', asyn
 });
 
 export const addCategoryAsync = createAsyncThunk('category/addCategory', async (category) => {
-  const response = await addCategory(category);
+  const response = await createCategory(category);
   return response.data.data;
 });
 

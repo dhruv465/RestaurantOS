@@ -6,13 +6,16 @@ import {
   selectCategoryStatus,
 } from "../../redux/slices/categorySlice";
 import Modal from "./Modal";
+import { useMutation } from "@tanstack/react-query";
+import { enqueueSnackbar } from "notistack";
+import { createCategory } from "../../https";
 
 const CategoryModal = ({ isOpen, onClose, initialCategory = {} }) => {
   const [categoryName, setCategoryName] = useState(
     initialCategory ? initialCategory.name || "" : ""
   );
   const dispatch = useDispatch();
-  const status = useSelector(selectCategoryStatus); // Get category operation status
+  const status = useSelector(selectCategoryStatus);
   const isEditing = initialCategory ? !!initialCategory._id : false;
 
   const handleSubmit = () => {
@@ -28,7 +31,28 @@ const CategoryModal = ({ isOpen, onClose, initialCategory = {} }) => {
         dispatch(addCategoryAsync({ name: categoryName }));
       }
     }
+
+    categoryMutation.mutate(categoryName);
   };
+
+  const categoryMutation = useMutation({
+    mutationFn: (reqData) => createCategory(reqData),
+
+    onSuccess: (res) => {
+      console.log(res);
+      onClose();
+      const { data } = res;
+      enqueueSnackbar(data.message, { variant: "success" });
+      console.log(error);
+    },
+    onError: (error) => {
+      console.log(error);
+      const { data } = error.response;
+      enqueueSnackbar(data.message, { variant: "error" });
+    },
+  });
+
+  if (!isOpen) return null;
 
   useEffect(() => {
     setCategoryName(initialCategory ? initialCategory.name || "" : "");
