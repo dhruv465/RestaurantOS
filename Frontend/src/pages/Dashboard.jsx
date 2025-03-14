@@ -10,14 +10,13 @@ import { MdCategory, MdTableBar } from "react-icons/md";
 import Metrics from "../components/dashboard/Metrics";
 import RecentOrders from "../components/dashboard/RecentOrders";
 import Modal from "../components/dashboard/Modal";
-import AddItemModal from "../components/ui/AddItemModal";
 import CategoryModal from "../components/ui/CategoryModal";
 import {
   addCategoryAsync,
   selectCategoryStatus,
 } from "../redux/slices/categorySlice";
 import { additemAsync, selectItemStatus } from "../redux/slices/itemSlice";
-import AdditemModal from "../components/ui/AddItemModal";
+import AddItemModal from "../components/ui/AddItemModal";
 
 const buttons = [
   { label: "Add Table", icon: <MdTableBar />, action: "table" },
@@ -105,24 +104,28 @@ const Dashboard = () => {
       {activeTab === "Metrics" && <Metrics />}
       {activeTab === "Orders" && <RecentOrders />}
 
-      {/* Table Modal with updated props */}
+      {/* Table Modal */}
       {isTableModalOpen && (
-        <Modal isOpen={isTableModalOpen} onClose={handleCloseTableModal} />
+        <Modal isOpen={true} onClose={handleCloseTableModal} />
       )}
 
       {/* Category Modal */}
-      <CategoryModal
-        isOpen={isCategoryModalOpen}
-        onClose={handleCloseCategoryModal}
-        initialCategory={editingCategory}
-      />
+      {isCategoryModalOpen && (
+        <CategoryModal
+          isOpen={true}
+          onClose={handleCloseCategoryModal}
+          initialCategory={editingCategory}
+        />
+      )}
 
       {/* Item Modal */}
-      <AdditemModal
-        isOpen={isItemModalOpen}
-        onClose={handleCloseItemModal}
-        initialItem={editingItem}
-      />
+      {isItemModalOpen && (
+        <AddItemModal
+          isOpen={true}
+          onClose={handleCloseItemModal}
+          initialItem={editingItem}
+        />
+      )}
     </section>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { additemAsync, selectItemStatus } from "../../redux/slices/itemSlice";
 import { enqueueSnackbar } from "notistack";
-import Modal from "../dashboard/Modal";
+import Modal from "./Modal";
 import { selectCategories } from "../../redux/slices/categorySlice";
 
 const AdditemModal = ({ isOpen, onClose, initialItem = {} }) => {
