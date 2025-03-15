@@ -63,6 +63,7 @@ const CategoryModal = ({ isOpen, onClose, initialCategory = {} }) => {
       isOpen={isOpen}
       onClose={onClose}
       title={isEditing ? "Edit Category" : "Add Category"}
+       className="bg-[var(--card-bg)] p-4 rounded-md shadow-md w-96 h-96"
     >
       <div className="mb-4">
         <input
@@ -70,12 +71,12 @@ const CategoryModal = ({ isOpen, onClose, initialCategory = {} }) => {
           value={categoryName}
           onChange={(e) => setCategoryName(e.target.value)}
           placeholder="Category Name"
-          className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full bg-[var(--input-bg)] text-[var(--text-color)] rounded-lg p-2 focus:ring-2 focus:ring-[var(--border-color)] focus:outline-none transition-all border border-[var(--border-color)]"
         />
       </div>
       <button
         onClick={handleSubmit}
-        className="px-4 py-2 rounded-md bg-blue-500 text-white font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+        className="bg-[#F6b100] text-white rounded-lg py-3 w-full mt-8 hover:bg-[#F6b100]/90 transition-colors duration-200"
         disabled={status === "loading"} // Disable button while loading
       >
         {isEditing ? "Save Changes" : "Add Category"}
