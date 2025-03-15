@@ -65,7 +65,7 @@ const AdditemModal = ({ isOpen, onClose, initialItem = {} }) => {
           value={itemName}
           onChange={(e) => setItemName(e.target.value)}
           placeholder="Item Name"
-          className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full bg-[var(--input-bg)] text-[var(--text-color)] rounded-lg p-2 focus:ring-2 focus:ring-[var(--border-color)] focus:outline-none transition-all border border-[var(--border-color)]"
         />
       </div>
       <div className="mb-4">
@@ -74,14 +74,14 @@ const AdditemModal = ({ isOpen, onClose, initialItem = {} }) => {
           value={itemPrice}
           onChange={(e) => setItemPrice(e.target.value)}
           placeholder="Item Price"
-          className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full bg-[var(--input-bg)] text-[var(--text-color)] rounded-lg p-2 focus:ring-2 focus:ring-[var(--border-color)] focus:outline-none transition-all border border-[var(--border-color)]"
         />
       </div>
       <div className="mb-4">
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full bg-[var(--input-bg)] text-[var(--text-color)] rounded-lg p-2 focus:ring-2 focus:ring-[var(--border-color)] focus:outline-none transition-all border border-[var(--border-color)]"
         >
           <option value="">Select Category</option>
           {categories.map((category) => (
@@ -93,7 +93,7 @@ const AdditemModal = ({ isOpen, onClose, initialItem = {} }) => {
       </div>
       <button
         onClick={handleSubmit}
-        className="px-4 py-2 rounded-md bg-blue-500 text-white font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+        className="bg-[#F6b100] text-white rounded-lg py-3 w-full mt-8 hover:bg-[#F6b100]/90 transition-colors duration-200"
         disabled={itemStatus === "loading"}
       >
         {isEditing ? "Save Changes" : "Add Item"}
