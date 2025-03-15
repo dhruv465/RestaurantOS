@@ -9,7 +9,7 @@ const Modal = ({ title, onClose, isOpen, children }) => {
         <div className="flex justify-between items-center px-6 py-4 border-b border-[var(--border-color)]">
           <h2 className="text-xl text-[var(--text-color)] font-semibold">{title}</h2>
           <button
-            className="text-[var(--text-color)]/50 text-2xl hover:text-[var(--text-color)]/70"
+            className="text-[var(--text-color)] text-2xl hover:text-[var(--text-color)]/70"
             onClick={onClose}
           >
             &times;
