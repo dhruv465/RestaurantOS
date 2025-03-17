@@ -27,7 +27,7 @@ export const deleteTable = (tableId) => api.delete(`/api/table/${tableId}`);
 export const addOrder = (data) => api.post('/api/order/', data);
 export const getOrders = () => api.get('/api/order');
 export const updateOrderStatus = ({ orderId, orderStatus }) => api.put(`/api/order/${orderId}`, { orderStatus });
-export const getOrderById = (orderId) => api.get(`/api/order/${orderId}`); 
+export const getOrderById = (orderId) => api.get(`/api/order/${orderId}`);
 export const updateOrder = ({ orderId, ...data }) => api.put(`/api/order/${orderId}`, data);
 
 // Payment API endpoints
