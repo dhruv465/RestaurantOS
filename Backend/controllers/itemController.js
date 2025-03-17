@@ -1,6 +1,15 @@
 const Item = require('../models/itemModel');
 const createHttpError = require('http-errors');
 
+const getPopularDishes = async (req, res, next) => {
+    try {
+        const popularDishes = await Item.find(); // Fetching all items from the items table
+        res.status(200).json({ message: 'Popular dishes fetched', data: popularDishes });
+    } catch (error) {
+        next(error);
+    }
+};
+
 const createItem = async (req, res, next) => {
     try {
         const newItem = await Item.create(req.body);
@@ -56,6 +65,7 @@ const deleteItem = async (req, res, next) => {
 };
 
 module.exports = {
+    getPopularDishes,
     createItem,
     getItems,
     getItemById,
