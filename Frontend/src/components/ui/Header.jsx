@@ -8,14 +8,15 @@ import {
   FaUserCircle,
   FaSignOutAlt,
   FaDownload,
+  FaTrash,
 } from "react-icons/fa";
 import { IoClose, IoMenu, IoSearch } from "react-icons/io5";
 import { useTheme } from "../../context/ThemeContext";
 import { useDispatch, useSelector } from "react-redux";
 import { removeUser } from "../../redux/slices/userSlice";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
-import { logout } from "../../https";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getOrders, logout } from "../../https";
 
 const Header = () => {
   const { theme, toggleTheme } = useTheme();
@@ -23,10 +24,15 @@ const Header = () => {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
-  const [activeTab, setActiveTab] = useState("General");
+  const [activeTab, setActiveTab] = useState("Orders");
+  const [notifications, setNotifications] = useState([]);
+  const [hasNewNotifications, setHasNewNotifications] = useState(false);
+  const [lastOrderCount, setLastOrderCount] = useState(0);
+  const notificationSound = useRef(new Audio("/notification-sound.mp3"));
   const searchRef = useRef(null);
   const menuRef = useRef(null);
   const notificationRef = useRef(null);
+  const queryClient = useQueryClient();
 
   const isDarkMode =
     theme === "dark" ||
@@ -36,46 +42,49 @@ const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Sample notification data - in a real app, this would come from your backend
-  const notificationData = {
-    General: [
-      {
-        id: 1,
-        user: "Caitlyn",
-        avatar: "https://i.pravatar.cc/150?img=1",
-        action: "shared two files in",
-        project: "ConnectBank",
-        time: "2 hours ago",
-        department: "Design",
-        files: [
-          { name: "Sign up idea 01.jpg", size: "240 KB" }
-        ]
-      },
-      {
-        id: 2,
-        user: "Zaid",
-        avatar: "https://i.pravatar.cc/150?img=2",
-        action: "commented in",
-        project: "ConnectBank",
-        time: "2 hours ago",
-        department: "Engineering",
-        comment: "Finished up the first crack at the new dashboard! Looks really great. Let me know how it goes."
-      },
-      {
-        id: 3,
-        user: "Marco",
-        avatar: "https://i.pravatar.cc/150?img=3",
-        action: "requested access to",
-        project: "Surface X",
-        time: "6 hours ago",
-        department: "Design",
-        requiresAction: true
+  // Fetch orders using React Query
+  const { data: ordersData, isLoading: ordersLoading } = useQuery({
+    queryKey: ["orders"],
+    queryFn: getOrders,
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
+  // Generate notifications from orders
+  useEffect(() => {
+    // Make sure ordersData exists and data is an array before proceeding
+    if (ordersData?.data && Array.isArray(ordersData.data)) {
+      const currentOrderCount = ordersData.data.length;
+      
+      // Map orders to notification format
+      const orderNotifications = ordersData.data.map((order) => ({
+        id: order._id,
+        type: "order",
+        user: order.customerName || "Customer",
+        avatar: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+        action: "placed a new order",
+        project: `Table ${order.tableNumber}`,
+        orderStatus: order.orderStatus,
+        time: new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        date: new Date(order.createdAt).toLocaleDateString(),
+        amount: order.totalAmount,
+        items: order.items,
+        read: false
+      }));
+      
+      setNotifications(orderNotifications);
+      
+      // Check if we have new orders and play sound
+      if (currentOrderCount > lastOrderCount && lastOrderCount !== 0) {
+        setHasNewNotifications(true);
+        notificationSound.current.play().catch(e => console.log("Audio play failed:", e));
       }
-    ],
-    Mentions: [],
-    Inbox: [],
-    Archive: []
-  };
+      
+      setLastOrderCount(currentOrderCount);
+    } else if (ordersData?.data) {
+      // Log error if data exists but is not in the expected format
+      console.error("Orders data is not an array:", ordersData.data);
+    }
+  }, [ordersData, lastOrderCount]);
 
   const logoutMutation = useMutation({
     mutationFn: () => logout(),
@@ -105,7 +114,25 @@ const Header = () => {
 
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
+    if (showNotifications === false) {
+      // Mark all as read when opening notifications
+      setHasNewNotifications(false);
+    }
     if (isMenuOpen) setIsMenuOpen(false);
+  };
+
+  const clearAllNotifications = () => {
+    setNotifications([]);
+    setHasNewNotifications(false);
+  };
+
+  const removeNotification = (id) => {
+    setNotifications(notifications.filter(notification => notification.id !== id));
+  };
+
+  const markAllAsRead = () => {
+    setNotifications(notifications.map(notif => ({ ...notif, read: true })));
+    setHasNewNotifications(false);
   };
 
   useEffect(() => {
@@ -194,6 +221,20 @@ const Header = () => {
     }
   };
 
+  const refreshOrders = () => {
+    queryClient.invalidateQueries({ queryKey: ['orders'] });
+  };
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'pending': return 'bg-yellow-500';
+      case 'processing': return 'bg-blue-500';
+      case 'completed': return 'bg-green-500';
+      case 'cancelled': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
   return (
     <header
       className="bg-[var(--header-bg)] border-b border-[var(--border-color)]"
@@ -230,7 +271,9 @@ const Header = () => {
             aria-label="Notifications"
           >
             <FaBell className="text-xl" />
-            <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full h-2 w-2"></span>
+            {hasNewNotifications && (
+              <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full h-2 w-2"></span>
+            )}
           </button>
 
           <button
@@ -355,6 +398,9 @@ const Header = () => {
                 aria-hidden="true"
               />
               <span className="text-[var(--text-color)]">Notifications</span>
+              {hasNewNotifications && (
+                <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">New</span>
+              )}
             </button>
 
             {/* Logout Button to Mobile Menu */}
@@ -447,7 +493,9 @@ const Header = () => {
               className="text-xl text-[var(--text-color)]"
               aria-hidden="true"
             />
-            <span className="absolute top-1 right-1 bg-red-500 text-white rounded-full h-2 w-2"></span>
+            {hasNewNotifications && (
+              <span className="absolute top-1 right-1 bg-red-500 text-white rounded-full h-2 w-2"></span>
+            )}
           </button>
           <button
             className="profile flex items-center gap-2 cursor-pointer bg-[var(--card-bg)] p-3 rounded-lg"
@@ -481,7 +529,7 @@ const Header = () => {
       {showNotifications && (
         <div
           ref={notificationRef}
-          className="fixed right-0 mt-2 bg-[var(--header-bg)] border border-[var(--border-color)] rounded-lg shadow-lg z-50 w-full md:w-[400px] max-h-[80vh] overflow-y-auto"
+          className="fixed right-0 mt-2 bg-[var(--main-bg)] border border-[var(--border-color)] rounded-lg shadow-lg z-50 w-full md:w-[400px] max-h-[80vh] overflow-y-auto"
           style={{ top: "60px", right: "20px" }}
         >
           <div className="p-4 border-b border-[var(--border-color)]">
@@ -489,48 +537,73 @@ const Header = () => {
               <h2 className="text-lg font-medium text-[var(--text-color)]">
                 Notifications
               </h2>
-              <div className="flex items-center">
+              <div className="flex items-center gap-2">
                 <button
-                  className="p-2 rounded-full hover:bg-[var(--card-bg)] transition-colors"
-                  aria-label="User profile"
+                  onClick={refreshOrders}
+                  className="p-2 text-xs bg-[var(--card-bg)] text-[var(--text-color)] rounded hover:bg-[var(--menu-item-bg-hover)]"
                 >
-                  <div className="flex items-center gap-2">
-                    <FaUserCircle className="text-[var(--text-color)]" />
-                    <span className="text-[var(--text-color)]">Sienna</span>
-                  </div>
+                  Refresh
+                </button>
+                <button
+                  onClick={markAllAsRead}
+                  className="p-2 text-xs bg-[var(--card-bg)] text-[var(--text-color)] rounded hover:bg-[var(--menu-item-bg-hover)]"
+                >
+                  Mark all as read
+                </button>
+                <button
+                  onClick={clearAllNotifications}
+                  className="p-2 text-xs bg-[var(--card-bg)] text-[var(--text-color)] rounded hover:bg-[var(--menu-item-bg-hover)]"
+                >
+                  Clear all
                 </button>
               </div>
             </div>
 
             {/* Tab Navigation */}
             <div className="flex border-b border-[var(--border-color)]">
-              {Object.keys(notificationData).map((tab) => (
-                <button
-                  key={tab}
-                  className={`py-2 px-4 ${
-                    activeTab === tab
-                      ? "border-b-2 border-[var(--text-color)] text-[var(--text-color)]"
-                      : "text-[var(--text-color)]/70"
-                  }`}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab}
-                </button>
-              ))}
+              <button
+                className={`py-2 px-4 ${
+                  activeTab === "Orders"
+                    ? "border-b-2 border-[var(--text-color)] text-[var(--text-color)]"
+                    : "text-[var(--text-color)]"
+                }`}
+                onClick={() => setActiveTab("Orders")}
+              >
+                Orders
+                {hasNewNotifications && (
+                  <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">New</span>
+                )}
+              </button>
+              <button
+                className={`py-2 px-4 ${
+                  activeTab === "Archive"
+                    ? "border-b-2 border-[var(--text-color)] text-[var(--text-color)]"
+                    : "text-[var(--text-color)]"
+                }`}
+                onClick={() => setActiveTab("Archive")}
+              >
+                Archive
+              </button>
             </div>
           </div>
 
           {/* Notification Content */}
           <div className="p-4">
-            {notificationData[activeTab].length === 0 ? (
+            {ordersLoading ? (
               <div className="text-center py-8 text-[var(--text-color)]/70">
+                Loading notifications...
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="text-center py-8 text-[var(--text-color)]">
                 No notifications
               </div>
             ) : (
-              notificationData[activeTab].map((notification) => (
+              notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className="mb-4 pb-4 border-b border-[var(--border-color)] last:border-0"
+                  className={`mb-4 pb-4 border-b border-[var(--border-color)] last:border-0 ${
+                    !notification.read ? "bg-[var(--card-bg)]/30 rounded-lg p-2" : ""
+                  }`}
                 >
                   <div className="flex items-start gap-3">
                     <div className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
@@ -541,71 +614,67 @@ const Header = () => {
                       />
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-1 mb-1">
-                        <span className="font-semibold text-[var(--text-color)]">
-                          {notification.user}
-                        </span>
-                        <span className="text-[var(--text-color)]/70">
-                          {notification.action}
-                        </span>
-                        <span className="font-semibold text-[var(--text-color)]">
-                          {notification.project}
-                        </span>
+                      <div className="flex items-center justify-between mb-1">
+                        <div>
+                          <span className="font-semibold text-[var(--text-color)]">
+                            {notification.user}
+                          </span>
+                          <span className="text-[var(--text-color)]/70 ml-1">
+                            {notification.action}
+                          </span>
+                          <span className="font-semibold text-[var(--text-color)] ml-1">
+                            {notification.project}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => removeNotification(notification.id)}
+                          className="text-[var(--text-color)]/70 hover:text-[var(--text-color)]"
+                          aria-label="Remove notification"
+                        >
+                          <FaTrash className="text-sm" />
+                        </button>
                       </div>
+                      
                       <div className="flex items-center text-xs text-[var(--text-color)]/70 mb-2">
                         <span>{notification.time}</span>
                         <span className="mx-1">•</span>
-                        <span>{notification.department}</span>
+                        <span>{notification.date}</span>
+                        <span className="mx-1">•</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full text-white ${getStatusColor(notification.orderStatus)}`}>
+                          {notification.orderStatus}
+                        </span>
                       </div>
                       
-                      {notification.files && (
-                        <div className="bg-[var(--card-bg)] rounded-lg p-2 my-2">
-                          {notification.files.map((file, index) => (
-                            <div key={index} className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className="bg-[var(--header-bg)] p-1 rounded">
-                                  <img
-                                    src="/api/placeholder/80/80"
-                                    alt="File preview"
-                                    className="w-10 h-10 object-cover rounded"
-                                  />
-                                </div>
-                                <div>
-                                  <p className="text-sm font-medium text-[var(--text-color)]">
-                                    {file.name}
-                                  </p>
-                                  <p className="text-xs text-[var(--text-color)]/70">
-                                    {file.size}
-                                  </p>
-                                </div>
-                              </div>
-                              <button
-                                className="p-1 hover:bg-[var(--border-color)] rounded"
-                                aria-label="Download"
-                              >
-                                <FaDownload className="text-[var(--text-color)]/70" />
-                              </button>
-                            </div>
-                          ))}
+                      <div className="bg-[var(--card-bg)] rounded-lg p-3 my-2">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium text-[var(--text-color)]">
+                            Order Details
+                          </span>
+                          <span className="text-sm font-bold text-[var(--text-color)]">
+                            ₹{notification.amount.toFixed(2)}
+                          </span>
                         </div>
-                      )}
+                        
+                        {notification.items && notification.items.map((item, index) => (
+                          <div key={index} className="flex justify-between text-sm mb-1">
+                            <span className="text-[var(--text-color)]">
+                              {item.name} x {item.quantity}
+                            </span>
+                            <span className="text-[var(--text-color)]/70">
+                              ₹{(item.price * item.quantity).toFixed(2)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                       
-                      {notification.comment && (
-                        <div className="bg-[var(--card-bg)] rounded-lg p-3 my-2 text-[var(--text-color)]">
-                          {notification.comment}
-                        </div>
-                      )}
-                      
-                      {notification.requiresAction && (
-                        <div className="flex gap-2 mt-2">
-                          <button className="px-4 py-2 bg-[var(--card-bg)] text-[var(--text-color)] rounded hover:bg-[var(--menu-item-bg-hover)]">
-                            Decline
-                          </button>
-                          <button className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800">
-                            Accept
-                          </button>
-                        </div>
-                      )}
+                      <div className="flex gap-2 mt-2">
+                        <button 
+                          onClick={() => navigate(`/order/${notification.id}`)}
+                          className="px-4 py-2 bg-[var(--card-bg)] text-[var(--text-color)] rounded text-sm hover:bg-[var(--menu-item-bg-hover)]"
+                        >
+                          View Details
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
