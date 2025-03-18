@@ -168,8 +168,7 @@ RestaurantOS_2/
 
 ## 📄 License
 
-This project is licensed under the MIT License.
-
+This project is open-source and licensed under the MIT License.
 ---
 
 > Built with ❤️ for restaurant efficiency.
