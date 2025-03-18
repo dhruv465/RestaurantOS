@@ -27,6 +27,7 @@ RestaurantOS is a full-stack application featuring a responsive digital menu, ro
 ## 🛠️ Tech Stack
 
 ### Frontend:
+- React: For building the user interface and user experience.
 - Vite
 - Tailwind CSS
 - Vanilla JavaScript
