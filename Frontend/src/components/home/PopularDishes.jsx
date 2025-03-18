@@ -1,25 +1,20 @@
 import React, { useEffect, useState } from "react";
-import Loader from "../ui/Loader";
+import { getItems } from "../../https/index";
 
 const PopularDishes = () => {
   const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const placeholderImage = "../../assets/images/image.png";
+  const placeholderImage = "path/to/placeholder/image.jpg";
 
   useEffect(() => {
     const fetchDishes = async () => {
       try {
-        // Fetch dishes data
-        const response = await fetch("http://localhost:8000/api/items");
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-
-        const data = await response.json();
+        // Use the imported API function instead of direct fetch
+        const response = await getItems();
 
         // Fetch images for each dish
         const dishesWithImages = await Promise.all(
-          data.data.map(async (dish) => {
+          response.data.data.map(async (dish) => {
             try {
               const imageResponse = await fetch(
                 `https://api.pexels.com/v1/search?query=${dish.name}`,
@@ -69,7 +64,7 @@ const PopularDishes = () => {
         </div>
         <div className="overflow-y-auto h-[680px] scrollbar-hide">
           {loading ? (
-            <Loader />
+            <p>Loading...</p>
           ) : (
             dishes.map((dish) => (
               <div

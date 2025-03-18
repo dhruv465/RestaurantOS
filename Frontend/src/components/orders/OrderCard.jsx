@@ -3,7 +3,7 @@ import { FaCheckDouble, FaCheckCircle } from "react-icons/fa"; // Import FaCheck
 import { formatDateAndTime, getAvatarName } from "../../utils/index";
 
 const OrderCard = ({ key, order }) => {
-  console.log(order);
+  // console.log(order);
 
   const cardClass =
     order.orderStatus === "Completed"
