@@ -153,7 +153,7 @@ const CartInfo = ({ orderData, tableId }) => {
               {editingItemId === item.id && (
                 <div className="mt-2">
                   <textarea
-                    className="w-full p-2 text-sm rounded border border-[var(--border-color)] bg-[var(--input-bg)] text-[var(--text-color)]"
+                    className="w-full p-2 text-sm rounded border border-[var(--border-color)] bg-[var(--input-bg)] text-[var(--text-color)] outline-none"
                     placeholder="Add special instructions for this dish..."
                     value={instructionText}
                     onChange={(e) => setInstructionText(e.target.value)}
