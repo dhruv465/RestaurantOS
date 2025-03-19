@@ -3,10 +3,10 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = [];
 
 const cartSlice = createSlice({
-    name : "cart",
+    name: "cart",
     initialState,
-    reducers : {
-        addItems : (state, action) => {
+    reducers: {
+        addItems: (state, action) => {
             const newItem = action.payload;
             
             // Check if this item already exists in the cart
@@ -31,10 +31,19 @@ const cartSlice = createSlice({
 
         removeAllItems: (state) => {
             return [];
+        },
+        
+        // New reducer for updating item instructions
+        updateItemInstructions: (state, action) => {
+            const { id, instructions } = action.payload;
+            const itemIndex = state.findIndex(item => item.id == id);
+            if (itemIndex !== -1) {
+                state[itemIndex].instructions = instructions;
+            }
         }
     }
-})
+});
 
 export const getTotalPrice = (state) => state.cart.reduce((total, item) => total + item.price, 0);
-export const { addItems, removeItem, removeAllItems } = cartSlice.actions;
+export const { addItems, removeItem, removeAllItems, updateItemInstructions } = cartSlice.actions;
 export default cartSlice.reducer;
