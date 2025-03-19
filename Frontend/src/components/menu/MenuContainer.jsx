@@ -5,6 +5,7 @@ import { GrRadialSelected } from "react-icons/gr";
 import { IoMdCart } from "react-icons/io";
 import { useDispatch } from "react-redux";
 import { addItems } from "../../redux/slices/cartSlice";
+import img from "../../assets/images/image.png";
 
 const MenuContainer = () => {
   const [selected, setSelected] = useState(menus[0]);
@@ -36,9 +37,9 @@ const MenuContainer = () => {
 
   const handleAddToCart = (menu) => {
     const quantity = itemCount[menu.id] || 0;
-    
+
     if (quantity === 0) return; // Don't add items with zero quantity
-    
+
     const { name, price } = menu;
     const newObj = {
       id: Date.now(),
@@ -49,14 +50,14 @@ const MenuContainer = () => {
     };
 
     dispatch(addItems(newObj));
-    
+
     // Reset only this item's count, not all counts
-    setItemCount(prev => ({
+    setItemCount((prev) => ({
       ...prev,
-      [menu.id]: 0
+      [menu.id]: 0,
     }));
   };
-  
+
   return (
     <>
       <div className="w-full px-4 py-4">
@@ -91,8 +92,27 @@ const MenuContainer = () => {
         {selected?.items.map((menu) => (
           <div
             key={menu.id}
-            className="flex flex-col items-start justify-between p-3 sm:p-4 rounded-lg h-[120px] sm:h-[150px] cursor-pointer bg-[var(--card-bg)] hover:bg-[var(--card-bg)]/90"
+            className="flex flex-col items-start justify-between p-3 sm:p-4 rounded-lg cursor-pointer bg-[var(--card-bg)] hover:bg-[var(--card-bg)]/90"
           >
+            {/* Image container */}
+            <div className="w-full h-32 mb-3 overflow-hidden rounded-lg">
+              {menu.image ? (
+                <img
+                  src={menu.image}
+                  alt={menu.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <img
+                    src={img}
+                    alt={`${menu.name} placeholder`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+            </div>
+
             <div className="flex items-center justify-between w-full">
               <h1 className="text-[var(--text-color)] text-lg font-semibold">
                 {menu.name}
@@ -100,12 +120,11 @@ const MenuContainer = () => {
               <button
                 onClick={() => handleAddToCart(menu)}
                 className="p-2 rounded-lg text-[var(--text-color)] bg-[var(--main-bg)]"
-                // style={{ background: colors[selected.id] }}
               >
                 <IoMdCart size={20} />
               </button>
             </div>
-            <div className="flex items-center justify-between w-full">
+            <div className="flex items-center justify-between w-full mt-2">
               <p className="text-[var(--text-color)] text-xl font-semibold">
                 ₹{menu.price}
               </p>
