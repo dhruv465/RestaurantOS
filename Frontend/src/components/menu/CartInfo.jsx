@@ -169,7 +169,7 @@ const CartInfo = ({ orderData, tableId }) => {
                     </button>
                     <button 
                       onClick={saveInstructions}
-                      className="px-2 py-1 text-xs rounded bg-[var(--accent-color)] text-white"
+                      className="px-2 py-1 text-xs rounded text-[var(--text-color)]"
                     >
                       Save
                     </button>
