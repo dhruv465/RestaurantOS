@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getItems } from "../../https/index";
+import Loader from "../ui/Loader";
 
 const PopularDishes = () => {
   const [dishes, setDishes] = useState([]);
@@ -64,7 +65,7 @@ const PopularDishes = () => {
         </div>
         <div className="overflow-y-auto h-[680px] scrollbar-hide">
           {loading ? (
-            <p>Loading...</p>
+            <Loader />
           ) : (
             dishes.map((dish) => (
               <div
