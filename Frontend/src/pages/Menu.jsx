@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { IoRestaurant } from "react-icons/io5";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
-import { setCustomer } from "../redux/slices/customerSlice";
-import { removeAllItems, addItems } from "../redux/slices/cartSlice";
 import Bill from "../components/menu/Bill";
 import CartInfo from "../components/menu/CartInfo";
 import CustomerInfo from "../components/menu/CustomerInfo";
 import MenuContainer from "../components/menu/MenuContainer";
 import BackButton from "../components/ui/BackButton";
 import BottomNav from "../components/ui/BottomNav";
+import { addItems, removeAllItems } from "../redux/slices/cartSlice";
+import { removeCustomer, setCustomer } from "../redux/slices/customerSlice";
 
 const Menu = () => {
   const location = useLocation();
@@ -30,54 +30,60 @@ const Menu = () => {
     if (!tableData) {
       return;
     }
-    
+
     // Check if we've switched to a different table
     const isNewTable = currentTableId !== tableData.tableId;
-    
+
     // If we have an order and either it's a new table or we haven't loaded this table before
     if (tableData.currentOrder?.data) {
-      console.log("Table has order data");
-      
       if (isNewTable) {
-        console.log("New table detected - resetting cart and updating customer data");
-        
         // Clear the cart immediately when switching tables
         dispatch(removeAllItems());
-        
+        dispatch(removeCustomer());
+
         // Update the current table ID tracker
         setCurrentTableId(tableData.tableId);
-        
+
         // Set customer data from the current order
         if (tableData.currentOrder.data.customerDetails) {
           const customerDetails = tableData.currentOrder.data.customerDetails;
-          
+
           const customerPayload = {
             orderId: tableData.currentOrder.data._id,
-            customerName: customerDetails.name ,
-            customerPhone: customerDetails.phone ,
+            customerName: customerDetails.name,
+            customerPhone: customerDetails.phone,
             guests: customerDetails.guests || 1,
             // Always include table info to maintain the relation
             table: {
               tableId: tableData.tableId,
-              tableNo: tableData.tableNo
-            }
+              tableNo: tableData.tableNo,
+            },
           };
-          
+
           console.log("Setting customer data:", customerPayload);
           dispatch(setCustomer(customerPayload));
-          
+
           // Load cart items from the order
-          if (tableData.currentOrder.data.items && tableData.currentOrder.data.items.length > 0) {
-            console.log("Loading cart items:", tableData.currentOrder.data.items);
-            
-            tableData.currentOrder.data.items.forEach(item => {
-              dispatch(addItems({
-                id: item.id || Date.now() + Math.random(),
-                name: item.name,
-                pricePerQuantity: item.pricePerQuantity || (item.price / item.quantity),
-                quantity: item.quantity,
-                price: item.price
-              }));
+          if (
+            tableData.currentOrder.data.items &&
+            tableData.currentOrder.data.items.length > 0
+          ) {
+            console.log(
+              "Loading cart items:",
+              tableData.currentOrder.data.items
+            );
+
+            tableData.currentOrder.data.items.forEach((item) => {
+              dispatch(
+                addItems({
+                  id: item.id || Date.now() + Math.random(),
+                  name: item.name,
+                  pricePerQuantity:
+                    item.pricePerQuantity || item.price / item.quantity,
+                  quantity: item.quantity,
+                  price: item.price,
+                })
+              );
             });
           } else {
             console.log("No items in the order");
@@ -93,18 +99,20 @@ const Menu = () => {
       if (isNewTable) {
         dispatch(removeAllItems());
         setCurrentTableId(tableData.tableId);
-        
+
         // Update just the table info in customer data
-        dispatch(setCustomer({
-          table: {
-            tableId: tableData.tableId,
-            tableNo: tableData.tableNo
-          }
-        }));
+        dispatch(
+          setCustomer({
+            table: {
+              tableId: tableData.tableId,
+              tableNo: tableData.tableNo,
+            },
+          })
+        );
       }
     }
   }, [tableData, dispatch]);
-  
+
   useEffect(() => {
     document.title = "RestOS | Menu";
   }, []);

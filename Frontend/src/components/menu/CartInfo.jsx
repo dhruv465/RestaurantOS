@@ -2,7 +2,10 @@ import React, { useRef, useEffect, useState } from "react";
 import { MdDeleteForever } from "react-icons/md";
 import { FaNotesMedical } from "react-icons/fa6";
 import { useSelector, useDispatch } from "react-redux";
-import { removeItem, updateItemInstructions } from "../../redux/slices/cartSlice";
+import {
+  removeItem,
+  updateItemInstructions,
+} from "../../redux/slices/cartSlice";
 
 const CartInfo = ({ orderData, tableId }) => {
   // Get tableId from props or from wherever you're tracking the current table
@@ -33,63 +36,72 @@ const CartInfo = ({ orderData, tableId }) => {
   // Load instructions from localStorage when component mounts or cart changes
   useEffect(() => {
     const newDisplayedInstructions = {};
-    
-    cartData.forEach(item => {
-      const savedInstructions = getTableItemInstructions(currentTableId, item.id);
+
+    cartData.forEach((item) => {
+      const savedInstructions = getTableItemInstructions(
+        currentTableId,
+        item.id
+      );
       if (savedInstructions) {
         newDisplayedInstructions[item.id] = savedInstructions;
       }
     });
-    
+
     setDisplayedInstructions(newDisplayedInstructions);
   }, [cartData, currentTableId]);
 
   useEffect(() => {
-    if(scrolLRef.current){
+    if (scrolLRef.current) {
       scrolLRef.current.scrollTo({
         top: scrolLRef.current.scrollHeight,
-        behavior: "smooth"
-      })
+        behavior: "smooth",
+      });
     }
-  },[cartData]);
+  }, [cartData]);
 
-  const handleRemove = (itemId) => {
+  const handleRemove = (itemId, itemPrice) => {
     // When removing an item, also remove its instructions from localStorage
     saveTableItemInstructions(currentTableId, itemId, null);
-    
+
     // Create a new displayed instructions object without the removed item
-    const newDisplayedInstructions = {...displayedInstructions};
+    const newDisplayedInstructions = { ...displayedInstructions };
     delete newDisplayedInstructions[itemId];
     setDisplayedInstructions(newDisplayedInstructions);
-    
+
     dispatch(removeItem(itemId));
+    // Optionally, you can add logic here to handle any additional actions after removing the item
+    // For example, updating total price or showing a notification
   };
-  
+
   const handleNoteClick = (itemId) => {
     setEditingItemId(itemId);
     // Get instructions from our local state which mirrors localStorage
     const currentInstructions = displayedInstructions[itemId] || "";
     setInstructionText(currentInstructions);
   };
-  
+
   const saveInstructions = () => {
     if (editingItemId !== null) {
       const trimmedInstructions = instructionText.trim();
-      
+
       // Save to localStorage for this specific table
-      saveTableItemInstructions(currentTableId, editingItemId, trimmedInstructions);
-      
+      saveTableItemInstructions(
+        currentTableId,
+        editingItemId,
+        trimmedInstructions
+      );
+
       // Update our local state to display the instructions
       setDisplayedInstructions({
         ...displayedInstructions,
-        [editingItemId]: trimmedInstructions
+        [editingItemId]: trimmedInstructions,
       });
-      
+
       setEditingItemId(null);
       setInstructionText("");
     }
   };
-  
+
   const cancelEditing = () => {
     setEditingItemId(null);
     setInstructionText("");
@@ -132,23 +144,24 @@ const CartInfo = ({ orderData, tableId }) => {
                     onClick={() => handleRemove(item.id)}
                     className="text-[var(--text-color)] cursor-pointer size={20}"
                   />
-                  <FaNotesMedical 
+                  <FaNotesMedical
                     onClick={() => handleNoteClick(item.id)}
-                    className="text-[var(--text-color)] cursor-pointer size={20}" 
+                    className="text-[var(--text-color)] cursor-pointer size={20}"
                   />
                 </div>
                 <p className="text-[var(--text-color)] text-md font-bold">
                   ₹ {item.price}
                 </p>
               </div>
-              
+
               {/* Display instructions if they exist in our local state */}
               {displayedInstructions[item.id] && (
                 <div className="mt-2 text-sm text-[var(--text-color)] opacity-80 bg-[var(--secondary-bg)] p-2 rounded">
-                  <span className="font-medium">Instructions:</span> {displayedInstructions[item.id]}
+                  <span className="font-medium">Instructions:</span>{" "}
+                  {displayedInstructions[item.id]}
                 </div>
               )}
-              
+
               {/* Edit instructions interface */}
               {editingItemId === item.id && (
                 <div className="mt-2">
@@ -161,13 +174,13 @@ const CartInfo = ({ orderData, tableId }) => {
                     autoFocus
                   />
                   <div className="flex justify-end gap-2 mt-1">
-                    <button 
+                    <button
                       onClick={cancelEditing}
                       className="px-2 py-1 text-xs rounded bg-[var(--secondary-bg)] text-[var(--text-color)]"
                     >
                       Cancel
                     </button>
-                    <button 
+                    <button
                       onClick={saveInstructions}
                       className="px-2 py-1 text-xs rounded text-[var(--text-color)]"
                     >

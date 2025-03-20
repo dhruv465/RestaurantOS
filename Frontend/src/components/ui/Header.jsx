@@ -54,31 +54,38 @@ const Header = () => {
     // Make sure ordersData exists and data is an array before proceeding
     if (ordersData?.data && Array.isArray(ordersData.data)) {
       const currentOrderCount = ordersData.data.length;
-      
+
       // Map orders to notification format
       const orderNotifications = ordersData.data.map((order) => ({
         id: order._id,
         type: "order",
         user: order.customerName || "Customer",
-        avatar: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+        avatar: `https://i.pravatar.cc/150?img=${Math.floor(
+          Math.random() * 70
+        )}`,
         action: "placed a new order",
         project: `Table ${order.tableNumber}`,
         orderStatus: order.orderStatus,
-        time: new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        time: new Date(order.createdAt).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
         date: new Date(order.createdAt).toLocaleDateString(),
         amount: order.totalAmount,
         items: order.items,
-        read: false
+        read: false,
       }));
-      
+
       setNotifications(orderNotifications);
-      
+
       // Check if we have new orders and play sound
       if (currentOrderCount > lastOrderCount && lastOrderCount !== 0) {
         setHasNewNotifications(true);
-        notificationSound.current.play().catch(e => console.log("Audio play failed:", e));
+        notificationSound.current
+          .play()
+          .catch((e) => console.log("Audio play failed:", e));
       }
-      
+
       setLastOrderCount(currentOrderCount);
     } else if (ordersData?.data) {
       // Log error if data exists but is not in the expected format
@@ -127,11 +134,13 @@ const Header = () => {
   };
 
   const removeNotification = (id) => {
-    setNotifications(notifications.filter(notification => notification.id !== id));
+    setNotifications(
+      notifications.filter((notification) => notification.id !== id)
+    );
   };
 
   const markAllAsRead = () => {
-    setNotifications(notifications.map(notif => ({ ...notif, read: true })));
+    setNotifications(notifications.map((notif) => ({ ...notif, read: true })));
     setHasNewNotifications(false);
   };
 
@@ -222,16 +231,21 @@ const Header = () => {
   };
 
   const refreshOrders = () => {
-    queryClient.invalidateQueries({ queryKey: ['orders'] });
+    queryClient.invalidateQueries({ queryKey: ["orders"] });
   };
 
   const getStatusColor = (status) => {
-    switch(status) {
-      case 'pending': return 'bg-yellow-500';
-      case 'processing': return 'bg-blue-500';
-      case 'completed': return 'bg-green-500';
-      case 'cancelled': return 'bg-red-500';
-      default: return 'bg-gray-500';
+    switch (status) {
+      case "pending":
+        return "bg-yellow-500";
+      case "processing":
+        return "bg-blue-500";
+      case "completed":
+        return "bg-green-500";
+      case "cancelled":
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
@@ -388,7 +402,7 @@ const Header = () => {
                 <span className="text-[var(--text-color)]">Dashboard</span>
               </button>
             )}
-            <button
+            {/* <button
               className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
               aria-label="Notifications"
               onClick={toggleNotifications}
@@ -399,9 +413,11 @@ const Header = () => {
               />
               <span className="text-[var(--text-color)]">Notifications</span>
               {hasNewNotifications && (
-                <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">New</span>
+                <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">
+                  New
+                </span>
               )}
-            </button>
+            </button> */}
 
             {/* Logout Button to Mobile Menu */}
             <button
@@ -434,7 +450,7 @@ const Header = () => {
           </h1>
         </div>
 
-        <form
+        {/* <form
           onSubmit={handleSearch}
           className="search flex items-center gap-4 bg-[var(--card-bg)] backdrop-blur-sm px-3 sm:px-4 md:px-5 py-2 w-full md:w-[400px] lg:w-[500px] rounded-lg border border-[var(--border-color)] shadow-sm"
         >
@@ -453,7 +469,7 @@ const Header = () => {
           <button type="submit" className="sr-only">
             Search
           </button>
-        </form>
+        </form> */}
 
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
           {userData.role === "Admin" && (
@@ -571,7 +587,9 @@ const Header = () => {
               >
                 Orders
                 {hasNewNotifications && (
-                  <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">New</span>
+                  <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                    New
+                  </span>
                 )}
               </button>
               <button
@@ -602,7 +620,9 @@ const Header = () => {
                 <div
                   key={notification.id}
                   className={`mb-4 pb-4 border-b border-[var(--border-color)] last:border-0 ${
-                    !notification.read ? "bg-[var(--card-bg)]/30 rounded-lg p-2" : ""
+                    !notification.read
+                      ? "bg-[var(--card-bg)]/30 rounded-lg p-2"
+                      : ""
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -634,17 +654,21 @@ const Header = () => {
                           <FaTrash className="text-sm" />
                         </button>
                       </div>
-                      
+
                       <div className="flex items-center text-xs text-[var(--text-color)]/70 mb-2">
                         <span>{notification.time}</span>
                         <span className="mx-1">•</span>
                         <span>{notification.date}</span>
                         <span className="mx-1">•</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full text-white ${getStatusColor(notification.orderStatus)}`}>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full text-white ${getStatusColor(
+                            notification.orderStatus
+                          )}`}
+                        >
                           {notification.orderStatus}
                         </span>
                       </div>
-                      
+
                       <div className="bg-[var(--card-bg)] rounded-lg p-3 my-2">
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm font-medium text-[var(--text-color)]">
@@ -654,21 +678,25 @@ const Header = () => {
                             ₹{notification.amount.toFixed(2)}
                           </span>
                         </div>
-                        
-                        {notification.items && notification.items.map((item, index) => (
-                          <div key={index} className="flex justify-between text-sm mb-1">
-                            <span className="text-[var(--text-color)]">
-                              {item.name} x {item.quantity}
-                            </span>
-                            <span className="text-[var(--text-color)]/70">
-                              ₹{(item.price * item.quantity).toFixed(2)}
-                            </span>
-                          </div>
-                        ))}
+
+                        {notification.items &&
+                          notification.items.map((item, index) => (
+                            <div
+                              key={index}
+                              className="flex justify-between text-sm mb-1"
+                            >
+                              <span className="text-[var(--text-color)]">
+                                {item.name} x {item.quantity}
+                              </span>
+                              <span className="text-[var(--text-color)]/70">
+                                ₹{(item.price * item.quantity).toFixed(2)}
+                              </span>
+                            </div>
+                          ))}
                       </div>
-                      
+
                       <div className="flex gap-2 mt-2">
-                        <button 
+                        <button
                           onClick={() => navigate(`/order/${notification.id}`)}
                           className="px-4 py-2 bg-[var(--card-bg)] text-[var(--text-color)] rounded text-sm hover:bg-[var(--menu-item-bg-hover)]"
                         >

@@ -92,7 +92,7 @@ const Orders = () => {
           </button>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 px-4 md:px-8 lg:px-16 py-4 overflow-y-auto  scrollbar-hide">
+      <div className="grid grid-cols-1 h-[calc(100vh-5rem-7rem)] sm:grid-cols-2 xl:grid-cols-3 gap-4 px-4 md:px-8 lg:px-16 py-4 overflow-y-auto  scrollbar-hide">
         {/* h-[calc(100vh-5rem-7rem)] */}
         {filteredOrders?.length > 0 ? (
           filteredOrders.map((order) => {

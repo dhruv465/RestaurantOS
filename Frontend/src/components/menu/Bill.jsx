@@ -7,7 +7,7 @@ import {
   createOrderRazorpay,
   updateTable,
   verifyPaymentRazorpay,
-  updateOrder
+  updateOrder,
 } from "../../https";
 import { getTotalPrice, removeAllItems } from "../../redux/slices/cartSlice";
 import { removeCustomer } from "../../redux/slices/customerSlice";
@@ -27,13 +27,12 @@ function loadScript(src) {
   });
 }
 
-
 const Bill = () => {
   const dispatch = useDispatch();
   const cartData = useSelector((state) => state.cart);
   const customerData = useSelector((state) => state.customer);
   console.log("Customer data from Redux store:", customerData);
-  const total = useSelector(getTotalPrice); 
+  const total = useSelector(getTotalPrice);
   const taxRate = 5.25;
   const tax = (total * taxRate) / 100;
   const grandTotal = total + tax;
@@ -42,16 +41,17 @@ const Bill = () => {
   const [showInvoice, setShowInvoice] = useState(false);
   const [orderInfo, setOrderInfo] = useState();
 
-
   const handlePlaceOrder = async () => {
     if (!paymentMethod) {
-      enqueueSnackbar("Please select a payment method!", { variant: "warning" });
+      enqueueSnackbar("Please select a payment method!", {
+        variant: "warning",
+      });
       return;
     }
-    
+
     // Check if we're updating an existing order
     const isExistingOrder = !!customerData.orderId;
-    
+
     if (paymentMethod === "Online") {
       try {
         const res = await loadScript(
@@ -111,7 +111,9 @@ const Bill = () => {
             }
 
             setTimeout(() => {
-              isExistingOrder ? updateOrderMutation.mutate(orderData) : orderMutation.mutate(orderData);
+              isExistingOrder
+                ? updateOrderMutation.mutate(orderData)
+                : orderMutation.mutate(orderData);
             }, 1500);
           },
           prefill: {
@@ -146,13 +148,15 @@ const Bill = () => {
         table: customerData.table.tableId,
         paymentMethod: paymentMethod,
       };
-      
+
       // If updating an existing order, include the orderId
       if (isExistingOrder) {
         orderData.orderId = customerData.orderId;
       }
-      
-      isExistingOrder ? updateOrderMutation.mutate(orderData) : orderMutation.mutate(orderData);
+
+      isExistingOrder
+        ? updateOrderMutation.mutate(orderData)
+        : orderMutation.mutate(orderData);
     }
   };
 
@@ -216,7 +220,6 @@ const Bill = () => {
     },
   });
 
-
   return (
     <div>
       <div className="flex items-center justify-between px-5 mt-2">
@@ -264,7 +267,7 @@ const Bill = () => {
 
       <div className="flex items-center gap-3 px-5 mt-4 mb-4">
         <button className="bg-[var(--card-bg)] px-4 py-3 w-full rounded-lg text-[var(--text-color)] font-semibold border border-[var(--border-color)] hover:bg-[var(--card-bg)]/90 transition-colors duration-200">
-         Book Table
+          Book Table
         </button>
         <button
           onClick={handlePlaceOrder}
