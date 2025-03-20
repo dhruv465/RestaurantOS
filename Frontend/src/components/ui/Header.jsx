@@ -1,22 +1,24 @@
-import React, { useEffect, useRef, useState } from "react";
-import { TbLayoutDashboardFilled } from "react-icons/tb";
-import { FaKitchenSet } from "react-icons/fa6";
-import {
-  FaBell,
-  FaMoon,
-  FaSun,
-  FaUserCircle,
-  FaSignOutAlt,
-  FaDownload,
-  FaTrash,
-} from "react-icons/fa";
-import { IoClose, IoMenu, IoSearch } from "react-icons/io5";
-import { useTheme } from "../../context/ThemeContext";
-import { useDispatch, useSelector } from "react-redux";
-import { removeUser } from "../../redux/slices/userSlice";
-import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  AlignJustify,
+  Bell,
+  CircleUserRound,
+  Ghost,
+  LayoutDashboard,
+  LogOut,
+  Moon,
+  Search,
+  Sun,
+  Trash2,
+  X,
+  
+} from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useTheme } from "../../context/ThemeContext";
 import { getOrders, logout } from "../../https";
+import { removeUser } from "../../redux/slices/userSlice";
 
 const Header = () => {
   const { theme, toggleTheme } = useTheme();
@@ -260,7 +262,7 @@ const Header = () => {
           onClick={() => handleNavigation("/")}
           className="logo flex items-center gap-2 cursor-pointer"
         >
-          <FaKitchenSet
+          <Ghost
             className="h-8 w-8 text-[var(--text-color)]"
             aria-hidden="true"
           />
@@ -276,7 +278,7 @@ const Header = () => {
             aria-expanded={isSearchExpanded}
             aria-label="Open search"
           >
-            <IoSearch className="text-xl" />
+            <Search size={20} className="text-xl" />
           </button>
 
           <button
@@ -284,7 +286,7 @@ const Header = () => {
             onClick={toggleNotifications}
             aria-label="Notifications"
           >
-            <FaBell className="text-xl" />
+            <Bell size={20} className="text-xl" />
             {hasNewNotifications && (
               <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full h-2 w-2"></span>
             )}
@@ -296,7 +298,7 @@ const Header = () => {
             aria-expanded={isMenuOpen}
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           >
-            <IoMenu className="text-2xl" />
+            <AlignJustify size={20} className="text-2xl" />
           </button>
         </div>
       </div>
@@ -313,7 +315,7 @@ const Header = () => {
               aria-label="Close search"
               className="p-1 text-[var(--text-color)]"
             >
-              <IoClose className="text-2xl" />
+              <X size={20} className="text-2xl" />
             </button>
           </div>
           <form onSubmit={handleSearch} className="flex-1">
@@ -326,7 +328,7 @@ const Header = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <IoSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-color)]/70 text-lg" />
+              <Search size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-color)]/70 text-lg" />
             </div>
           </form>
         </div>
@@ -349,13 +351,13 @@ const Header = () => {
                 aria-label="Close menu"
                 className="p-1 text-[var(--text-color)]"
               >
-                <IoClose className="text-2xl" />
+                <X size={20} className="text-2xl" />
               </button>
             </div>
 
             {/* User Profile in Menu */}
             <div className="flex items-center gap-3 p-4 bg-[var(--menu-item-bg)] rounded-lg mb-6">
-              <FaUserCircle aria-hidden="true" />
+              <CircleUserRound size={20} aria-hidden="true" />
               <div className="text-[var(--text-color)]">
                 <h3 className="text-md font-semibold">
                   {userData.name || "TEST USER"}
@@ -374,12 +376,12 @@ const Header = () => {
               }
             >
               {isDarkMode ? (
-                <FaSun
+                <Sun size={20}
                   className="text-xl text-[var(--text-color)]"
                   aria-hidden="true"
                 />
               ) : (
-                <FaMoon
+                <Moon size={20}
                   className="text-xl text-[var(--text-color)]"
                   aria-hidden="true"
                 />
@@ -395,7 +397,7 @@ const Header = () => {
                 className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
                 aria-label="Dashboard"
               >
-                <TbLayoutDashboardFilled
+                <LayoutDashboard size={20}
                   className="text-xl text-[var(--text-color)]"
                   aria-hidden="true"
                 />
@@ -407,7 +409,7 @@ const Header = () => {
               aria-label="Notifications"
               onClick={toggleNotifications}
             >
-              <FaBell
+              <Bell size={20}
                 className="text-xl text-[var(--text-color)]"
                 aria-hidden="true"
               />
@@ -425,7 +427,7 @@ const Header = () => {
               className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
               aria-label="Logout"
             >
-              <FaSignOutAlt
+              <LogOut size={20}
                 className="text-xl text-[var(--text-color)]"
                 aria-hidden="true"
               />
@@ -441,7 +443,7 @@ const Header = () => {
           onClick={() => navigate("/")}
           className="logo flex items-center gap-2 cursor-pointer"
         >
-          <FaKitchenSet
+          <Ghost
             className="h-8 w-8 text-[var(--text-color)]"
             alt="RestOS logo"
           />
@@ -454,7 +456,7 @@ const Header = () => {
           onSubmit={handleSearch}
           className="search flex items-center gap-4 bg-[var(--card-bg)] backdrop-blur-sm px-3 sm:px-4 md:px-5 py-2 w-full md:w-[400px] lg:w-[500px] rounded-lg border border-[var(--border-color)] shadow-sm"
         >
-          <IoSearch
+          <Search size={20}
             className="text-xl text-[var(--text-color)]"
             aria-hidden="true"
           />
@@ -478,7 +480,7 @@ const Header = () => {
               className="flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
               aria-label="Dashboard"
             >
-              <TbLayoutDashboardFilled className="text-xl" />
+              <LayoutDashboard size={20} className="text-xl" />
             </button>
           )}
           <button
@@ -489,12 +491,12 @@ const Header = () => {
             }
           >
             {isDarkMode ? (
-              <FaSun
+              <Sun size={20}
                 className="text-xl text-[var(--text-color)]"
                 aria-hidden="true"
               />
-            ) : (
-              <FaMoon
+            ) : ( 
+              <Moon size={20}
                 className="text-xl text-[var(--text-color)]"
                 aria-hidden="true"
               />
@@ -505,7 +507,7 @@ const Header = () => {
             aria-label="Notifications"
             onClick={toggleNotifications}
           >
-            <FaBell
+            <Bell size={20}
               className="text-xl text-[var(--text-color)]"
               aria-hidden="true"
             />
@@ -517,7 +519,7 @@ const Header = () => {
             className="profile flex items-center gap-2 cursor-pointer bg-[var(--card-bg)] p-3 rounded-lg"
             aria-label="User profile"
           >
-            <FaUserCircle
+            <CircleUserRound size={20}
               className="text-2xl text-[var(--text-color)]"
               aria-hidden="true"
             />
@@ -536,7 +538,7 @@ const Header = () => {
             className="flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
             aria-label="Logout"
           >
-            <FaSignOutAlt className="text-xl" />
+            <LogOut size={20} className="text-xl" />
           </button>
         </div>
       </div>
@@ -651,7 +653,7 @@ const Header = () => {
                           className="text-[var(--text-color)]/70 hover:text-[var(--text-color)]"
                           aria-label="Remove notification"
                         >
-                          <FaTrash className="text-sm" />
+                          <Trash2 className="text-sm" />
                         </button>
                       </div>
 
