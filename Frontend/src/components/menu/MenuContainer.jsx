@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getRandomColor } from "../../utils/index";
 import { menus } from "../../constants";
 import { GrRadialSelected } from "react-icons/gr";
-import { IoMdCart } from "react-icons/io";
+import { ShoppingCart, Plus, Minus } from 'lucide-react';
 import { useDispatch } from "react-redux";
 import { addItems } from "../../redux/slices/cartSlice";
 import img from "../../assets/images/image.png";
@@ -92,59 +92,55 @@ const MenuContainer = () => {
         {selected?.items.map((menu) => (
           <div
             key={menu.id}
-            className="flex flex-col items-start justify-between p-3 sm:p-4 rounded-lg cursor-pointer bg-[var(--card-bg)] hover:bg-[var(--card-bg)]/90"
+            className="flex flex-col overflow-hidden rounded-lg bg-[var(--card-bg)] hover:shadow-md transition-shadow"
           >
-            {/* Image container */}
-            <div className="w-full h-32 mb-3 overflow-hidden rounded-lg">
+            <div className="relative">
               {menu.image ? (
                 <img
                   src={menu.image}
                   alt={menu.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-32 object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                  <img
-                    src={img}
-                    alt={`${menu.name} placeholder`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                <img
+                  src={img}
+                  alt={`${menu.name} placeholder`}
+                  className="w-full h-32 object-cover"
+                />
               )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+                <div className="p-3 text-white">
+                  <h3 className="font-medium">{menu.name}</h3>
+                  <p className="text-sm">₹{menu.price}</p>
+                </div>
+              </div>
             </div>
-
-            <div className="flex items-center justify-between w-full">
-              <h1 className="text-[var(--text-color)] text-lg font-semibold">
-                {menu.name}
-              </h1>
-              <button
-                onClick={() => handleAddToCart(menu)}
-                className="p-2 rounded-lg text-[var(--text-color)] bg-[var(--main-bg)]"
-              >
-                <IoMdCart size={20} />
-              </button>
-            </div>
-            <div className="flex items-center justify-between w-full mt-2">
-              <p className="text-[var(--text-color)] text-xl font-semibold">
-                ₹{menu.price}
-              </p>
-              <div className="flex items-center justify-between px-4 py-3 rounded-lg gap-6 bg-[var(--main-bg)]">
+            
+            <div className="p-3 flex justify-between items-center">
+              <div className="flex items-center gap-2">
                 <button
+                  className="h-8 w-8 rounded-full flex items-center justify-center border border-[var(--border-color)] text-[var(--text-color)]"
                   onClick={() => decrement(menu.id)}
-                  className="text-[var(--text-color)] text-2xl z"
+                  disabled={!itemCount[menu.id]}
                 >
-                  &minus;
+                  <Minus className="h-4 w-4" />
                 </button>
-                <span className="text-[var(--text-color)]">
+                <span className="w-6 text-center text-[var(--text-color)]">
                   {itemCount[menu.id] || 0}
                 </span>
                 <button
+                  className="h-8 w-8 rounded-full flex items-center justify-center border border-[var(--border-color)] text-[var(--text-color)]"
                   onClick={() => increment(menu.id)}
-                  className="text-[var(--text-color)] text-2xl"
                 >
-                  &#43;
+                  <Plus className="h-4 w-4" />
                 </button>
               </div>
+              <button
+                className="h-8 w-8 flex items-center justify-center text-[var(--text-color)]"
+                onClick={() => handleAddToCart(menu)}
+              >
+                <ShoppingCart className="h-4 w-4" />
+              </button>
             </div>
           </div>
         ))}
