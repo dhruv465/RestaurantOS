@@ -140,13 +140,13 @@ const CartInfo = ({ orderData, tableId }) => {
               </div>
               <div className="flex items-center justify-between mt-3">
                 <div className="flex items-center gap-3">
-                  <MdDeleteForever
+                  <MdDeleteForever size={20}
                     onClick={() => handleRemove(item.id)}
-                    className="text-[var(--text-color)] cursor-pointer size={20}"
+                    className="text-[var(--text-color)] cursor-pointer "
                   />
-                  <FaNotesMedical
+                  <FaNotesMedical size={16}
                     onClick={() => handleNoteClick(item.id)}
-                    className="text-[var(--text-color)] cursor-pointer size={20}"
+                    className="text-[var(--text-color)] cursor-pointer "
                   />
                 </div>
                 <p className="text-[var(--text-color)] text-md font-bold">
