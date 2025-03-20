@@ -1,6 +1,6 @@
 import { useTheme } from "../context/ThemeContext";
 import { Link } from "react-router-dom";
-import { LuMoveLeft } from "react-icons/lu";
+import { LucideMoveLeft } from "lucide-react";
 
 import React, { useEffect } from "react";
 
@@ -30,7 +30,7 @@ const NotFound = () => {
           }}
           className="inline-flex items-center gap-2 rounded-lg border px-6 py-3 font-medium transition-colors hover:opacity-90"
         >
-          <LuMoveLeft className="h-5 w-5" />
+          <LucideMoveLeft className="h-5 w-5" />
           Back to Home
         </Link>
       </div>

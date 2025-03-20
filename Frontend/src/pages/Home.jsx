@@ -1,11 +1,8 @@
 import React, { useEffect } from "react";
-import BottomNav from "../components/ui/BottomNav";
 import Greetings from "../components/home/Greetings";
-import MiniCard from "../components/home/MiniCard";
-import { BsCashCoin } from "react-icons/bs";
-import { GrInProgress } from "react-icons/gr";
-import RecentOders from "../components/home/RecentOders";
 import PopularDishes from "../components/home/PopularDishes";
+import RecentOders from "../components/home/RecentOders";
+import BottomNav from "../components/ui/BottomNav";
 
 const Home = () => {
   useEffect(() => {
