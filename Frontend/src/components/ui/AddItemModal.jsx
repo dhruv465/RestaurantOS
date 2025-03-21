@@ -1,56 +1,75 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { additemAsync, selectItemStatus } from "../../redux/slices/itemSlice";
+import { additemAsync, selectItemStatus, updateItemAsync } from "../../redux/slices/itemSlice";
 import { enqueueSnackbar } from "notistack";
 import Modal from "./Modal";
 import { selectCategories } from "../../redux/slices/categorySlice";
+import { useMutation } from "@tanstack/react-query";
+import { addItem, updateItem } from "../../https";
 
-const AdditemModal = ({ isOpen, onClose, initialItem = {} }) => {
+const AddItemModal = ({ isOpen, onClose, initialItem = {} }) => {
   const dispatch = useDispatch();
   const categories = useSelector(selectCategories);
   const itemStatus = useSelector(selectItemStatus);
   const isEditing = initialItem && !!initialItem._id;
 
-  const [itemName, setItemName] = useState(
-    initialItem && initialItem.name ? initialItem.name : ""
-  );
-  const [itemPrice, setItemPrice] = useState(
-    initialItem && initialItem.price ? initialItem.price : ""
-  );
-  const [selectedCategory, setSelectedCategory] = useState(
-    initialItem && initialItem.category ? initialItem.category : ""
-  );
+  const [itemName, setItemName] = useState("");
+  const [itemPrice, setItemPrice] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   useEffect(() => {
-    setItemName(initialItem && initialItem.name ? initialItem.name : "");
-    setItemPrice(initialItem && initialItem.price ? initialItem.price : "");
-    setSelectedCategory(
-      initialItem && initialItem.category ? initialItem.category : ""
-    );
+    if (isOpen) {
+      setItemName(initialItem?.name || "");
+      setItemPrice(initialItem?.price || "");
+      setSelectedCategory(initialItem?.category?._id || initialItem?.category || "");
+    }
   }, [isOpen, initialItem]);
 
-  const handleSubmit = async () => {
-    if (itemName && itemPrice && selectedCategory) {
-      const newItem = {
-        name: itemName,
-        price: parseFloat(itemPrice),
-        category: selectedCategory,
-      };
-
-      const response = await dispatch(
-        isEditing
-          ? additemAsync({ id: initialItem._id, data: newItem })
-          : additemAsync(newItem)
-      );
-      if (response.meta.requestStatus === "fulfilled") {
-        enqueueSnackbar("Item added/updated successfully!", {
-          variant: "success",
-        });
+  const itemMutation = useMutation({
+    mutationFn: (data) => {
+      if (isEditing) {
+        return updateItem(initialItem._id, data);
       } else {
-        enqueueSnackbar("Failed to add/update item.", { variant: "error" });
+        return addItem(data);
       }
+    },
+    onSuccess: (res) => {
       onClose();
+      const { data } = res;
+      enqueueSnackbar(data.message || `Item ${isEditing ? 'updated' : 'added'} successfully`, { 
+        variant: "success" 
+      });
+    },
+    onError: (error) => {
+      console.error(error);
+      const message = error.response?.data?.message || `Failed to ${isEditing ? 'update' : 'add'} item`;
+      enqueueSnackbar(message, { variant: "error" });
+    },
+  });
+
+  const handleSubmit = () => {
+    if (!itemName.trim()) {
+      enqueueSnackbar("Item name cannot be empty", { variant: "warning" });
+      return;
     }
+    
+    if (!itemPrice || isNaN(parseFloat(itemPrice)) || parseFloat(itemPrice) <= 0) {
+      enqueueSnackbar("Please enter a valid price", { variant: "warning" });
+      return;
+    }
+    
+    if (!selectedCategory) {
+      enqueueSnackbar("Please select a category", { variant: "warning" });
+      return;
+    }
+
+    const itemData = {
+      name: itemName,
+      price: parseFloat(itemPrice),
+      category: selectedCategory
+    };
+
+    itemMutation.mutate(itemData);
   };
 
   return (
@@ -94,7 +113,7 @@ const AdditemModal = ({ isOpen, onClose, initialItem = {} }) => {
       <button
         onClick={handleSubmit}
         className="bg-[#F6b100] text-white rounded-lg py-3 w-full mt-8 hover:bg-[#F6b100]/90 transition-colors duration-200"
-        disabled={itemStatus === "loading"}
+        disabled={itemMutation.isPending || itemStatus === "loading"}
       >
         {isEditing ? "Save Changes" : "Add Item"}
       </button>
@@ -102,4 +121,4 @@ const AdditemModal = ({ isOpen, onClose, initialItem = {} }) => {
   );
 };
 
-export default AdditemModal;
+export default AddItemModal;

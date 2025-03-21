@@ -8,7 +8,7 @@ import {
 import Modal from "./Modal";
 import { useMutation } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
-import { createCategory } from "../../https";
+import { createCategory, updateCategory } from "../../https";
 
 const CategoryModal = ({ isOpen, onClose, initialCategory = {} }) => {
   const [categoryName, setCategoryName] = useState(
@@ -18,52 +18,44 @@ const CategoryModal = ({ isOpen, onClose, initialCategory = {} }) => {
   const status = useSelector(selectCategoryStatus);
   const isEditing = initialCategory ? !!initialCategory._id : false;
 
-  const handleSubmit = () => {
-    if (categoryName) {
-      if (isEditing) {
-        dispatch(
-          updateCategoryAsync({
-            id: initialCategory._id,
-            data: { name: categoryName },
-          })
-        );
-      } else {
-        dispatch(addCategoryAsync({ name: categoryName }));
-      }
-    }
-
-    categoryMutation.mutate(categoryName);
-  };
-
-  const categoryMutation = useMutation({
-    mutationFn: (reqData) => createCategory(reqData),
-
-    onSuccess: (res) => {
-      console.log(res);
-      onClose();
-      const { data } = res;
-      enqueueSnackbar(data.message, { variant: "success" });
-      console.log(error);
-    },
-    onError: (error) => {
-      console.log(error);
-      const { data } = error.response;
-      enqueueSnackbar(data.message, { variant: "error" });
-    },
-  });
-
-  if (!isOpen) return null;
-
   useEffect(() => {
     setCategoryName(initialCategory ? initialCategory.name || "" : "");
   }, [isOpen, initialCategory]);
+
+  const categoryMutation = useMutation({
+    mutationFn: (data) => {
+      if (isEditing) {
+        return updateCategory(initialCategory._id, { name: data });
+      } else {
+        return createCategory({ name: data });
+      }
+    },
+    onSuccess: (res) => {
+      onClose();
+      const { data } = res;
+      enqueueSnackbar(data.message || "Category operation successful", { variant: "success" });
+    },
+    onError: (error) => {
+      console.error(error);
+      const message = error.response?.data?.message || "Category operation failed";
+      enqueueSnackbar(message, { variant: "error" });
+    },
+  });
+
+  const handleSubmit = () => {
+    if (!categoryName.trim()) {
+      enqueueSnackbar("Category name cannot be empty", { variant: "warning" });
+      return;
+    }
+    categoryMutation.mutate(categoryName);
+  };
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={isEditing ? "Edit Category" : "Add Category"}
-       className="bg-[var(--card-bg)] p-4 rounded-md shadow-md w-96 h-96"
+      className="bg-[var(--card-bg)] p-4 rounded-md shadow-md w-96 h-96"
     >
       <div className="mb-4">
         <input
@@ -77,7 +69,7 @@ const CategoryModal = ({ isOpen, onClose, initialCategory = {} }) => {
       <button
         onClick={handleSubmit}
         className="bg-[#F6b100] text-white rounded-lg py-3 w-full mt-8 hover:bg-[#F6b100]/90 transition-colors duration-200"
-        disabled={status === "loading"} // Disable button while loading
+        disabled={categoryMutation.isPending || status === "loading"}
       >
         {isEditing ? "Save Changes" : "Add Category"}
       </button>
