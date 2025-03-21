@@ -5,9 +5,7 @@ import { useDispatch } from "react-redux";
 import TableCard from "../components/tables/TableCard";
 import BackButton from "../components/ui/BackButton";
 import BottomNav from "../components/ui/BottomNav";
-import { getTables, deleteTable } from "../https";
-import { setCustomer } from "../redux/slices/customerSlice";
-import { Plus } from "lucide-react";
+import { deleteTable, getTables } from "../https";
 
 const Tables = () => {
   useEffect(() => {
