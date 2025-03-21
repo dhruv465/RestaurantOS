@@ -38,7 +38,8 @@ export const verifyPaymentRazorpay = (data) => api.post('/api/payment/verify-pay
 // Category API endpoints
 export const createCategory = (data) => api.post('/api/categories', data);
 export const getCategories = () => api.get('/api/categories');
-export const updateCategory = (id, data) => api.put(`/api/categories/${id}`, data);
+// Add or update these functions
+const updateCategory = (id, data) => api.put(`/api/categories/${id}`, data);
 export const deleteCategory = (id) => api.delete(`/api/categories/${id}`);
 
 // Item API endpoints 
@@ -47,3 +48,8 @@ export const getItems = () => api.get('/api/items');
 export const getItemById = (id) => api.get(`/api/items/${id}`);
 export const updateItem = (id, data) => api.put(`/api/items/${id}`, data);
 export const deleteItem = (id) => api.delete(`/api/items/${id}`);
+
+// Make sure these are exported
+export {
+  updateCategory,
+};

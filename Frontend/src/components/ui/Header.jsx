@@ -516,7 +516,7 @@ const Header = () => {
             )}
           </button>
           <button
-            className="profile flex items-center gap-2 cursor-pointer bg-[var(--card-bg)] p-3 rounded-lg"
+            className="profile flex items-center gap-2 cursor-pointer bg-[var(--card-bg)] p-2 rounded-lg"
             aria-label="User profile"
           >
             <CircleUserRound size={20}
