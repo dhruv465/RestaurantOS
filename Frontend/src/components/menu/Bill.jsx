@@ -249,16 +249,20 @@ const Bill = () => {
       <div className="flex items-center gap-3 px-5 mt-4">
         <button
           onClick={() => setPaymentMethod("Cash")}
-          className={`bg-[var(--card-bg)] px-4 py-3 w-full rounded-lg text-[var(--text-color)] font-semibold border border-[var(--border-color)] hover:bg-[var(--card-bg)]/90 transition-colors duration-200 ${
-            paymentMethod === "Cash" ? "bg-[var(--main-bg)]" : ""
+          className={`px-4 py-3 w-full rounded-lg font-semibold transition-colors duration-200 ${
+            paymentMethod === "Cash"
+              ? "bg-teal-600 text-white hover:bg-teal-700"
+              : "bg-[var(--card-bg)] text-[var(--text-color)] border border-[var(--border-color)] hover:bg-[var(--card-bg)]/90"
           }`}
         >
           Cash
         </button>
         <button
           onClick={() => setPaymentMethod("Online")}
-          className={`bg-[var(--card-bg)] px-4 py-3 w-full rounded-lg text-[var(--text-color)] font-semibold border border-[var(--border-color)] hover:bg-[var(--card-bg)]/90 transition-colors duration-200 ${
-            paymentMethod === "Online" ? "bg-[var(--main-bg)]" : ""
+          className={`px-4 py-3 w-full rounded-lg font-semibold transition-colors duration-200 ${
+            paymentMethod === "Online"
+              ? "bg-indigo-600 text-white hover:bg-indigo-700"
+              : "bg-[var(--card-bg)] text-[var(--text-color)] border border-[var(--border-color)] hover:bg-[var(--card-bg)]/90"
           }`}
         >
           Online
@@ -266,12 +270,12 @@ const Bill = () => {
       </div>
 
       <div className="flex items-center gap-3 px-5 mt-4 mb-4">
-        <button className="bg-[var(--card-bg)] px-4 py-3 w-full rounded-lg text-[var(--text-color)] font-semibold border border-[var(--border-color)] hover:bg-[var(--card-bg)]/90 transition-colors duration-200">
+        <button className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-3 w-full rounded-lg font-semibold transition-colors duration-200">
           Book Table
         </button>
         <button
           onClick={handlePlaceOrder}
-          className="bg-[var(--card-bg)] px-4 py-3 w-full rounded-lg text-[var(--text-color)] font-semibold border border-[var(--border-color)] hover:bg-[var(--card-bg)]/90 transition-colors duration-200"
+          className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-3 w-full rounded-lg font-semibold transition-colors duration-200"
         >
           {customerData.orderId ? "Update Order" : "Place Order"}
         </button>
