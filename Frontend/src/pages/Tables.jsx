@@ -100,7 +100,7 @@ const Tables = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 sm:p-6 md:p-8">
         {tablesWithShape.length === 0 ? (
-          <div className="col-span-full  flex items-center justify-center text-gray-500">
+          <div className="col-span-full h-[calc(100vh-200px)] flex items-center justify-center text-gray-500">
             <div className="mx-auto max-w-md text-center bg-[var(--main-bg)] overflow-hidden">
               {/* Card Header */}
               <div className="p-6 pb-2">
@@ -165,7 +165,7 @@ const Tables = () => {
                   </div>
                 </div>
                 <h2 className="mt-4 text-xl font-semibold text-[var(--text-color)]">
-                  No Tables are Listed
+                No tables available
                 </h2>
               </div>
             </div>
