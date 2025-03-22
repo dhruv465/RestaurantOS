@@ -12,9 +12,7 @@ import { getItems } from "../https";
 import {
   fetchCategories,
   selectCategories,
-  selectCategoryStatus,
 } from "../redux/slices/categorySlice";
-import { selectItemStatus } from "../redux/slices/itemSlice";
 
 const buttons = [
   { label: "Add Table", icon: <MdTableBar />, action: "table" },
@@ -27,8 +25,6 @@ const tabs = ["Metrics", "Orders", "Payment", "Manage Menu"];
 const Dashboard = () => {
   const dispatch = useDispatch();
   const categories = useSelector(selectCategories);
-  const categoryStatus = useSelector(selectCategoryStatus);
-  const itemStatus = useSelector(selectItemStatus);
 
   useEffect(() => {
     document.title = "RestOS | Dashboard";
@@ -82,12 +78,12 @@ const Dashboard = () => {
         .then(() => {
           // After deletion is successful, refetch items
           refetchItems();
-          // Show success message (you can add a toast notification here)
+          // Show success message
           console.log("Item deleted successfully");
         })
         .catch((error) => {
           console.error("Error deleting item:", error);
-          // Show error message (you can add a toast notification here)
+          // Show error message
         })
         .finally(() => {
           setDeletingItem(null);
@@ -151,7 +147,6 @@ const Dashboard = () => {
   }, {});
 
   // Get sorted categories for display
-  const sortedCategories = Object.keys(itemsByCategory).sort();
 
   // Modify the Menu Management Component to show all categories
   const MenuManagementComponent = () => {
@@ -299,86 +294,6 @@ const Dashboard = () => {
   };
 
   // Update the CategoriesAndItemsList component
-  const CategoriesAndItemsList = () => {
-    if (!categories || categories.length === 0) {
-      return (
-        <p className="text-[var(--text-color)]">No categories available</p>
-      );
-    }
-
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-        <div className="bg-[var(--card-bg)] p-4 rounded-lg">
-          <h2 className="text-[var(--text-color)] text-xl font-semibold mb-4">
-            Categories
-          </h2>
-          <div className="space-y-2">
-            {categories.map((category) => (
-              <div
-                key={category._id}
-                className="flex justify-between items-center p-3 bg-[var(--main-bg)] rounded-lg"
-              >
-                <span className="text-[var(--text-color)]">
-                  {category.name}
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleEditCategory(category)}
-                    className="text-blue-500 hover:text-blue-700 p-1.5 bg-blue-500/10 rounded-md transition-colors"
-                  >
-                    <MdEdit className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setDeletingCategory(category._id)}
-                    className="text-red-500 hover:text-red-700 p-1.5 bg-red-500/10 rounded-md transition-colors"
-                  >
-                    <MdDelete className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-[var(--card-bg)] p-4 rounded-lg">
-          <h2 className="text-[var(--text-color)] text-xl font-semibold mb-4">
-            Items
-          </h2>
-          <div className="space-y-2">
-            {items.map((item) => (
-              <div
-                key={item._id}
-                className="flex justify-between items-center p-3 bg-[var(--main-bg)] rounded-lg"
-              >
-                <div>
-                  <span className="text-[var(--text-color)] block">
-                    {item.name}
-                  </span>
-                  <span className="text-[var(--text-color)]/70 text-sm">
-                    ₹{item.price} - {item.category?.name || "Unknown Category"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleEditItem(item)}
-                    className="text-blue-500 hover:text-blue-700 p-1.5 bg-blue-500/10 rounded-md transition-colors"
-                  >
-                    <MdEdit className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setDeletingItem(item._id)}
-                    className="text-red-500 hover:text-red-700 p-1.5 bg-red-500/10 rounded-md transition-colors"
-                  >
-                    <MdDelete className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   // Delete Confirmation Modal Component
   const DeleteConfirmationModal = ({
@@ -396,7 +311,7 @@ const Dashboard = () => {
           <h2 className="text-xl font-semibold text-[var(--text-color)]">
             {title}
           </h2>
-          <p className="text-[var(--text-color)]/70 mt-2">{description}</p>
+          <p className="text-[var(--text-color)] mt-2">{description}</p>
           <div className="flex justify-end gap-2 mt-6">
             <button
               onClick={onCancel}
