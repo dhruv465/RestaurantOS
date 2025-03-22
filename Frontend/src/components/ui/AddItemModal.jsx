@@ -34,8 +34,9 @@ const AddItemModal = ({ isOpen, onClose, initialItem = {} }) => {
       }
     },
     onSuccess: (res) => {
-      onClose();
       const { data } = res;
+      dispatch(additemAsync(data.item)); // Dispatch the action to update Redux state
+      onClose();
       enqueueSnackbar(data.message || `Item ${isEditing ? 'updated' : 'added'} successfully`, { 
         variant: "success" 
       });

@@ -31,8 +31,9 @@ const CategoryModal = ({ isOpen, onClose, initialCategory = {} }) => {
       }
     },
     onSuccess: (res) => {
-      onClose();
       const { data } = res;
+      dispatch(addCategoryAsync(data.category)); // Dispatch the action to update Redux state
+      onClose();
       enqueueSnackbar(data.message || "Category operation successful", { variant: "success" });
     },
     onError: (error) => {
