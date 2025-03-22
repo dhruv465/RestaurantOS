@@ -314,9 +314,8 @@ const Bill = () => {
         <button
           onClick={handlePlaceOrder}
           className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-3 w-full rounded-lg font-semibold transition-colors duration-200"
-          // Disable for existing orders
         >
-          Process Payment
+          Pay Now
         </button>
       </div>
       {showInvoice && (
