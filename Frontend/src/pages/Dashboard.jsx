@@ -239,7 +239,7 @@ const Dashboard = () => {
                           <h4 className="text-lg font-medium text-[var(--text-color)]">
                             {item.name}
                           </h4>
-                          <p className="text-[var(--text-color)]/70 mt-1">
+                          <p className="text-[var(--text-color)] mt-1">
                             {item.description || "No description provided"}
                           </p>
                           <p className="font-medium mt-2 text-[var(--text-color)]">
@@ -292,8 +292,6 @@ const Dashboard = () => {
       </div>
     );
   };
-
-  // Update the CategoriesAndItemsList component
 
   // Delete Confirmation Modal Component
   const DeleteConfirmationModal = ({
