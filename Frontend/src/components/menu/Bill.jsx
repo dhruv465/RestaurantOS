@@ -41,6 +41,60 @@ const Bill = () => {
   const [showInvoice, setShowInvoice] = useState(false);
   const [orderInfo, setOrderInfo] = useState();
 
+  // Check if we're updating an existing order
+  const isExistingOrder = !!customerData.orderId;
+
+  // Function to prepare the order data
+  const prepareOrderData = (
+    includePaymentData = false,
+    paymentDetails = null
+  ) => {
+    const orderData = {
+      customerDetails: {
+        name: customerData.customerName,
+        phone: customerData.customerPhone,
+        guests: customerData.guests,
+      },
+      // orderStatus: "test",
+      bills: {
+        total: total,
+        tax: tax,
+        grandTotal: grandTotal,
+      },
+      items: cartData,
+      table: customerData.table.tableId,
+    };
+
+    // Add payment method if specified
+    if (paymentMethod) {
+      orderData.paymentMethod = paymentMethod;
+    }
+
+    // Add payment data if provided
+    if (includePaymentData && paymentDetails) {
+      orderData.paymentData = paymentDetails;
+    }
+
+    // If updating an existing order, include the orderId
+    if (isExistingOrder) {
+      orderData.orderId = customerData.orderId;
+    }
+
+    return orderData;
+  };
+
+  const handleBookTable = () => {
+    // Prepare the order data
+    const orderData = prepareOrderData();
+
+    // For Book Table, we handle both new orders and updates
+    if (isExistingOrder) {
+      bookTableUpdateMutation.mutate(orderData);
+    } else {
+      bookTableMutation.mutate(orderData);
+    }
+  };
+
   const handlePlaceOrder = async () => {
     if (!paymentMethod) {
       enqueueSnackbar("Please select a payment method!", {
@@ -48,9 +102,6 @@ const Bill = () => {
       });
       return;
     }
-
-    // Check if we're updating an existing order
-    const isExistingOrder = !!customerData.orderId;
 
     if (paymentMethod === "Online") {
       try {
@@ -83,38 +134,14 @@ const Bill = () => {
             console.log(verification);
             enqueueSnackbar(verification.data.message, { variant: "success" });
 
-            // Prepare orderData for create/update
-            const orderData = {
-              customerDetails: {
-                name: customerData.customerName,
-                phone: customerData.customerPhone,
-                guests: customerData.guests,
-              },
-              orderStatus: "In Progress",
-              bills: {
-                total: total,
-                tax: tax,
-                grandTotal: grandTotal,
-              },
-              items: cartData,
-              table: customerData.table.tableId,
-              paymentMethod: paymentMethod,
-              paymentData: {
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: response.razorpay_order_id,
-              },
+            // Prepare order data with payment details
+            const paymentDetails = {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
             };
 
-            // If updating an existing order, include the orderId
-            if (isExistingOrder) {
-              orderData.orderId = customerData.orderId;
-            }
-
-            setTimeout(() => {
-              isExistingOrder
-                ? updateOrderMutation.mutate(orderData)
-                : orderMutation.mutate(orderData);
-            }, 1500);
+            const orderData = prepareOrderData(true, paymentDetails);
+            orderMutation.mutate(orderData);
           },
           prefill: {
             name: customerData.name,
@@ -131,40 +158,66 @@ const Bill = () => {
         enqueueSnackbar("Payment Failed!", { variant: "error" });
       }
     } else {
-      // Cash payment
-      const orderData = {
-        customerDetails: {
-          name: customerData.customerName,
-          phone: customerData.customerPhone,
-          guests: customerData.guests,
-        },
-        orderStatus: "In Progress",
-        bills: {
-          total: total,
-          tax: tax,
-          grandTotal: grandTotal,
-        },
-        items: cartData,
-        table: customerData.table.tableId,
-        paymentMethod: paymentMethod,
-      };
+      // Cash payment - only handle new orders with payment
+      const orderData = prepareOrderData();
 
-      // If updating an existing order, include the orderId
-      if (isExistingOrder) {
-        orderData.orderId = customerData.orderId;
-      }
-
-      isExistingOrder
-        ? updateOrderMutation.mutate(orderData)
-        : orderMutation.mutate(orderData);
+      // Place Order only handles payment, not updates
+      orderMutation.mutate(orderData);
     }
   };
 
+  // Book Table mutations - handle both new orders and updates
+  const bookTableMutation = useMutation({
+    mutationFn: (reqData) => addOrder(reqData),
+    onSuccess: (resData) => {
+      const { data } = resData.data;
+      console.log("Table booked with order:", data);
+
+      // Update Table
+      const tableData = {
+        status: "Booked",
+        orderId: data._id,
+        tableId: data.table,
+      };
+
+      setTimeout(() => {
+        tableUpdateMutation.mutate(tableData);
+      }, 1500);
+
+      enqueueSnackbar("Table Booked Successfully!", {
+        variant: "success",
+      });
+      // No invoice display for book table
+    },
+    onError: (error) => {
+      console.log(error);
+      enqueueSnackbar("Failed to book table!", { variant: "error" });
+    },
+  });
+
+  const bookTableUpdateMutation = useMutation({
+    mutationFn: (reqData) => updateOrder(reqData),
+    onSuccess: (resData) => {
+      const { data } = resData.data;
+      console.log("Table booking updated:", data);
+
+      enqueueSnackbar("Table Booking Updated!", {
+        variant: "success",
+      });
+      // No invoice display for table booking updates
+    },
+    onError: (error) => {
+      console.log(error);
+      enqueueSnackbar("Failed to update table booking!", { variant: "error" });
+    },
+  });
+
+  // Place Order mutation - only handles payment processing for new orders
   const orderMutation = useMutation({
     mutationFn: (reqData) => addOrder(reqData),
     onSuccess: (resData) => {
       const { data } = resData.data;
-      console.log("Order created:", data);
+      console.log("Order with payment created:", data);
 
       setOrderInfo(data);
 
@@ -179,32 +232,14 @@ const Bill = () => {
         tableUpdateMutation.mutate(tableData);
       }, 1500);
 
-      enqueueSnackbar("Order Placed!", {
+      enqueueSnackbar("Payment Processed Successfully!", {
         variant: "success",
       });
-      setShowInvoice(true);
+      setShowInvoice(true); // Show invoice for payment
     },
     onError: (error) => {
       console.log(error);
-      enqueueSnackbar("Failed to create order!", { variant: "error" });
-    },
-  });
-
-  const updateOrderMutation = useMutation({
-    mutationFn: (reqData) => updateOrder(reqData),
-    onSuccess: (resData) => {
-      const { data } = resData.data;
-      console.log("Order updated:", data);
-
-      setOrderInfo(data);
-      enqueueSnackbar("Order Updated!", {
-        variant: "success",
-      });
-      setShowInvoice(true);
-    },
-    onError: (error) => {
-      console.log(error);
-      enqueueSnackbar("Failed to update order!", { variant: "error" });
+      enqueueSnackbar("Payment processing failed!", { variant: "error" });
     },
   });
 
@@ -270,14 +305,18 @@ const Bill = () => {
       </div>
 
       <div className="flex items-center gap-3 px-5 mt-4 mb-4">
-        <button className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-3 w-full rounded-lg font-semibold transition-colors duration-200">
-          Book Table
+        <button
+          onClick={handleBookTable}
+          className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-3 w-full rounded-lg font-semibold transition-colors duration-200"
+        >
+          {isExistingOrder ? "Update Order" : "Book Table"}
         </button>
         <button
           onClick={handlePlaceOrder}
           className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-3 w-full rounded-lg font-semibold transition-colors duration-200"
+          // Disable for existing orders
         >
-          {customerData.orderId ? "Update Order" : "Place Order"}
+          Process Payment
         </button>
       </div>
       {showInvoice && (
