@@ -127,9 +127,9 @@ const TableCard = ({
       // For square tables, place chairs closer to each side
       const positions = [
         { left: "50%", top: "6%", transform: "translate(-50%, -50%)" }, // Top
-        { left: "70%", top: "50%", transform: "translate(-50%, -50%)" }, // Right
+        { left: "75%", top: "50%", transform: "translate(-50%, -50%)" }, // Right
         { left: "50%", top: "100%", transform: "translate(-50%, -50%)" }, // Bottom
-        { left: "30%", top: "50%", transform: "translate(-50%, -50%)" }, // Left
+        { left: "25%", top: "50%", transform: "translate(-50%, -50%)" }, // Left
       ];
 
       for (let i = 0; i < Math.min(chairCount, positions.length); i++) {
