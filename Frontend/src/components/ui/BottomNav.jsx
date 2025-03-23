@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { BiSolidDish } from "react-icons/bi";
-import { CiCircleMore } from "react-icons/ci";
+import { Settings } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { BiFoodMenu, BiSolidDish } from "react-icons/bi";
 import { FaHome } from "react-icons/fa";
-import { BiFoodMenu } from "react-icons/bi";
 import { MdTableBar } from "react-icons/md";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import { setCustomer } from "../../redux/slices/customerSlice";
 import "../../styles/animations.css";
 import Modal from "./Modal";
-import { useDispatch } from "react-redux";
-import { setCustomer } from "../../redux/slices/customerSlice";
 
 const BottomNav = () => {
   const navigate = useNavigate();
@@ -31,11 +30,13 @@ const BottomNav = () => {
 
   const handleCreateOrder = () => {
     // Send data to store with proper field names
-    dispatch(setCustomer({ 
-      customerName: name, 
-      customerPhone: phone, 
-      guests: guestCount 
-    }));
+    dispatch(
+      setCustomer({
+        customerName: name,
+        customerPhone: phone,
+        guests: guestCount,
+      })
+    );
     navigate("/tables");
   };
 
@@ -136,8 +137,15 @@ const BottomNav = () => {
         >
           <MdTableBar className="inline mr-2 text-lg sm:text-xl" /> Tables
         </button>
-        <button className="text-[var(--text-color)] w-full sm:w-[150px] md:w-[200px] flex items-center justify-center text-sm sm:text-base px-2 sm:px-4 py-2 hover:bg-[var(--card-bg)] rounded-[20px] transition-colors duration-200">
-          <CiCircleMore className="inline mr-2 text-lg sm:text-xl" /> More
+        <button
+          onClick={() => navigate("/settings")}
+          className={`text-[var(--text-color)] ${
+            location.pathname === "/settings"
+              ? "bg-[var(--card-bg)]"
+              : "hover:bg-[var(--card-bg)]"
+          } w-full sm:w-[150px] md:w-[200px] flex items-center justify-center text-sm sm:text-base px-2 sm:px-4 py-2 rounded-full transition-colors duration-200`}
+        >
+          <Settings size={20} className="inline mr-2 text-lg sm:text-xl" /> Settings
         </button>
       </div>
 
