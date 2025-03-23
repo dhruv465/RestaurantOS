@@ -5,12 +5,12 @@ const paymentSchema = new mongoose.Schema({
     orderId: String,
     amount: Number,
     currency: String,
-    status:String,
+    status: String,
     method: String,
     email: String,
     contact: String,
     createdAt: Date
-})
+});
 
 const Payment = mongoose.model("Payment", paymentSchema);
 module.exports = Payment;
