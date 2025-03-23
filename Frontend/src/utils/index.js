@@ -1,13 +1,13 @@
 // Predefined color palette for initials
 const colorPalette = [
-  '#FF6B6B', // Soft red
-  '#4ECDC4', // Turquoise
-  '#FF9F1C', // Orange
-  '#6B5B95', // Purple
-  '#F25F5C', // Coral
-  '#2EC4B6', // Teal
-  '#247BA0', // Blue
-  '#F25F5C'  // Coral
+  '#0ea5e9',
+  '#14b8a6',
+  '#10b981',
+  '#f59e0b',
+  '#f43f5e',
+  '#8b5cf6',
+  '#f87171',
+  '#06b6d4'
 ];
 
 // Get a random color from the predefined palette

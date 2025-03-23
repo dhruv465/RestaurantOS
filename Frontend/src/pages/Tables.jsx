@@ -165,7 +165,7 @@ const Tables = () => {
                   </div>
                 </div>
                 <h2 className="mt-4 text-xl font-semibold text-[var(--text-color)]">
-                No tables available
+                  No tables available
                 </h2>
               </div>
             </div>

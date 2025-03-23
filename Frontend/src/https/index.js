@@ -1,13 +1,13 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL,
-    withCredentials: true,
+  baseURL: import.meta.env.VITE_BACKEND_URL,
+  withCredentials: true,
 
-    headers: {
-        'Content-Type': 'application/json',
-        Accept: "application/json"
-    }
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: "application/json"
+  }
 });
 
 //Api endpoints
@@ -38,8 +38,7 @@ export const verifyPaymentRazorpay = (data) => api.post('/api/payment/verify-pay
 // Category API endpoints
 export const createCategory = (data) => api.post('/api/categories', data);
 export const getCategories = () => api.get('/api/categories');
-// Add or update these functions
-const updateCategory = (id, data) => api.put(`/api/categories/${id}`, data);
+export const updateCategory = (id, data) => api.put(`/api/categories/${id}`, data);
 export const deleteCategory = (id) => api.delete(`/api/categories/${id}`);
 
 // Item API endpoints 
@@ -49,7 +48,4 @@ export const getItemById = (id) => api.get(`/api/items/${id}`);
 export const updateItem = (id, data) => api.put(`/api/items/${id}`, data);
 export const deleteItem = (id) => api.delete(`/api/items/${id}`);
 
-// Make sure these are exported
-export {
-  updateCategory,
-};
+
