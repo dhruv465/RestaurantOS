@@ -12,11 +12,13 @@ import {
   Plus,
   Salad,
   Sandwich,
-  ShoppingBag,
+  UtensilsCrossed,
   ShoppingCart,
   Soup,
   Utensils,
   Wine,
+  Leaf, // Importing Leaf icon for veg
+  Drumstick, // Importing Drumstick icon for non-veg
 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -50,7 +52,7 @@ const MenuContainer = () => {
   const availableIcons = useMemo(
     () => [
       Utensils,
-      ShoppingBag,
+      UtensilsCrossed,
       Coffee,
       Soup,
       Cake,
@@ -117,7 +119,7 @@ const MenuContainer = () => {
             name: item.name,
             price: item.price,
             image: item.image || null,
-            itemCategory: item.itemCategory || "veg", // Add this line to include itemCategory
+            itemCategory: item.itemCategory || "veg", 
           }));
 
         return {
@@ -186,7 +188,7 @@ const MenuContainer = () => {
       const IconComponent = availableIcons[iconIndex];
       return <IconComponent className="h-4 w-4" />;
     }
-    return <ShoppingBag className="h-4 w-4" />;
+    return <UtensilsCrossed className="h-4 w-4" />;
   };
 
   // Generate contrast text color based on background color
@@ -316,7 +318,15 @@ const MenuContainer = () => {
                           : "bg-red-600 text-white"
                       }`}
                     >
-                      {menu.itemCategory === "veg" ? "Veg" : "Non-Veg"}
+                      {menu.itemCategory === "veg" ? (
+                     <span className="flex items-center gap-1">
+                     <Leaf className="h-3 w-3" /> Veg
+                   </span>
+                    ) : (
+                      <span className="flex items-center gap-1">
+                <Drumstick className="h-3 w-3" /> Non-Veg
+              </span>
+                    )}
                     </div>
                   </div>
                 )}
