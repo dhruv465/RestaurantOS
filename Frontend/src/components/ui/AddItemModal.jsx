@@ -16,12 +16,14 @@ const AddItemModal = ({ isOpen, onClose, initialItem = {} }) => {
   const [itemName, setItemName] = useState("");
   const [itemPrice, setItemPrice] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [itemCategory, setItemCategory] = useState("none"); // Default to none
 
   useEffect(() => {
     if (isOpen) {
       setItemName(initialItem?.name || "");
       setItemPrice(initialItem?.price || "");
       setSelectedCategory(initialItem?.category?._id || initialItem?.category || "");
+      setItemCategory(initialItem?.itemCategory || "none");
     }
   }, [isOpen, initialItem]);
 
@@ -67,7 +69,8 @@ const AddItemModal = ({ isOpen, onClose, initialItem = {} }) => {
     const itemData = {
       name: itemName,
       price: parseFloat(itemPrice),
-      category: selectedCategory
+      category: selectedCategory,
+      itemCategory: itemCategory
     };
 
     itemMutation.mutate(itemData);
@@ -110,6 +113,44 @@ const AddItemModal = ({ isOpen, onClose, initialItem = {} }) => {
             </option>
           ))}
         </select>
+      </div>
+      <div className="mb-4">
+        <div className="text-[var(--text-color)] mb-2">Item Type</div>
+        <div className="flex space-x-4">
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="radio"
+              name="itemCategory"
+              value="none"
+              checked={itemCategory === "none"}
+              onChange={() => setItemCategory("none")}
+              className="form-radio text-gray-500"
+            />
+            <span className="text-[var(--text-color)]">None</span>
+          </label>
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="radio"
+              name="itemCategory"
+              value="veg"
+              checked={itemCategory === "veg"}
+              onChange={() => setItemCategory("veg")}
+              className="form-radio text-green-500"
+            />
+            <span className="text-[var(--text-color)]">Vegetarian</span>
+          </label>
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="radio"
+              name="itemCategory"
+              value="non-veg"
+              checked={itemCategory === "non-veg"}
+              onChange={() => setItemCategory("non-veg")}
+              className="form-radio text-red-500"
+            />
+            <span className="text-[var(--text-color)]">Non-Vegetarian</span>
+          </label>
+        </div>
       </div>
       <button
         onClick={handleSubmit}

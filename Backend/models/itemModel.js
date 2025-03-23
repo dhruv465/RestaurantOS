@@ -14,7 +14,11 @@ const itemSchema = new mongoose.Schema({
         ref: 'Category',
         required: true,
     },
-    // Add any additional fields as necessary
+    itemCategory: {
+        type: String,
+        enum: ['veg', 'non-veg', 'none'],
+        default: 'none', // Setting default to 'none'
+    },
 }, {
     timestamps: true,
 });
