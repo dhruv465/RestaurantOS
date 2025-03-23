@@ -5,7 +5,7 @@ import {
   useLocation,
   Navigate,
 } from "react-router-dom";
-import { Home, Auth, Orders, Tables, Menu, NotFound, Dashboard } from "./pages";
+import { Home, Auth, Orders, Tables, Menu, NotFound, Dashboard, Settings } from "./pages";
 import Header from "./components/ui/Header";
 import { ThemeProvider } from "./context/ThemeContext";
 import { useSelector } from "react-redux";
@@ -24,7 +24,12 @@ function Layout() {
     <>
       {hideHeaderRoutes.includes(location.pathname) ? null : <Header />}
       <Routes>
-    <Route path="/menu/:id" element={<Menu />} />
+        <Route path="/menu/:id" element={<Menu />} />
+        <Route path="/settings" element={
+          <ProtectedRoutes>
+            <Settings />
+          </ProtectedRoutes>
+        } />
         <Route path="*" element={<NotFound />} />
         <Route
           path="/"
@@ -80,6 +85,7 @@ function ProtectedRoutes({ children }) {
 
   return children;
 }
+
 function App() {
   return (
     <ThemeProvider>

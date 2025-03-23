@@ -55,7 +55,7 @@ const Bill = () => {
         phone: customerData.customerPhone,
         guests: customerData.guests,
       },
-      // orderStatus: "test",
+      orderStatus: "In Progress",
       bills: {
         total: total,
         tax: tax,
@@ -130,23 +130,79 @@ const Bill = () => {
           description: "Secure Payment for Your Meal",
           order_id: data.order.id,
           handler: async function (response) {
-            const verification = await verifyPaymentRazorpay(response);
-            console.log(verification);
-            enqueueSnackbar(verification.data.message, { variant: "success" });
+            try {
+              // Add the orderId to the verification request
+              const verificationData = {
+                ...response,
+                orderId: customerData.orderId || null, // Send the existing orderId if available
+              };
 
-            // Prepare order data with payment details
-            const paymentDetails = {
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-            };
+              const verification = await verifyPaymentRazorpay(
+                verificationData
+              );
+              console.log("Payment verification response:", verification);
 
-            const orderData = prepareOrderData(true, paymentDetails);
-            orderMutation.mutate(orderData);
+              if (verification.data.success) {
+                enqueueSnackbar(verification.data.message, {
+                  variant: "success",
+                });
+
+                // If we've already saved payment details on the server, we can use the returned order
+                if (verification.data.order) {
+                  setOrderInfo(verification.data.order);
+                  setShowInvoice(true);
+
+                  // Update table status if needed
+                  const tableData = {
+                    status: "Booked",
+                    orderId: verification.data.order._id,
+                    tableId: verification.data.order.table,
+                  };
+
+                  setTimeout(() => {
+                    tableUpdateMutation.mutate(tableData);
+                  }, 1500);
+
+                  // Clear cart and customer data
+                  setTimeout(() => {
+                    dispatch(removeCustomer());
+                    dispatch(removeAllItems());
+                  }, 2000);
+
+                  return;
+                }
+
+                // For backward compatibility, continue with the existing flow
+                // Prepare order data with payment details
+                const paymentDetails = {
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                };
+
+                const orderData = prepareOrderData(true, paymentDetails);
+
+                // If existing order, update it; otherwise create new order
+                if (isExistingOrder) {
+                  paymentUpdateMutation.mutate(orderData);
+                } else {
+                  orderMutation.mutate(orderData);
+                }
+              } else {
+                enqueueSnackbar("Payment verification failed", {
+                  variant: "error",
+                });
+              }
+            } catch (error) {
+              console.error("Payment handling error:", error);
+              enqueueSnackbar("Payment processing failed!", {
+                variant: "error",
+              });
+            }
           },
           prefill: {
-            name: customerData.name,
+            name: customerData.customerName,
             email: "",
-            contact: customerData.phone,
+            contact: customerData.customerPhone,
           },
           theme: { color: "#025cca" },
         };
@@ -158,11 +214,15 @@ const Bill = () => {
         enqueueSnackbar("Payment Failed!", { variant: "error" });
       }
     } else {
-      // Cash payment - only handle new orders with payment
+      // Cash payment
       const orderData = prepareOrderData();
 
-      // Place Order only handles payment, not updates
-      orderMutation.mutate(orderData);
+      // If existing order, update it; otherwise create new order
+      if (isExistingOrder) {
+        paymentUpdateMutation.mutate(orderData);
+      } else {
+        orderMutation.mutate(orderData);
+      }
     }
   };
 
@@ -236,6 +296,39 @@ const Bill = () => {
         variant: "success",
       });
       setShowInvoice(true); // Show invoice for payment
+    },
+    onError: (error) => {
+      console.log(error);
+      enqueueSnackbar("Payment processing failed!", { variant: "error" });
+    },
+  });
+
+  // Add this mutation for updating existing orders with payment
+  const paymentUpdateMutation = useMutation({
+    mutationFn: (reqData) => updateOrder(reqData),
+    onSuccess: (resData) => {
+      const { data } = resData.data;
+      console.log("Order updated with payment:", data);
+
+      setOrderInfo(data);
+
+      enqueueSnackbar("Payment Processed Successfully!", {
+        variant: "success",
+      });
+      setShowInvoice(true); // Show invoice for payment
+
+      // Update table if needed
+      if (data.table) {
+        const tableData = {
+          status: "Booked",
+          orderId: data._id,
+          tableId: data.table,
+        };
+
+        setTimeout(() => {
+          tableUpdateMutation.mutate(tableData);
+        }, 1500);
+      }
     },
     onError: (error) => {
       console.log(error);

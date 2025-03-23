@@ -64,10 +64,20 @@ const LoginForm = ({ onToggleForm }) => {
     },
   });
 
+  const fillTestCredentials = () => {
+    setFormData({
+      email: "dhruvsathe11@gmail.com",
+      password: "password123",
+    });
+  };
+
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: `url('/src/assets/images/restaurant-img.jpg') no-repeat center center fixed`, backgroundSize: 'cover' }}
+      style={{
+        background: `url('/src/assets/images/restaurant-img.jpg') no-repeat center center fixed`,
+        backgroundSize: "cover",
+      }}
     >
       {/* Background Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -125,6 +135,13 @@ const LoginForm = ({ onToggleForm }) => {
               className="w-full py-3 px-4 rounded-lg font-medium bg-[#F6b100] text-white hover:bg-[#F6b100]/90 transition-colors duration-200"
             >
               Sign In
+            </button>
+            <button
+              type="button"
+              onClick={fillTestCredentials}
+              className="w-full py-2 px-4 rounded-lg font-medium bg-black text-white hover:bg-gray-700 transition-colors duration-200 mb-3"
+            >
+              Get Test Credentials
             </button>
           </form>
 
