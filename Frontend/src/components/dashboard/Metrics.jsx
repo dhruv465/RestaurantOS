@@ -27,7 +27,7 @@ const Metrics = () => {
         </button>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
         {metricsData.map((metric, index) => {
           return (
             <div
@@ -66,7 +66,7 @@ const Metrics = () => {
             </div>
           );
         })}
-      </div>
+      </div> */}
 
       <div className="flex flex-col justify-between mt-12">
         <div>
@@ -79,7 +79,7 @@ const Metrics = () => {
           </p>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
           {itemsData.map((item, index) => {
             return (
               <div key={index} className="shadow-sm rounded-lg p-4" style={{ backgroundColor: item.color }}>
@@ -96,7 +96,7 @@ const Metrics = () => {
               </div>
             );
           })}
-        </div>
+        </div> */}
       </div>
     </div>
   );
