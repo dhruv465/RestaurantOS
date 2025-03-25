@@ -205,7 +205,7 @@ const TableCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       key={id}
-      className="shadow-lg border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md bg-[var(--card-bg)] relative h-48 overflow-hidden"
+      className="shadow-lg border border-[var(--border-color)] rounded-lg p-4 cursor-pointer transition-all hover:shadow-md bg-[var(--card-bg)] relative h-48 overflow-hidden "
     >
       {showDeleteConfirm ? (
         <div className="absolute inset-0 rounded-lg p-4 bg-[var(--card-bg)] flex flex-col items-center justify-center z-10">

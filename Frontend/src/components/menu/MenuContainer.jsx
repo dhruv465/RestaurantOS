@@ -3,22 +3,22 @@ import {
   Apple,
   Beef,
   Cake,
-  Coffee,
+  Coffee, // Importing Leaf icon for veg
+  Drumstick,
   Egg,
   Fish,
   IceCream,
+  Leaf,
   Minus,
   Pizza,
   Plus,
   Salad,
   Sandwich,
-  UtensilsCrossed,
   ShoppingCart,
   Soup,
   Utensils,
+  UtensilsCrossed,
   Wine,
-  Leaf, // Importing Leaf icon for veg
-  Drumstick, // Importing Drumstick icon for non-veg
 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -119,7 +119,7 @@ const MenuContainer = () => {
             name: item.name,
             price: item.price,
             image: item.image || null,
-            itemCategory: item.itemCategory || "veg", 
+            itemCategory: item.itemCategory || "veg",
           }));
 
         return {
@@ -221,60 +221,44 @@ const MenuContainer = () => {
         <h2 className="text-lg font-bold mb-4 text-[var(--text-color)]">
           Menu Categories
         </h2>
-
-        {/* Container with horizontal scroll on mobile/tablet and grid on desktop */}
-        <div className="flex gap-4 overflow-x-auto pb-4 lg:grid lg:grid-cols-4 lg:overflow-x-visible">
+        <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar ">
           {menuCategories.map((category, index) => {
-            const bgColor = colors[index];
-            const textColor = getContrastTextColor(bgColor);
-
             return (
               <div
                 key={category.id}
                 className={`
-                  flex-shrink-0 w-[180px] sm:w-[220px] lg:w-auto 
-                  flex flex-col p-4 rounded-xl cursor-pointer 
-                  transition-all duration-300
+                  flex-shrink-0 w-auto
+                  flex items-center gap-2 p-2 px-4 rounded-full mb-2 mt-2 ml-1 cursor-pointer 
+                  transition-all duration-300 snap-start
+                  hover:scale-105 
                   ${
                     selected && selected.id === category.id
-                      ? "shadow-lg ring-2 ring-offset-2 ring-opacity-60 ring-white/30"
-                      : "hover:shadow-md hover:opacity-90"
+                      ? "bg-[#F6b100] text-white shadow-md"
+                      : "bg-[var(--card-bg)] border border-[var(--border-color)] text-[var(--text-color)] hover:shadow-sm hover:bg-[var(--card-bg)]/90"
                   }
                 `}
-                style={{
-                  background: bgColor,
-                  color: textColor,
-                  transform:
-                    selected && selected.id === category.id
-                      ? "translateY(-2px)"
-                      : "none",
-                }}
                 onClick={() => setSelected(category)}
               >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="rounded-full bg-white/20 p-2 mb-2">
-                    {renderCategoryIcon(category.id)}
-                  </div>
-
-                  {selected && selected.id === category.id && (
-                    <div className="h-3 w-3 rounded-full bg-white shadow-inner" />
-                  )}
+                <div
+                  className={`rounded-full ${
+                    selected && selected.id === category.id
+                      ? "bg-white/20"
+                      : "bg-[var(--main-bg)]"
+                  } p-2`}
+                >
+                  {renderCategoryIcon(category.id)}
                 </div>
 
-                <div className="mt-auto">
-                  <h3
-                    className="text-lg font-semibold truncate"
-                    style={{ color: textColor }}
-                  >
-                    {category.name}
-                  </h3>
-                  <p
-                    className="text-sm font-medium mt-1"
-                    style={{ color: textColor }}
-                  >
-                    {category.items ? category.items.length : "0"}{" "}
-                    {category.items?.length === 1 ? "Item" : "Items"}
-                  </p>
+                <span className="font-medium">{category.name}</span>
+                <div
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full  ${
+                    selected && selected.id === category.id
+                      ? "bg-white/20 text-white"
+                      : "bg-[var(--main-bg)] text-[var(--text-color)]"
+                  }`}
+                >
+                  {category.items ? category.items.length : 0}{" "}
+                  {/* {category.items?.length === 1 ? "Item" : "Items"} */}
                 </div>
               </div>
             );
@@ -284,7 +268,7 @@ const MenuContainer = () => {
 
       <hr className="border-[var(--border-color)] border-t-2 mt-2" />
 
-      {/* Menu Items Grid - Keep this unchanged */}
+      {/* Menu Items Grid  */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4 sm:px-6 md:px-8 lg:px-10 py-4 w-full overflow-y-auto">
         {selected &&
           selected.items &&
@@ -319,14 +303,14 @@ const MenuContainer = () => {
                       }`}
                     >
                       {menu.itemCategory === "veg" ? (
-                     <span className="flex items-center gap-1">
-                     <Leaf className="h-3 w-3" /> Veg
-                   </span>
-                    ) : (
-                      <span className="flex items-center gap-1">
-                <Drumstick className="h-3 w-3" /> Non-Veg
-              </span>
-                    )}
+                        <span className="flex items-center gap-1">
+                          <Leaf className="h-3 w-3" /> Veg
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1">
+                          <Drumstick className="h-3 w-3" /> Non-Veg
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}
