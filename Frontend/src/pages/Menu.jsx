@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { IoRestaurant } from "react-icons/io5";
+import { IoSearch } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import Bill from "../components/menu/Bill";
@@ -126,6 +127,17 @@ const Menu = () => {
             <h1 className="text-lg sm:text-xl md:text-2xl text-[var(--text-color)] tracking-wider font-bold">
               Menu
             </h1>
+          </div>
+          <div className="relative w-full md:w-[400px] mt-2 md:mt-0">
+            <div className="flex items-center bg-[var(--card-bg)] rounded-lg px-3 py-2 border border-[var(--border-color)]">
+              <IoSearch className="text-[var(--text-color)] text-xl opacity-80 mr-2" />
+              <input 
+                type="text" 
+                placeholder="Search menu items..." 
+                className="bg-transparent w-full text-[var(--text-color)] outline-none"
+                id="menuSearchInput"
+              />
+            </div>
           </div>
         </div>
 

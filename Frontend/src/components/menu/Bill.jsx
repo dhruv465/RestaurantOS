@@ -402,7 +402,7 @@ const Bill = () => {
           onClick={handleBookTable}
           className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-3 w-full rounded-lg font-semibold transition-colors duration-200"
         >
-          {isExistingOrder ? "Update Order" : "Send TO Kitchen"}
+          {isExistingOrder ? "Update Order" : "KOT & Print"}
         </button>
         <button
           onClick={handlePlaceOrder}
