@@ -29,6 +29,7 @@ export const getOrders = () => api.get('/api/order');
 export const updateOrderStatus = ({ orderId, orderStatus }) => api.put(`/api/order/${orderId}`, { orderStatus });
 export const getOrderById = (orderId) => api.get(`/api/order/${orderId}`);
 export const updateOrder = ({ orderId, ...data }) => api.put(`/api/order/${orderId}`, data);
+export const deleteItemFromOrder = (orderId, itemId) => api.delete(`/api/orders/${orderId}/items/${itemId}`);
 
 // Payment API endpoints
 export const createOrderRazorpay = (data) => api.post('/api/payment/create-order', data);

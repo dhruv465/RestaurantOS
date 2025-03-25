@@ -6,16 +6,20 @@ import {
   removeItem,
   updateItemInstructions,
 } from "../../redux/slices/cartSlice";
+import { deleteItemFromOrder } from "../../https"; // Import the new API function
+import { enqueueSnackbar } from "notistack"; // For notifications
 
 const CartInfo = ({ orderData, tableId }) => {
   // Get tableId from props or from wherever you're tracking the current table
   const currentTableId = tableId || "default-table";
   const cartData = useSelector((state) => state.cart);
+  const customerData = useSelector((state) => state.customer); // Get customer data for orderId
   const scrolLRef = useRef();
   const dispatch = useDispatch();
   const [editingItemId, setEditingItemId] = useState(null);
   const [instructionText, setInstructionText] = useState("");
   const [displayedInstructions, setDisplayedInstructions] = useState({});
+  const [isDeleting, setIsDeleting] = useState(false); // Track deletion state
 
   // Helper function to get table-specific instructions from localStorage
   const getTableItemInstructions = (tableId, itemId) => {
@@ -59,18 +63,33 @@ const CartInfo = ({ orderData, tableId }) => {
     }
   }, [cartData]);
 
-  const handleRemove = (itemId, itemPrice) => {
-    // When removing an item, also remove its instructions from localStorage
-    saveTableItemInstructions(currentTableId, itemId, null);
+  const handleRemove = async (itemId, itemPrice) => {
+    try {
+      setIsDeleting(true);
+      
+      // Check if we have an active order
+      if (customerData.orderId) {
+        // Delete from database if we have an orderId
+        await deleteItemFromOrder(customerData.orderId, itemId);
+        enqueueSnackbar("Item removed from order", { variant: "success" });
+      }
+      
+      // When removing an item, also remove its instructions from localStorage
+      saveTableItemInstructions(currentTableId, itemId, null);
 
-    // Create a new displayed instructions object without the removed item
-    const newDisplayedInstructions = { ...displayedInstructions };
-    delete newDisplayedInstructions[itemId];
-    setDisplayedInstructions(newDisplayedInstructions);
+      // Create a new displayed instructions object without the removed item
+      const newDisplayedInstructions = { ...displayedInstructions };
+      delete newDisplayedInstructions[itemId];
+      setDisplayedInstructions(newDisplayedInstructions);
 
-    dispatch(removeItem(itemId));
-    // Optionally, you can add logic here to handle any additional actions after removing the item
-    // For example, updating total price or showing a notification
+      // Remove from Redux store
+      dispatch(removeItem(itemId));
+    } catch (error) {
+      console.error("Error removing item:", error);
+      enqueueSnackbar("Failed to remove item from order", { variant: "error" });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleNoteClick = (itemId) => {
@@ -134,6 +153,9 @@ const CartInfo = ({ orderData, tableId }) => {
                 <h1 className="text-[var(--text-color)] font-semibold tracking-wide text-md">
                   {item.name}
                 </h1>
+                <span className="text-xs text-[var(--text-color)] opacity-60">
+                    ID: {item.id}
+                  </span>
                 <p className="text-[var(--text-color)] font-semibold">
                   x{item.quantity}
                 </p>
@@ -141,8 +163,8 @@ const CartInfo = ({ orderData, tableId }) => {
               <div className="flex items-center justify-between mt-3">
                 <div className="flex items-center gap-3">
                   <MdDeleteForever size={20}
-                    onClick={() => handleRemove(item.id)}
-                    className="text-[var(--text-color)] cursor-pointer "
+                    onClick={() => !isDeleting && handleRemove(item.id)}
+                    className={`text-[var(--text-color)] cursor-pointer ${isDeleting ? 'opacity-50' : ''}`}
                   />
                   <FaNotesMedical size={16}
                     onClick={() => handleNoteClick(item.id)}
