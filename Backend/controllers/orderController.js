@@ -44,7 +44,6 @@ const getOrders = async (req, res, next) => {
 
 const updateOrder = async (req, res, next) => {
   try {
-    const { orderStatus } = req.body;
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -52,16 +51,20 @@ const updateOrder = async (req, res, next) => {
       return next(error);
     }
 
-    const order = await Order.findByIdAndUpdate(
-      id,
-      { orderStatus },
-      { new: true }
-    );
-
-    if (!order) {
+    // Get the existing order first
+    const existingOrder = await Order.findById(id);
+    if (!existingOrder) {
       const error = createHttpError(404, "Order not found!");
       return next(error);
     }
+
+    // Update all fields from the request body
+    // This allows updating items, bills, customerDetails, etc.
+    const order = await Order.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true }
+    );
 
     res.status(200).json({ success: true, message: "Order updated", data: order });
   } catch (error) {
@@ -73,8 +76,8 @@ const deleteItemFromOrder = async (req, res, next) => {
     try {
         const { orderId, itemId } = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
-            return next(createHttpError(404, "Invalid orderId or itemId!"));
+        if (!mongoose.Types.ObjectId.isValid(orderId)) {
+            return next(createHttpError(404, "Invalid orderId!"));
         }
 
         const order = await Order.findById(orderId);
@@ -82,8 +85,8 @@ const deleteItemFromOrder = async (req, res, next) => {
             return next(createHttpError(404, "Order not found!"));
         }
 
-        // Remove the item from the order's items array
-        order.items = order.items.filter(item => item.toString() !== itemId);
+        // Remove the item from the order's items array using the numeric id
+        order.items = order.items.filter(item => item.id !== parseInt(itemId));
         await order.save();
 
         res.status(200).json({ success: true, message: "Item removed from order", data: order });

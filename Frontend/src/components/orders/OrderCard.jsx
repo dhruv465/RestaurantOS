@@ -12,7 +12,7 @@ const OrderCard = ({ key, order }) => {
 
   return (
     <div
-      className={`w-full bg-[var(--card-bg)] p-4 rounded-lg shadow-lg mb-4 ${cardClass}`}
+      className={`w-full bg-[var(--card-bg)] p-4 rounded-lg shadow-lg mb-4 ${cardClass} border border-[var(--border-color)]`}
     >
       <div className="flex items-center gap-4">
         <button className="bg-amber-400 p-3 md:p-4 text-lg md:text-xl font-bold text-white rounded-full">
