@@ -23,7 +23,7 @@ const Home = () => {
         </div>
 
         {/* Right Div */}
-        <div className="flex-[2]  mt-8 md:mt-0">
+        <div className="flex-[2]  mt-8 md:mt-0 ">
           <PopularDishes />
         </div>
       </section>
