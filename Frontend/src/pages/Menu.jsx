@@ -152,11 +152,11 @@ const Menu = () => {
       </div>
 
       {/* Right Div */}
-      <div className="w-full md:w-auto md:flex-[1] bg-[var(--card-bg)] mt-2 md:mt-4 mx-2 md:mr-3 rounded-lg pt-2 px-2 sm:px-4">
+      <div className="w-full md:w-auto md:flex-[1] bg-[var(--card-bg)] mt-2 md:mt-4 mx-2 md:mr-2 rounded-lg pt-2 px-2 sm:px-4">
         <CustomerInfo />
         <hr className="border-t-2 border-[var(--border-color)] m-2" />
         {/* Order Items */}
-        <CartInfo />
+        <CartInfo  />
         {/* Bill */}
         <Bill />
       </div>
