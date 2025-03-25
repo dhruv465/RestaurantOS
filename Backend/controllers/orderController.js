@@ -63,20 +63,33 @@ const updateOrder = async (req, res, next) => {
       return next(error);
     }
 
-    res
-      .status(200)
-      .json({ success: true, message: "Order updated", data: order });
+    res.status(200).json({ success: true, message: "Order updated", data: order });
   } catch (error) {
     next(error);
   }
 };
 
-const deleteOrdersByTableId = async (tableId) => {
-  try {
-    await Order.deleteMany({ table: tableId });
-  } catch (error) {
-    throw error;
-  }
+const deleteItemFromOrder = async (req, res, next) => {
+    try {
+        const { orderId, itemId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
+            return next(createHttpError(404, "Invalid orderId or itemId!"));
+        }
+
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return next(createHttpError(404, "Order not found!"));
+        }
+
+        // Remove the item from the order's items array
+        order.items = order.items.filter(item => item.toString() !== itemId);
+        await order.save();
+
+        res.status(200).json({ success: true, message: "Item removed from order", data: order });
+    } catch (error) {
+        next(error);
+    }
 };
 
 const getOrderByTable = async (req, res, next) => {
@@ -95,10 +108,10 @@ const getOrderByTable = async (req, res, next) => {
 };
 
 module.exports = {
-  deleteOrdersByTableId,
   addOrder,
   getOrders,
   updateOrder,
   getOrderById,
-  getOrderByTable
+  getOrderByTable,
+  deleteItemFromOrder
 }
