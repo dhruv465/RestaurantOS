@@ -66,14 +66,14 @@ const CartInfo = ({ orderData, tableId }) => {
   const handleRemove = async (itemId, itemPrice) => {
     try {
       setIsDeleting(true);
-      
+
       // Check if we have an active order
       if (customerData.orderId) {
         // Delete from database if we have an orderId
         await deleteItemFromOrder(customerData.orderId, itemId);
         enqueueSnackbar("Item removed from order", { variant: "success" });
       }
-      
+
       // When removing an item, also remove its instructions from localStorage
       saveTableItemInstructions(currentTableId, itemId, null);
 
@@ -153,20 +153,21 @@ const CartInfo = ({ orderData, tableId }) => {
                 <h1 className="text-[var(--text-color)] font-semibold tracking-wide text-md">
                   {item.name}
                 </h1>
-                <span className="text-xs text-[var(--text-color)] opacity-60">
-                    ID: {item.id}
-                  </span>
                 <p className="text-[var(--text-color)] font-semibold">
                   x{item.quantity}
                 </p>
               </div>
               <div className="flex items-center justify-between mt-3">
                 <div className="flex items-center gap-3">
-                  <MdDeleteForever size={20}
+                  <MdDeleteForever
+                    size={20}
                     onClick={() => !isDeleting && handleRemove(item.id)}
-                    className={`text-[var(--text-color)] cursor-pointer ${isDeleting ? 'opacity-50' : ''}`}
+                    className={`text-[var(--text-color)] cursor-pointer ${
+                      isDeleting ? "opacity-50" : ""
+                    }`}
                   />
-                  <FaNotesMedical size={16}
+                  <FaNotesMedical
+                    size={16}
                     onClick={() => handleNoteClick(item.id)}
                     className="text-[var(--text-color)] cursor-pointer "
                   />

@@ -54,7 +54,7 @@ const PopularDishes = () => {
 
   return (
     <div className="mt-6 pr-6 px-4">
-      <div className="bg-[var(--card-bg)] w-full rounded-lg">
+      <div className="bg-[var(--card-bg)] w-full rounded-lg border border-[var(--border-color)]">
         <div className="flex justify-between items-center px-6 py-4">
           <h1 className="text-[var(--text-color)] text-lg font-semibold tracking-wide">
             Popular Dishes
