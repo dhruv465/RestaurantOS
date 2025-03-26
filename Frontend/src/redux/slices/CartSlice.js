@@ -40,6 +40,33 @@ const cartSlice = createSlice({
             if (itemIndex !== -1) {
                 state[itemIndex].instructions = instructions;
             }
+        },
+        
+        // New reducer for marking an item as returned
+        markItemAsReturned: (state, action) => {
+            const { id, quantity } = action.payload;
+            const itemIndex = state.findIndex(item => item.id == id);
+            
+            if (itemIndex !== -1) {
+                // If the item exists, mark it as returned
+                if (!state[itemIndex].returned) {
+                    state[itemIndex].returned = quantity || state[itemIndex].quantity;
+                } else {
+                    // If already marked, update the returned quantity
+                    state[itemIndex].returned = quantity || state[itemIndex].quantity;
+                }
+            }
+        },
+        
+        // New reducer for unmarking an item as returned
+        unmarkItemAsReturned: (state, action) => {
+            const id = action.payload;
+            const itemIndex = state.findIndex(item => item.id == id);
+            
+            if (itemIndex !== -1 && state[itemIndex].returned) {
+                // Remove the returned flag
+                delete state[itemIndex].returned;
+            }
         }
     }
 });
