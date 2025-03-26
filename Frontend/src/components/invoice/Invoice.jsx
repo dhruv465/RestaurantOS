@@ -117,14 +117,14 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
             </button>
             <div className="flex gap-2 justify-center">
               <button
-                className="border border-gray-300 text-[var(--text-color)] py-2 px-4 rounded-md text-sm font-bold"
+                className="border border-gray-300 py-2 px-4 rounded-md text-sm font-bold"
                 variant="outline"
                 size="sm"
                 onClick={() => window.print()}
               >
                 Print
               </button>
-              <button className="border border-gray-300 text-[var(--text-color)] py-2 px-4 rounded-md text-sm font-bold">
+              <button className="border border-gray-300 py-2 px-4 rounded-md text-sm font-bold">
                 <Share2 className="mr-1 h-3 w-3 inline" /> Share
               </button>
             </div>
