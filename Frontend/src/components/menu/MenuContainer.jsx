@@ -347,60 +347,67 @@ const MenuContainer = () => {
 
   return (
     <>
-      {!isSearching && (
-        <>
-          {/* Categories Section - Only show when not searching */}
-          <div className="w-full px-4 py-6">
-            <h2 className="text-lg font-bold mb-4 text-[var(--text-color)]">
-              Menu Categories
-            </h2>
-            <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar ">
-              {menuCategories.map((category, index) => {
-                return (
-                  <div
-                    key={category.id}
-                    className={`
-                      flex-shrink-0 w-auto
-                      flex items-center gap-2 p-2 px-4 rounded-full mb-2 mt-2 ml-1 mr-1 cursor-pointer 
-                      transition-all duration-300 snap-start
-                      hover:scale-105 
-                      ${
-                        selected && selected.id === category.id
-                          ? "bg-[#F6b100] text-white shadow-md"
-                          : "bg-[var(--card-bg)] border border-[var(--border-color)] text-[var(--text-color)] hover:shadow-sm hover:bg-[var(--card-bg)]/90"
-                      }
-                    `}
-                    onClick={() => setSelected(category)}
-                  >
-                    <div
-                      className={`rounded-full ${
-                        selected && selected.id === category.id
-                          ? "bg-white/20"
-                          : "bg-[var(--main-bg)]"
-                      } p-2`}
-                    >
-                      {renderCategoryIcon(category.id)}
-                    </div>
+      {/* Categories Section - Always show */}
+      <div className="w-full px-4 py-6">
+        <h2 className="text-lg font-bold mb-4 text-[var(--text-color)]">
+          Menu Categories
+        </h2>
+        <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar ">
+          {menuCategories.map((category, index) => {
+            return (
+              <div
+                key={category.id}
+                className={`
+                  flex-shrink-0 w-auto
+                  flex items-center gap-2 p-2 px-4 rounded-full mb-2 mt-2 ml-1 mr-1 cursor-pointer 
+                  transition-all duration-300 snap-start
+                  hover:scale-105 
+                  ${
+                    !isSearching && selected && selected.id === category.id
+                      ? "bg-[#F6b100] text-white shadow-md"
+                      : "bg-[var(--card-bg)] border border-[var(--border-color)] text-[var(--text-color)] hover:shadow-sm hover:bg-[var(--card-bg)]/90"
+                  }
+                `}
+                onClick={() => {
+                  setSelected(category);
+                  // Clear search when selecting a category
+                  if (isSearching) {
+                    const searchInput = document.getElementById("menuSearchInput");
+                    if (searchInput) {
+                      searchInput.value = "";
+                      setSearchQuery("");
+                      setIsSearching(false);
+                    }
+                  }
+                }}
+              >
+                <div
+                  className={`rounded-full ${
+                    !isSearching && selected && selected.id === category.id
+                      ? "bg-white/20"
+                      : "bg-[var(--main-bg)]"
+                  } p-2`}
+                >
+                  {renderCategoryIcon(category.id)}
+                </div>
 
-                    <span className="font-medium">{category.name}</span>
-                    <div
-                      className={`ml-1 px-1.5 py-0.5 text-xs rounded-full  ${
-                        selected && selected.id === category.id
-                          ? "bg-white/20 text-white"
-                          : "bg-[var(--main-bg)] text-[var(--text-color)]"
-                      }`}
-                    >
-                      {category.items ? category.items.length : 0}{" "}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+                <span className="font-medium">{category.name}</span>
+                <div
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full  ${
+                    !isSearching && selected && selected.id === category.id
+                      ? "bg-white/20 text-white"
+                      : "bg-[var(--main-bg)] text-[var(--text-color)]"
+                  }`}
+                >
+                  {category.items ? category.items.length : 0}{" "}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
-          <hr className="border-[var(--border-color)] border-t-2 mt-2" />
-        </>
-      )}
+      <hr className="border-[var(--border-color)] border-t-2 mt-2" />
 
       {/* Search Results or Category Items */}
       <div className="px-4 py-4">
