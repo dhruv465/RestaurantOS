@@ -63,3 +63,9 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none;  /* Chrome, Safari and Opera */
 }
+
+
+.scroll-container {
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent);
+  mask-image: linear-gradient(to right, black 85%, transparent);
+}

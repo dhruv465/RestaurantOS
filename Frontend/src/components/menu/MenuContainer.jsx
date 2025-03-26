@@ -348,64 +348,72 @@ const MenuContainer = () => {
   return (
     <>
       {/* Categories Section - Always show */}
-      <div className="w-full px-4 py-6">
-        <h2 className="text-lg font-bold mb-4 text-[var(--text-color)]">
-          Menu Categories
-        </h2>
-        <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar ">
-          {menuCategories.map((category, index) => {
-            return (
-              <div
-                key={category.id}
-                className={`
-                  flex-shrink-0 w-auto
-                  flex items-center gap-2 p-2 px-4 rounded-full mb-2 mt-2 ml-1 mr-1 cursor-pointer 
-                  transition-all duration-300 snap-start
-                  hover:scale-105 
-                  ${
-                    !isSearching && selected && selected.id === category.id
-                      ? "bg-[#F6b100] text-white shadow-md"
-                      : "bg-[var(--card-bg)] border border-[var(--border-color)] text-[var(--text-color)] hover:shadow-sm hover:bg-[var(--card-bg)]/90"
-                  }
-                `}
-                onClick={() => {
-                  setSelected(category);
-                  // Clear search when selecting a category
-                  if (isSearching) {
-                    const searchInput = document.getElementById("menuSearchInput");
-                    if (searchInput) {
-                      searchInput.value = "";
-                      setSearchQuery("");
-                      setIsSearching(false);
-                    }
-                  }
-                }}
-              >
-                <div
-                  className={`rounded-full ${
-                    !isSearching && selected && selected.id === category.id
-                      ? "bg-white/20"
-                      : "bg-[var(--main-bg)]"
-                  } p-2`}
-                >
-                  {renderCategoryIcon(category.id)}
-                </div>
+      <div className="w-full px-4 py-6 relative">
+  <h2 className="text-lg font-bold mb-4 text-[var(--text-color)]">
+    Menu Categories
+  </h2>
+  <div className="relative">
+    {/* Start gradient overlay */}
+    <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[var(--background)] to-transparent z-10"></div>
+    
+    <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar scroll-container">
+      {menuCategories.map((category, index) => {
+        return (
+          <div
+            key={category.id}
+            className={`
+              flex-shrink-0 w-auto
+              flex items-center gap-2 p-2 px-4 rounded-full mb-2 mt-2 ml-1 mr-1 cursor-pointer 
+              transition-all duration-300 snap-start
+              hover:scale-105 
+              ${
+                !isSearching && selected && selected.id === category.id
+                  ? "bg-[#F6b100] text-white shadow-md"
+                  : "bg-[var(--card-bg)] border border-[var(--border-color)] text-[var(--text-color)] hover:shadow-sm hover:bg-[var(--card-bg)]/90"
+              }
+            `}
+            onClick={() => {
+              setSelected(category);
+              // Clear search when selecting a category
+              if (isSearching) {
+                const searchInput = document.getElementById("menuSearchInput");
+                if (searchInput) {
+                  searchInput.value = "";
+                  setSearchQuery("");
+                  setIsSearching(false);
+                }
+              }
+            }}
+          >
+            <div
+              className={`rounded-full ${
+                !isSearching && selected && selected.id === category.id
+                  ? "bg-white/20"
+                  : "bg-[var(--main-bg)]"
+              } p-2`}
+            >
+              {renderCategoryIcon(category.id)}
+            </div>
 
-                <span className="font-medium">{category.name}</span>
-                <div
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full  ${
-                    !isSearching && selected && selected.id === category.id
-                      ? "bg-white/20 text-white"
-                      : "bg-[var(--main-bg)] text-[var(--text-color)]"
-                  }`}
-                >
-                  {category.items ? category.items.length : 0}{" "}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+            <span className="font-medium">{category.name}</span>
+            <div
+              className={`ml-1 px-1.5 py-0.5 text-xs rounded-full  ${
+                !isSearching && selected && selected.id === category.id
+                  ? "bg-white/20 text-white"
+                  : "bg-[var(--main-bg)] text-[var(--text-color)]"
+              }`}
+            >
+              {category.items ? category.items.length : 0}{" "}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+    
+    {/* End gradient overlay */}
+    <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[var(--background)] to-transparent z-10"></div>
+  </div>
+</div>
 
       <hr className="border-[var(--border-color)] border-t-2 mt-2" />
 

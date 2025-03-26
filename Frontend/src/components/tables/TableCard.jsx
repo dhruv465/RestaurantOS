@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { updateTable, removeCustomer } from "../../redux/slices/customerSlice";
 import { removeAllItems } from "../../redux/slices/cartSlice";
-import { Users, Utensils, Clock, User, Info } from "lucide-react";
+import { Users, Utensils, Clock, User } from "lucide-react";
 import { getOrderById } from "../../https";
 import { enqueueSnackbar } from "notistack";
 
@@ -238,16 +238,7 @@ const TableCard = ({
           {/* Hover panel - only visible on hover */}
           {isHovered && (
             <div className="absolute right-2 top-2 flex flex-col gap-1 z-20">
-              {status === "Booked" && (
-                <button
-                  className="bg-white p-1 rounded-full shadow-sm border hover:bg-gray-50"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                >
-                  <Info className="h-4 w-4 text-blue-600" />
-                </button>
-              )}
+              
               <button
                 className="bg-white p-1 rounded-full shadow-sm border hover:bg-gray-50"
                 onClick={(e) => {
