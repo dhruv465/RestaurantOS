@@ -20,7 +20,7 @@ const buttons = [
   { label: "Add Dishes", icon: <BiSolidDish />, action: "dishes" },
 ];
 
-const tabs = [ "Orders", "Payment", "Manage Menu"];
+const tabs = ["Orders", "Payment", "Manage Menu"];
 
 const Dashboard = () => {
   const dispatch = useDispatch();

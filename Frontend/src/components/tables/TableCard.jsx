@@ -238,7 +238,6 @@ const TableCard = ({
           {/* Hover panel - only visible on hover */}
           {isHovered && (
             <div className="absolute right-2 top-2 flex flex-col gap-1 z-20">
-              
               <button
                 className="bg-white p-1 rounded-full shadow-sm border hover:bg-gray-50"
                 onClick={(e) => {

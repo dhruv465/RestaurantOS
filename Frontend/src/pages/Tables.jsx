@@ -17,7 +17,7 @@ const Tables = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const customerData = useSelector((state) => state.customer);
-  
+
   // Check if we're coming from the create order flow
   const isFromCreateOrder = customerData.customerName && !customerData.table;
 
