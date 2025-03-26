@@ -12,6 +12,7 @@ import {
 import { getTotalPrice, removeAllItems } from "../../redux/slices/cartSlice";
 import { removeCustomer } from "../../redux/slices/customerSlice";
 import Invoice from "../invoice/Invoice";
+import ReturnedItemsReceipt from "../invoice/ReturnedItemsReceipt";
 
 function loadScript(src) {
   return new Promise((resolve) => {
@@ -39,6 +40,7 @@ const Bill = () => {
 
   const [paymentMethod, setPaymentMethod] = useState();
   const [showInvoice, setShowInvoice] = useState(false);
+  const [showReturnedItemsReceipt, setShowReturnedItemsReceipt] = useState(false);
   const [orderInfo, setOrderInfo] = useState();
 
   // Check if we're updating an existing order
@@ -54,6 +56,7 @@ const Bill = () => {
         name: customerData.customerName,
         phone: customerData.customerPhone,
         guests: customerData.guests,
+        table: customerData.table, // Include the full table object with tableNo
       },
       orderStatus: "In Progress",
       bills: {
@@ -86,6 +89,36 @@ const Bill = () => {
   const handleBookTable = () => {
     // Prepare the order data
     const orderData = prepareOrderData();
+
+    // Check if this is a new order or an update to an existing order
+    if (isExistingOrder) {
+    
+      const newlyAddedItems = cartData.filter(item => item.newlyAdded);
+      
+      const receiptOrderData = {
+        ...orderData,
+        items: newlyAddedItems
+      };
+      
+      // Set the order info for receipt generation
+      setOrderInfo(receiptOrderData);
+    } else {
+      const cartWithReturnedItems = cartData.map(item => ({
+        ...item,
+        returned: item.quantity 
+      }));
+
+      const receiptOrderData = {
+        ...orderData,
+        items: cartWithReturnedItems
+      };
+
+      // Set the order info for receipt generation
+      setOrderInfo(receiptOrderData);
+    }
+    
+    // Always show the returned items receipt when KOT & Print is clicked
+    setShowReturnedItemsReceipt(true);
 
     // For Book Table, we handle both new orders and updates
     if (isExistingOrder) {
@@ -261,10 +294,17 @@ const Bill = () => {
       const { data } = resData.data;
       console.log("Table booking updated:", data);
 
+      // Check if there are any returned items in the cart
+      const hasReturnedItems = cartData.some(item => item.returned);
+
       enqueueSnackbar("Table Booking Updated!", {
         variant: "success",
       });
-      // No invoice display for table booking updates
+      
+      // Set order info for returned items receipt if needed
+      if (hasReturnedItems) {
+        setOrderInfo(data);
+      }
     },
     onError: (error) => {
       console.log(error);
@@ -413,6 +453,9 @@ const Bill = () => {
       </div>
       {showInvoice && (
         <Invoice orderInfo={orderInfo} setShowInvoice={setShowInvoice} />
+      )}
+      {showReturnedItemsReceipt && (
+        <ReturnedItemsReceipt orderInfo={orderInfo} setShowReceipt={setShowReturnedItemsReceipt} />
       )}
     </div>
   );

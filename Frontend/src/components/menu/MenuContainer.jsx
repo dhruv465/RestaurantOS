@@ -286,21 +286,20 @@ const MenuContainer = () => {
         {menu.itemCategory !== "none" && (
           <div className="absolute top-2 right-2">
             <div
-              className={`text-xs font-semibold px-2 rounded-full ${
-                menu.itemCategory === "veg"
-                  ? "bg-green-500 text-white"
-                  : "bg-red-600 text-white"
+              className={`w-5 h-5 rounded-lg flex items-center justify-center border-2 ${menu.itemCategory === "veg" 
+                ? "border-green-400" 
+                : "border-red-400"
               }`}
             >
-              {menu.itemCategory === "veg" ? (
-                <span className="flex items-center gap-1">
-                  <Leaf className="h-3 w-3" /> Veg
-                </span>
-              ) : (
-                <span className="flex items-center gap-1">
-                  <Drumstick className="h-3 w-3" /> Non-Veg
-                </span>
-              )}
+              <span
+                className={`inline-block w-2 h-2 rounded-full ${menu.itemCategory === "veg" 
+                  ? "bg-green-400" 
+                  : "bg-red-400"
+                }`}
+                style={{
+                  boxShadow: `0 0 4px 1px ${menu.itemCategory === "veg" ? "rgba(74, 222, 128, 0.6)" : "rgba(248, 113, 113, 0.6)"}`,
+                }}
+              ></span>
             </div>
           </div>
         )}
