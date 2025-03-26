@@ -1,7 +1,8 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import TableCard from "../components/tables/TableCard";
 import BackButton from "../components/ui/BackButton";
 import BottomNav from "../components/ui/BottomNav";
@@ -14,6 +15,11 @@ const Tables = () => {
 
   const [status, setStatus] = useState("all");
   const dispatch = useDispatch();
+  const location = useLocation();
+  const customerData = useSelector((state) => state.customer);
+  
+  // Check if we're coming from the create order flow
+  const isFromCreateOrder = customerData.customerName && !customerData.table;
 
   const {
     data: resData,
@@ -42,9 +48,14 @@ const Tables = () => {
     }
   };
 
-  // Filter tables based on status
+  // Filter tables based on status and navigation source
   const filteredTables =
     resData?.data.data.filter((table) => {
+      // When coming from create order, only show available tables
+      if (isFromCreateOrder) {
+        return table.status === "Available";
+      }
+      // Otherwise use the selected filter
       return status === "all" || table.status === status;
     }) || [];
 
@@ -70,32 +81,40 @@ const Tables = () => {
           </h1>
         </div>
 
-        <div className="flex items-center justify-center flex-wrap gap-2 md:gap-4">
-          <button
-            onClick={() => setStatus("all")}
-            className={`text-[var(--text-color)] text-sm md:text-base ${
-              status === "all" && "bg-[var(--card-bg)]"
-            } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setStatus("Booked")}
-            className={`text-[var(--text-color)] text-sm md:text-base ${
-              status === "Booked" && "bg-[var(--card-bg)]"
-            } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
-          >
-            Occupied
-          </button>
-          <button
-            onClick={() => setStatus("Available")}
-            className={`text-[var(--text-color)] text-sm md:text-base ${
-              status === "Available" && "bg-[var(--card-bg)]"
-            } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
-          >
-            Available
-          </button>
-        </div>
+        {!isFromCreateOrder ? (
+          <div className="flex items-center justify-center flex-wrap gap-2 md:gap-4">
+            <button
+              onClick={() => setStatus("all")}
+              className={`text-[var(--text-color)] text-sm md:text-base ${
+                status === "all" && "bg-[var(--card-bg)]"
+              } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setStatus("Booked")}
+              className={`text-[var(--text-color)] text-sm md:text-base ${
+                status === "Booked" && "bg-[var(--card-bg)]"
+              } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
+            >
+              Occupied
+            </button>
+            <button
+              onClick={() => setStatus("Available")}
+              className={`text-[var(--text-color)] text-sm md:text-base ${
+                status === "Available" && "bg-[var(--card-bg)]"
+              } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
+            >
+              Available
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center">
+            <h2 className="text-[var(--text-color)] text-sm md:text-base font-semibold bg-[var(--card-bg)] rounded-lg px-3 md:px-5 py-1 md:py-2">
+              Select an available table
+            </h2>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 sm:p-6 md:p-8">

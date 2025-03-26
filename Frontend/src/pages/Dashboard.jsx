@@ -20,7 +20,7 @@ const buttons = [
   { label: "Add Dishes", icon: <BiSolidDish />, action: "dishes" },
 ];
 
-const tabs = ["Metrics", "Orders", "Payment", "Manage Menu"];
+const tabs = [ "Orders", "Payment", "Manage Menu"];
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -50,7 +50,7 @@ const Dashboard = () => {
   const [deletingItem, setDeletingItem] = useState(null);
   const [deletingCategory, setDeletingCategory] = useState(null);
 
-  const [activeTab, setActiveTab] = useState("Metrics");
+  const [activeTab, setActiveTab] = useState("Orders");
 
   // Fetch categories and items
   const { data: itemsData, refetch: refetchItems } = useQuery({
