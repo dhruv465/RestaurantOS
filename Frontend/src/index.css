@@ -69,3 +69,16 @@
   -webkit-mask-image: linear-gradient(to right, black 85%, transparent);
   mask-image: linear-gradient(to right, black 85%, transparent);
 }
+
+/* Prevent scroll bounce/overscroll effect */
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+* {
+  overscroll-behavior: none;
+}
