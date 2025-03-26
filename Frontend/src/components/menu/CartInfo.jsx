@@ -125,6 +125,8 @@ const CartInfo = ({ orderData, tableId }) => {
     setEditingItemId(null);
     setInstructionText("");
   };
+  
+
 
   return (
     <div className="px-4 py-2">
@@ -176,6 +178,8 @@ const CartInfo = ({ orderData, tableId }) => {
                   ₹ {item.price}
                 </p>
               </div>
+              
+
 
               {/* Display instructions if they exist in our local state */}
               {displayedInstructions[item.id] && (

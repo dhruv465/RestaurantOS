@@ -19,9 +19,14 @@ const cartSlice = createSlice({
                 // If the item exists, just update the quantity and price
                 state[existingItemIndex].quantity += newItem.quantity;
                 state[existingItemIndex].price += newItem.price;
+                // Mark as newly added if this is an update to an existing order
+                state[existingItemIndex].newlyAdded = true;
             } else {
-                // Otherwise, add a new item
-                state.push(newItem);
+                // Otherwise, add a new item and mark as newly added
+                state.push({
+                    ...newItem,
+                    newlyAdded: true
+                });
             }
         },
 
@@ -72,5 +77,5 @@ const cartSlice = createSlice({
 });
 
 export const getTotalPrice = (state) => state.cart.reduce((total, item) => total + item.price, 0);
-export const { addItems, removeItem, removeAllItems, updateItemInstructions } = cartSlice.actions;
+export const { addItems, removeItem, removeAllItems, updateItemInstructions, markItemAsReturned, unmarkItemAsReturned } = cartSlice.actions;
 export default cartSlice.reducer;
