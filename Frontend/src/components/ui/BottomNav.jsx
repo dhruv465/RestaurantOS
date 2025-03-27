@@ -1,5 +1,5 @@
 import { Settings } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { BiFoodMenu, BiSolidDish } from "react-icons/bi";
 import { FaHome } from "react-icons/fa";
 import { MdTableBar } from "react-icons/md";

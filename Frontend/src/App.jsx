@@ -15,7 +15,7 @@ import Loader from "./components/ui/Loader";
 function Layout() {
   const location = useLocation();
   const isLoading = useLoadData();
-  const hideHeaderRoutes = ["/auth"];
+  const hideHeaderRoutes = ["/auth", "*"];
   const { isAuth } = useSelector((state) => state.user);
 
   if (isLoading) return <Loader />;
