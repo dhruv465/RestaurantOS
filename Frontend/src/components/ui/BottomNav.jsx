@@ -8,6 +8,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { setCustomer } from "../../redux/slices/customerSlice";
 import "../../styles/animations.css";
 import Modal from "./Modal";
+import { enqueueSnackbar } from "notistack";
 
 const BottomNav = () => {
   const navigate = useNavigate();
@@ -16,28 +17,59 @@ const BottomNav = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSpeedDialOpen, setIsSpeedDialOpen] = useState(false);
   const isActive = (path) => location.pathname === path;
-  const [guestCount, setGuestCount] = useState(0);
+  const [guestCount, setGuestCount] = useState(1);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
   const toggleSpeedDial = () => setIsSpeedDialOpen(!isSpeedDialOpen);
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
+  // Add state for validation errors
+  const [errors, setErrors] = useState({
+    name: false,
+    phone: false,
+    guests: false
+  });
 
   const increment = () => setGuestCount((prev) => prev + 1);
   const decrement = () => {
     if (guestCount > 0) setGuestCount((prev) => prev - 1);
   };
 
+  const validateForm = () => {
+    const newErrors = {
+      name: !name.trim(),
+      phone: !phone.trim(),
+      guests: guestCount <= 0
+    };
+    
+    setErrors(newErrors);
+    
+    // Return true if no errors (all fields are filled)
+    return !Object.values(newErrors).some(error => error);
+  };
+
   const handleCreateOrder = () => {
-    // Send data to store with proper field names
-    dispatch(
-      setCustomer({
-        customerName: name,
-        customerPhone: phone,
-        guests: guestCount,
-      })
-    );
-    navigate("/tables");
+    // Validate form before submitting
+    if (validateForm()) {
+      // Send data to store with proper field names
+      dispatch(
+        setCustomer({
+          customerName: name,
+          customerPhone: phone,
+          guests: guestCount,
+        })
+      );
+      navigate("/tables");
+      // Reset form fields
+      setName("");
+      setPhone("");
+      setGuestCount(0);
+      setErrors({ name: false, phone: false, guests: false });
+      closeModal();
+    } else {
+      // Show error message
+      enqueueSnackbar("All fields are required", { variant: "error" });
+    }
   };
 
   return (
@@ -159,11 +191,21 @@ const BottomNav = () => {
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (e.target.value.trim()) {
+                  setErrors({...errors, name: false});
+                }
+              }}
               placeholder="Enter Customer Name"
-              className="w-full bg-[var(--input-bg)] text-[var(--text-color)] rounded-lg p-2 focus:ring-2 focus:ring-[var(--border-color)] focus:outline-none transition-all border border-[var(--border-color)]"
+              className={`w-full bg-[var(--input-bg)] text-[var(--text-color)] rounded-lg p-2 focus:ring-2 focus:ring-[var(--border-color)] focus:outline-none transition-all border ${
+                errors.name ? "border-red-500" : "border-[var(--border-color)]"
+              }`}
               id=""
             />
+            {errors.name && (
+              <p className="text-red-500 text-xs mt-1">Customer name is required</p>
+            )}
           </div>
         </div>
         <div>
@@ -174,18 +216,30 @@ const BottomNav = () => {
             <input
               type="number"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                setPhone(e.target.value);
+                if (e.target.value.trim()) {
+                  setErrors({...errors, phone: false});
+                }
+              }}
               placeholder="Enter Customer Phone Number"
-              className="w-full bg-[var(--input-bg)] text-[var(--text-color)] rounded-lg p-2 focus:ring-2 focus:ring-[var(--border-color)] focus:outline-none transition-all border border-[var(--border-color)]"
+              className={`w-full bg-[var(--input-bg)] text-[var(--text-color)] rounded-lg p-2 focus:ring-2 focus:ring-[var(--border-color)] focus:outline-none transition-all border ${
+                errors.phone ? "border-red-500" : "border-[var(--border-color)]"
+              }`}
               id=""
             />
+            {errors.phone && (
+              <p className="text-red-500 text-xs mt-1">Phone number is required</p>
+            )}
           </div>
         </div>
         <div>
           <label className="block mb-2 mt-3 text-sm font-medium text-[#ababab]">
             Guest
           </label>
-          <div className="flex items-center justify-between bg-[var(--input-bg)] px-4 py-3 rounded-lg border border-[var(--border-color)]">
+          <div className={`flex items-center justify-between bg-[var(--input-bg)] px-4 py-3 rounded-lg border ${
+            errors.guests ? "border-red-500" : "border-[var(--border-color)]"
+          }`}>
             <button
               onClick={decrement}
               className="text-[var(--text-color)] text-2xl hover:text-[var(--text-color)]/70"
@@ -196,12 +250,20 @@ const BottomNav = () => {
               {guestCount} Person
             </span>
             <button
-              onClick={increment}
+              onClick={() => {
+                increment();
+                if (guestCount + 1 > 0) {
+                  setErrors({...errors, guests: false});
+                }
+              }}
               className="text-[var(--text-color)] text-2xl hover:text-[var(--text-color)]/70"
             >
               &#43;
             </button>
           </div>
+          {errors.guests && (
+            <p className="text-red-500 text-xs mt-1">At least 1 guest is required</p>
+          )}
         </div>
         <button
           onClick={handleCreateOrder}
