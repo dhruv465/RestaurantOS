@@ -1,0 +1,100 @@
+flowchart TD
+    Start([Start Registration]) --> Step1
+    
+    subgraph Step1["Step 1: Basic Restaurant Info"]
+        S1A[Restaurant Name]
+        S1B[Restaurant Type]
+        S1C[Cuisine]
+        S1D[Seating Capacity]
+        S1E[Dining Style]
+        S1F[Year Established]
+    end
+    
+    Step1 --> Step2
+    
+    subgraph Step2["Step 2: Owner / Admin Details"]
+        S2A[Owner/Administrator Name]
+        S2B[Contact Number]
+        S2C[Email Address]
+        S2D[Designation/Role]
+        S2E[Alternate Contact]
+    end
+    
+    Step2 --> Step3
+    
+    subgraph Step3["Step 3: Address & Location"]
+        S3A[Address Line 1]
+        S3B[Address Line 2]
+        S3C[Landmark/Locality]
+        S3D[City/Town]
+        S3E[State]
+        S3F[PIN Code]
+        S3G[Google Maps Link]
+    end
+    
+    Step3 --> Step4
+    
+    subgraph Step4["Step 4: Tax & Compliance"]
+        S4A[GSTIN]
+        S4B[FSSAI License Number]
+        S4C[PAN]
+        S4D[Business Registration No.]
+        S4E[Invoice Prefix & Start No.]
+    end
+    
+    Step4 --> Step5
+    
+    subgraph Step5["Step 5: Banking & Payout Info"]
+        S5A[Account Holder Name]
+        S5B[Bank Name]
+        S5C[Account Number]
+        S5D[IFSC Code]
+        S5E[UPI ID]
+        S5F[Preferred Payout Method]
+    end
+    
+    Step5 --> Step6
+    
+    subgraph Step6["Step 6: Operational Preferences"]
+        S6A[Business Hours]
+        S6B[Weekly Off]
+        S6C[Service Modes]
+        S6D[Delivery Radius]
+        S6E[Table Management]
+        S6F[KDS / KOT Printing Setup]
+    end
+    
+    Step6 --> Step7
+    
+    subgraph Step7["Step 7: Branding & Media"]
+        S7A[Logo Upload]
+        S7B[Tagline]
+        S7C[Restaurant Photos]
+        S7D[Theme Color]
+    end
+    
+    Step7 --> Step8
+    
+    subgraph Step8["Step 8: Franchise & Branch Info"]
+        S8A{Is this part of a franchise?}
+        S8A -->|Yes| S8B[Parent Brand/Company Name]
+        S8B --> S8C[Branch Name]
+        S8C --> S8D[Branch Code]
+        S8D --> S8E[No. of Branches]
+        S8A -->|No| Step9
+    end
+    
+    Step8 --> Step9
+    
+    subgraph Step9["Step 9: Account Settings"]
+        S9A[Primary Account Email]
+        S9B[Password]
+        S9C[Contact Person for POS]
+        S9D[Phone for POS Manager]
+        S9E[Preferred Language]
+        S9F[Time Zone]
+        S9G[Terms & Conditions]
+        S9H[Newsletter Opt-in]
+    end
+    
+    Step9 --> Complete([Registration Complete])

@@ -1,0 +1,60 @@
+flowchart TD
+    Start([User Visits Website]) --> LandingPage
+    
+    subgraph LandingPage["1️⃣ Landing on Website"]
+        LP1[View Features & Benefits]
+        LP2[View Pricing Plans]
+        LP3[View Demo Videos/Screenshots]
+        CTA[Click CTA: Register or Start Free Trial]
+    end
+    
+    LandingPage --> Registration
+    
+    subgraph Registration["2️⃣ Registration on SaaS Platform"]
+        R1[Step 1: Restaurant Details]
+        R2[Step 2: Owner/Admin Details]
+        R3[Step 3: Address]
+        R4[Step 4: Tax Info]
+        R5[Step 5: Banking Details]
+        R6[Steps 6-9: Additional Info]
+        
+        R1 --> R2 --> R3 --> R4 --> R5 --> R6
+        R6 --> AccountCreated[Restaurant Account Created]
+    end
+    
+    Registration --> SaaSLogin
+    
+    subgraph SaaSLogin["3️⃣ SaaS Admin Login"]
+        SL1[Login to Admin Portal]
+        SL2[View Restaurant Dashboard]
+        SL3[Complete Restaurant Setup]
+        SL4[Manage Settings]
+        
+        SL1 --> SL2 --> SL3 --> SL4
+    end
+    
+    SaaSLogin --> POSAccess
+    
+    subgraph POSAccess["4️⃣ POS Access"]
+        PA1[Click Launch POS Button]
+        PA2[SSO/Token-based Login to POS]
+        
+        PA1 --> PA2
+    end
+    
+    POSAccess --> POSSystem
+    
+    subgraph POSSystem["5️⃣ Inside POS System"]
+        PS1[Tables Layout]
+        PS2[KOT/Kitchen Tickets]
+        PS3[Billing/Invoice Generation]
+        PS4[Payment Collection]
+        PS5[Order Status Updates]
+        
+        PS1 --- PS2
+        PS2 --- PS3
+        PS3 --- PS4
+        PS4 --- PS5
+    end
+    
+    POSSystem --> DailyUse([Daily Restaurant Operations])
