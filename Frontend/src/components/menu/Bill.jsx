@@ -13,6 +13,7 @@ import { getTotalPrice, removeAllItems } from "../../redux/slices/cartSlice";
 import { removeCustomer } from "../../redux/slices/customerSlice";
 import Invoice from "../invoice/Invoice";
 import ReturnedItemsReceipt from "../invoice/ReturnedItemsReceipt";
+import { CreditCard, IndianRupee, ReceiptText } from "lucide-react";
 
 function loadScript(src) {
   return new Promise((resolve) => {
@@ -440,15 +441,16 @@ const Bill = () => {
       <div className="flex items-center gap-3 px-5 mt-4 mb-4">
         <button
           onClick={handleBookTable}
-          className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-3 w-full rounded-lg font-semibold transition-colors duration-200"
+          className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-3 w-full rounded-lg flex gap-2 font-semibold transition-colors duration-200"
         >
-          {isExistingOrder ? "Update Order" : "KOT & Print"}
+        🧾 {isExistingOrder ? "Update Order" : "KOT & Print"}
         </button>
         <button
           onClick={handlePlaceOrder}
-          className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-3 w-full rounded-lg font-semibold transition-colors duration-200"
+          className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-3 w-full gap-2 rounded-lg font-semibold transition-colors duration-200"
         >
-          Pay Now
+          
+          ₹ Pay Now
         </button>
       </div>
       {showInvoice && (
