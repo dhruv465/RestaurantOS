@@ -1,45 +1,69 @@
-import { useMutation } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addOrder,
-  createOrderRazorpay,
   updateTable,
-  verifyPaymentRazorpay,
   updateOrder,
+  previewOrderPrice,
 } from "../../https";
+import { newId, can } from "../../utils";
 import { getTotalPrice, removeAllItems } from "../../redux/slices/cartSlice";
-import { removeCustomer } from "../../redux/slices/customerSlice";
+import { removeCustomer, setCustomer } from "../../redux/slices/customerSlice";
 import Invoice from "../invoice/Invoice";
 import ReturnedItemsReceipt from "../invoice/ReturnedItemsReceipt";
-import { CreditCard, IndianRupee, ReceiptText } from "lucide-react";
-
-function loadScript(src) {
-  return new Promise((resolve) => {
-    const script = document.createElement("script");
-    script.src = src;
-    script.onload = () => {
-      resolve(true);
-    };
-    script.onerror = () => {
-      resolve(false);
-    };
-    document.body.appendChild(script);
-  });
-}
+import CheckoutModal from "../checkout/CheckoutModal";
+import { showOnDisplay } from "../../utils/display";
 
 const Bill = () => {
   const dispatch = useDispatch();
   const cartData = useSelector((state) => state.cart);
   const customerData = useSelector((state) => state.customer);
-  console.log("Customer data from Redux store:", customerData);
-  const total = useSelector(getTotalPrice);
-  const taxRate = 5.25;
-  const tax = (total * taxRate) / 100;
-  const grandTotal = total + tax;
+  const user = useSelector((state) => state.user);
+  const cartTotal = useSelector(getTotalPrice);
 
-  const [paymentMethod, setPaymentMethod] = useState();
+  // Totals and tax come from the server (utils/pricing.js); the cart total is only a placeholder while loading.
+  const priceLines = cartData.map(({ itemId, name, quantity, modifiers }) => ({
+    itemId,
+    name,
+    quantity,
+    modifiers: (modifiers || []).map(({ groupId, optionId }) => ({ groupId, optionId })),
+  }));
+  const zoneId = customerData.orderType === "Delivery" ? customerData.delivery?.zoneId : undefined;
+  const { data: priceData } = useQuery({
+    queryKey: ["price", priceLines, zoneId],
+    queryFn: () => previewOrderPrice(priceLines, zoneId),
+    enabled: priceLines.length > 0,
+    placeholderData: keepPreviousData,
+  });
+  const bills = cartData.length ? priceData?.data?.data?.bills : null;
+  const total = bills ? bills.total - (bills.deliveryFeePaise || 0) / 100 : cartTotal; // food only; fee has its own line
+  const tax = bills?.tax ?? 0;
+  const grandTotal = bills?.grandTotal ?? cartTotal;
+  const taxLabel = bills ? `Tax (${bills.taxRatePercent}%${bills.taxInclusive ? " incl." : ""})` : "Tax";
+
+  // Mirror the cart on the customer display (no-op when none is open).
+  useEffect(() => {
+    if (!cartData.length) return showOnDisplay({ type: "idle" });
+    const lines = priceData?.data?.data?.items;
+    showOnDisplay({
+      type: "cart",
+      items: cartData.map((l, i) => ({
+        name: l.name,
+        quantity: l.quantity,
+        modifiers: (l.modifiers || []).map((m) => m.name),
+        pricePaise: Math.round((lines?.[i]?.price ?? l.price) * 100),
+      })),
+      taxPaise: Math.round(tax * 100),
+      totalPaise: Math.round(grandTotal * 100),
+    });
+  }, [cartData, priceData, tax, grandTotal]);
+
+  const [checkoutId, setCheckoutId] = useState(null);
+  // Same id for repeated taps on one new order, so the server creates it (and its KOT) once.
+  const requestIdRef = useRef(newId());
+  const nextRequest = () => (requestIdRef.current = newId());
   const [showInvoice, setShowInvoice] = useState(false);
   const [showReturnedItemsReceipt, setShowReturnedItemsReceipt] = useState(false);
   const [orderInfo, setOrderInfo] = useState();
@@ -48,10 +72,7 @@ const Bill = () => {
   const isExistingOrder = !!customerData.orderId;
 
   // Function to prepare the order data
-  const prepareOrderData = (
-    includePaymentData = false,
-    paymentDetails = null
-  ) => {
+  const prepareOrderData = () => {
     const orderData = {
       customerDetails: {
         name: customerData.customerName,
@@ -66,18 +87,12 @@ const Bill = () => {
         grandTotal: grandTotal,
       },
       items: cartData,
-      table: customerData.table.tableId,
+      table: customerData.table?.tableId,
+      orderType: customerData.orderType,
+      delivery: customerData.orderType === "Delivery" && customerData.delivery ? { zoneId: customerData.delivery.zoneId, address: customerData.delivery.address, note: customerData.delivery.note } : undefined,
+      scheduledFor: customerData.scheduledFor || undefined,
+      clientRequestId: requestIdRef.current,
     };
-
-    // Add payment method if specified
-    if (paymentMethod) {
-      orderData.paymentMethod = paymentMethod;
-    }
-
-    // Add payment data if provided
-    if (includePaymentData && paymentDetails) {
-      orderData.paymentData = paymentDetails;
-    }
 
     // If updating an existing order, include the orderId
     if (isExistingOrder) {
@@ -87,7 +102,36 @@ const Bill = () => {
     return orderData;
   };
 
+  // Dine-in books the table (its success clears the cart); takeaway/delivery has no table, so clear now.
+  const bookTableFor = (order) => {
+    if (!order?.table) {
+      dispatch(removeCustomer());
+      dispatch(removeAllItems());
+      return;
+    }
+    setTimeout(() => {
+      tableUpdateMutation.mutate({ status: "Booked", orderId: order._id, tableId: order.table });
+    }, 1500);
+  };
+
+  const canSubmit = () => {
+    if (cartData.length === 0) {
+      enqueueSnackbar("Add at least one item", { variant: "warning" });
+      return false;
+    }
+    if (customerData.orderType === "Delivery" && !customerData.delivery?.zoneId) {
+      enqueueSnackbar("Start a new delivery order and pick its zone and address", { variant: "warning" });
+      return false;
+    }
+    if (customerData.orderType === "Dine-in" && !customerData.table?.tableId) {
+      enqueueSnackbar("Pick a table first", { variant: "warning" });
+      return false;
+    }
+    return true;
+  };
+
   const handleBookTable = () => {
+    if (!canSubmit()) return;
     // Prepare the order data
     const orderData = prepareOrderData();
 
@@ -118,9 +162,6 @@ const Bill = () => {
       setOrderInfo(receiptOrderData);
     }
     
-    // Always show the returned items receipt when KOT & Print is clicked
-    setShowReturnedItemsReceipt(true);
-
     // For Book Table, we handle both new orders and updates
     if (isExistingOrder) {
       bookTableUpdateMutation.mutate(orderData);
@@ -129,154 +170,46 @@ const Bill = () => {
     }
   };
 
-  const handlePlaceOrder = async () => {
-    if (!paymentMethod) {
-      enqueueSnackbar("Please select a payment method!", {
-        variant: "warning",
-      });
-      return;
-    }
-
-    if (paymentMethod === "Online") {
-      try {
-        const res = await loadScript(
-          "https://checkout.razorpay.com/v1/checkout.js"
-        );
-
-        if (!res) {
-          enqueueSnackbar("Razorpay SDK failed to load. Are you online?", {
-            variant: "warning",
-          });
-          return;
-        }
-
-        //create order
-        const reqData = {
-          amount: grandTotal.toFixed(2),
-        };
-        const { data } = await createOrderRazorpay(reqData);
-
-        const options = {
-          key: `${import.meta.env.VITE_RAZORPAY_KEY_ID}`,
-          amount: data.order.amount,
-          currency: data.order.currency,
-          name: "RestOS",
-          description: "Secure Payment for Your Meal",
-          order_id: data.order.id,
-          handler: async function (response) {
-            try {
-              // Add the orderId to the verification request
-              const verificationData = {
-                ...response,
-                orderId: customerData.orderId || null, // Send the existing orderId if available
-              };
-
-              const verification = await verifyPaymentRazorpay(
-                verificationData
-              );
-              console.log("Payment verification response:", verification);
-
-              if (verification.data.success) {
-                enqueueSnackbar(verification.data.message, {
-                  variant: "success",
-                });
-
-                // If we've already saved payment details on the server, we can use the returned order
-                if (verification.data.order) {
-                  setOrderInfo(verification.data.order);
-                  setShowInvoice(true);
-
-                  // Update table status if needed
-                  const tableData = {
-                    status: "Booked",
-                    orderId: verification.data.order._id,
-                    tableId: verification.data.order.table,
-                  };
-
-                  setTimeout(() => {
-                    tableUpdateMutation.mutate(tableData);
-                  }, 1500);
-
-                  // Clear cart and customer data
-                  setTimeout(() => {
-                    dispatch(removeCustomer());
-                    dispatch(removeAllItems());
-                  }, 2000);
-
-                  return;
-                }
-
-                // For backward compatibility, continue with the existing flow
-                // Prepare order data with payment details
-                const paymentDetails = {
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_order_id: response.razorpay_order_id,
-                };
-
-                const orderData = prepareOrderData(true, paymentDetails);
-
-                // If existing order, update it; otherwise create new order
-                if (isExistingOrder) {
-                  paymentUpdateMutation.mutate(orderData);
-                } else {
-                  orderMutation.mutate(orderData);
-                }
-              } else {
-                enqueueSnackbar("Payment verification failed", {
-                  variant: "error",
-                });
-              }
-            } catch (error) {
-              console.error("Payment handling error:", error);
-              enqueueSnackbar("Payment processing failed!", {
-                variant: "error",
-              });
-            }
-          },
-          prefill: {
-            name: customerData.customerName,
-            email: "",
-            contact: customerData.customerPhone,
-          },
-          theme: { color: "#025cca" },
-        };
-
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-      } catch (error) {
-        console.log(error);
-        enqueueSnackbar("Payment Failed!", { variant: "error" });
-      }
-    } else {
-      // Cash payment
-      const orderData = prepareOrderData();
-
-      // If existing order, update it; otherwise create new order
-      if (isExistingOrder) {
-        paymentUpdateMutation.mutate(orderData);
+  // Pay Now: save the cart as an order (sends new items to the kitchen), then open checkout.
+  const handlePay = async () => {
+    if (!canSubmit()) return;
+    try {
+      let orderId = customerData.orderId;
+      if (orderId) {
+        await updateOrder(prepareOrderData());
       } else {
-        orderMutation.mutate(orderData);
+        const { data } = await addOrder(prepareOrderData());
+        nextRequest();
+        orderId = data.data._id;
+        dispatch(setCustomer({ orderId }));
+        if (customerData.table?.tableId) {
+          await updateTable({ tableId: customerData.table.tableId, status: "Booked", orderId });
+        }
       }
+      setCheckoutId(orderId);
+    } catch (error) {
+      enqueueSnackbar(error.response?.data?.message || "Could not save the order", { variant: "error" });
     }
+  };
+
+  const handlePaid = (order) => {
+    setCheckoutId(null);
+    setOrderInfo(order);
+    setShowInvoice(true);
+    dispatch(removeCustomer());
+    dispatch(removeAllItems());
   };
 
   // Book Table mutations - handle both new orders and updates
   const bookTableMutation = useMutation({
     mutationFn: (reqData) => addOrder(reqData),
     onSuccess: (resData) => {
+      nextRequest();
       const { data } = resData.data;
-      console.log("Table booked with order:", data);
-
-      // Update Table
-      const tableData = {
-        status: "Booked",
-        orderId: data._id,
-        tableId: data.table,
-      };
-
-      setTimeout(() => {
-        tableUpdateMutation.mutate(tableData);
-      }, 1500);
+      bookTableFor(data);
+      // Show the kitchen ticket only once the server has the order, with its real number.
+      setOrderInfo((info) => ({ ...info, orderNo: data.orderNo }));
+      setShowReturnedItemsReceipt(true);
 
       enqueueSnackbar("Table Booked Successfully & Order Sent to Kitchen!", {
         variant: "success",
@@ -285,7 +218,7 @@ const Bill = () => {
     },
     onError: (error) => {
       console.log(error);
-      enqueueSnackbar("Failed to book table!", { variant: "error" });
+      enqueueSnackbar(error.response?.data?.message || "Could not send the order", { variant: "error" });
     },
   });
 
@@ -293,7 +226,8 @@ const Bill = () => {
     mutationFn: (reqData) => updateOrder(reqData),
     onSuccess: (resData) => {
       const { data } = resData.data;
-      console.log("Table booking updated:", data);
+      setOrderInfo((info) => ({ ...info, orderNo: data.orderNo }));
+      setShowReturnedItemsReceipt(true);
 
       // Check if there are any returned items in the cart
       const hasReturnedItems = cartData.some(item => item.returned);
@@ -309,71 +243,7 @@ const Bill = () => {
     },
     onError: (error) => {
       console.log(error);
-      enqueueSnackbar("Failed to update table booking!", { variant: "error" });
-    },
-  });
-
-  // Place Order mutation - only handles payment processing for new orders
-  const orderMutation = useMutation({
-    mutationFn: (reqData) => addOrder(reqData),
-    onSuccess: (resData) => {
-      const { data } = resData.data;
-      console.log("Order with payment created:", data);
-
-      setOrderInfo(data);
-
-      // Update Table
-      const tableData = {
-        status: "Booked",
-        orderId: data._id,
-        tableId: data.table,
-      };
-
-      setTimeout(() => {
-        tableUpdateMutation.mutate(tableData);
-      }, 1500);
-
-      enqueueSnackbar("Payment Processed Successfully!", {
-        variant: "success",
-      });
-      setShowInvoice(true); // Show invoice for payment
-    },
-    onError: (error) => {
-      console.log(error);
-      enqueueSnackbar("Payment processing failed!", { variant: "error" });
-    },
-  });
-
-  // Add this mutation for updating existing orders with payment
-  const paymentUpdateMutation = useMutation({
-    mutationFn: (reqData) => updateOrder(reqData),
-    onSuccess: (resData) => {
-      const { data } = resData.data;
-      console.log("Order updated with payment:", data);
-
-      setOrderInfo(data);
-
-      enqueueSnackbar("Payment Processed Successfully!", {
-        variant: "success",
-      });
-      setShowInvoice(true); // Show invoice for payment
-
-      // Update table if needed
-      if (data.table) {
-        const tableData = {
-          status: "Booked",
-          orderId: data._id,
-          tableId: data.table,
-        };
-
-        setTimeout(() => {
-          tableUpdateMutation.mutate(tableData);
-        }, 1500);
-      }
-    },
-    onError: (error) => {
-      console.log(error);
-      enqueueSnackbar("Payment processing failed!", { variant: "error" });
+      enqueueSnackbar(error.response?.data?.message || "Could not update the order", { variant: "error" });
     },
   });
 
@@ -399,9 +269,15 @@ const Bill = () => {
           ₹{total.toFixed(2)}
         </h1>
       </div>
+      {bills?.deliveryFeePaise > 0 && (
+        <div className="flex items-center justify-between px-5 mt-2">
+          <p className="text-xs text-[var(--text-color)] font-medium mt-2">Delivery ({customerData.delivery?.zoneName})</p>
+          <h1 className="text-[var(--text-color)] text-md font-bold">₹{(bills.deliveryFeePaise / 100).toFixed(2)}</h1>
+        </div>
+      )}
       <div className="flex items-center justify-between px-5 mt-2">
         <p className="text-xs text-[var(--text-color)] font-medium mt-2">
-          Tax(5.25%)
+            {taxLabel}
         </p>
         <h1 className="text-[var(--text-color)] text-md font-bold">
           ₹{tax.toFixed(2)}
@@ -415,29 +291,6 @@ const Bill = () => {
           ₹{grandTotal.toFixed(2)}
         </h1>
       </div>
-      <div className="flex items-center gap-3 px-5 mt-4">
-        <button
-          onClick={() => setPaymentMethod("Cash")}
-          className={`px-4 py-3 w-full rounded-lg font-semibold transition-colors duration-200 ${
-            paymentMethod === "Cash"
-              ? "bg-teal-600 text-white hover:bg-teal-700"
-              : "bg-[var(--card-bg)] text-[var(--text-color)] border border-[var(--border-color)] hover:bg-[var(--card-bg)]/90"
-          }`}
-        >
-          Cash
-        </button>
-        <button
-          onClick={() => setPaymentMethod("Online")}
-          className={`px-4 py-3 w-full rounded-lg font-semibold transition-colors duration-200 ${
-            paymentMethod === "Online"
-              ? "bg-indigo-600 text-white hover:bg-indigo-700"
-              : "bg-[var(--card-bg)] text-[var(--text-color)] border border-[var(--border-color)] hover:bg-[var(--card-bg)]/90"
-          }`}
-        >
-          Online
-        </button>
-      </div>
-
       <div className="flex items-center gap-3 px-5 mt-4 mb-4">
         <button
           onClick={handleBookTable}
@@ -445,14 +298,17 @@ const Bill = () => {
         >
         🧾 {isExistingOrder ? "Update Order" : "KOT & Print"}
         </button>
-        <button
-          onClick={handlePlaceOrder}
+        {can(user, "payments.collect") && <button
+          onClick={handlePay}
           className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-3 w-full gap-2 rounded-lg font-semibold transition-colors duration-200"
         >
           
           ₹ Pay Now
-        </button>
+        </button>}
       </div>
+      {checkoutId && (
+        <CheckoutModal orderId={checkoutId} onClose={() => setCheckoutId(null)} onPaid={handlePaid} />
+      )}
       {showInvoice && (
         <Invoice orderInfo={orderInfo} setShowInvoice={setShowInvoice} />
       )}

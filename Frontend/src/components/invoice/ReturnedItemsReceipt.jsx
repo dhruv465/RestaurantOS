@@ -17,7 +17,7 @@ const ReturnedItemsReceipt = ({ orderInfo, setShowReceipt }) => {
   // Get table information for display at the top
   const tableInfo = orderInfo.customerDetails?.table?.tableNo 
     ? `Table ${orderInfo.customerDetails.table.tableNo}` 
-    : orderInfo.table ? `Table ${orderInfo.table}` : "Takeaway";
+    : orderInfo.table ? `Table ${orderInfo.table}` : orderInfo.orderType || "Takeaway";
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center p-4">
@@ -62,7 +62,7 @@ const ReturnedItemsReceipt = ({ orderInfo, setShowReceipt }) => {
             <div className="flex items-center gap-2 justify-center">
               <Receipt className="h-3 w-3 text-primary" />
               <span className="font-medium">
-                #{Math.floor(new Date().getTime())}
+                {orderInfo.orderNo ? `#${orderInfo.orderNo}` : "New ticket"}
               </span>
             </div>
             <div className="flex items-center gap-2 justify-center mt-1">

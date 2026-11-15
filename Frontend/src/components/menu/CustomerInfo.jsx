@@ -14,14 +14,16 @@ const CustomerInfo = () => {
           {customerData.customerName || "Customer Name"}
         </h1>
         <p className="text-xs text-[var(--text-color)] font-medium mt-1  text-ellipsis">
-          #{customerData.orderId || "N/A"} / Dine in
+          #{customerData.orderId || "N/A"} / {customerData.orderType}
         </p>
-        <p className="flex items-center mt-2 bg-[var(--main-bg)] px-3 py-1.5 rounded-md">
-          <MapPin className="h-4 w-4 mr-2 text-[var(--text-color)]" />
-          <span className="font-medium text-[var(--text-color)]">
-            Table: {customerData.table?.tableNo || "N/A"}
-          </span>
-        </p>
+        {customerData.orderType === "Dine-in" && (
+          <p className="flex items-center mt-2 bg-[var(--main-bg)] px-3 py-1.5 rounded-md">
+            <MapPin className="h-4 w-4 mr-2 text-[var(--text-color)]" />
+            <span className="font-medium text-[var(--text-color)]">
+              Table: {customerData.table?.tableNo || "N/A"}
+            </span>
+          </p>
+        )}
         <p className="text-xs text-[var(--text-color)] font-medium mt-2">
           {" "}
           {formatDate(dateTime)}

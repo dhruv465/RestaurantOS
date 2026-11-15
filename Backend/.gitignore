@@ -1,0 +1,6 @@
+
+# Uploaded menu photos
+uploads/*
+!uploads/items/
+uploads/items/*
+!uploads/items/.gitkeep

@@ -95,7 +95,7 @@ const CartInfo = ({ orderData, tableId }) => {
   const handleNoteClick = (itemId) => {
     setEditingItemId(itemId);
     // Get instructions from our local state which mirrors localStorage
-    const currentInstructions = displayedInstructions[itemId] || "";
+    const currentInstructions = cartData.find((i) => i.id === itemId)?.instructions || displayedInstructions[itemId] || "";
     setInstructionText(currentInstructions);
   };
 
@@ -103,7 +103,8 @@ const CartInfo = ({ orderData, tableId }) => {
     if (editingItemId !== null) {
       const trimmedInstructions = instructionText.trim();
 
-      // Save to localStorage for this specific table
+      // The cart line carries the note to the server and kitchen; localStorage only remembers it for this screen.
+      dispatch(updateItemInstructions({ id: editingItemId, instructions: trimmedInstructions }));
       saveTableItemInstructions(
         currentTableId,
         editingItemId,
@@ -159,6 +160,9 @@ const CartInfo = ({ orderData, tableId }) => {
                   x{item.quantity}
                 </p>
               </div>
+              {item.modifiers?.length > 0 && (
+                <p className="text-xs text-[#ababab] mt-1">{item.modifiers.map((m) => m.name).join(", ")}</p>
+              )}
               <div className="flex items-center justify-between mt-3">
                 <div className="flex items-center gap-3">
                   <MdDeleteForever
@@ -182,10 +186,10 @@ const CartInfo = ({ orderData, tableId }) => {
 
 
               {/* Display instructions if they exist in our local state */}
-              {displayedInstructions[item.id] && (
+              {(item.instructions || displayedInstructions[item.id]) && (
                 <div className="mt-2 text-sm text-[var(--text-color)] opacity-80 bg-[var(--secondary-bg)] p-2 rounded">
                   <span className="font-medium">Instructions:</span>{" "}
-                  {displayedInstructions[item.id]}
+                  {item.instructions || displayedInstructions[item.id]}
                 </div>
               )}
 

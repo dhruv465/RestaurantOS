@@ -54,8 +54,8 @@ const LoginForm = ({ onToggleForm }) => {
     onSuccess: (res) => {
       const { data } = res;
       console.log(data);
-      const { _id, name, email, phone, role } = data.data;
-      dispatch(setUser({ _id, name, email, phone, role }));
+      const { _id, name, email, phone, role, permissions } = data.data;
+      dispatch(setUser({ _id, name, email, phone, role, permissions }));
       navigate("/");
     },
     onError: (error) => {
@@ -145,14 +145,14 @@ const LoginForm = ({ onToggleForm }) => {
             </button>
           </form>
 
-          <div className="mt-6 text-center">
+          {onToggleForm && <div className="mt-6 text-center">
             <button
               onClick={onToggleForm}
               className="text-sm text-[#ababab] hover:text-[var(--text-color)] transition-colors"
             >
-              Don't have an account? Sign up
+              First time here? Create the owner account
             </button>
-          </div>
+          </div>}
         </div>
       </div>
     </div>

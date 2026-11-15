@@ -51,6 +51,7 @@ const Menu = () => {
 
           const customerPayload = {
             orderId: tableData.currentOrder.data._id,
+            orderType: "Dine-in",
             customerName: customerDetails.name,
             customerPhone: customerDetails.phone,
             guests: customerDetails.guests || 1,
@@ -78,7 +79,10 @@ const Menu = () => {
               dispatch(
                 addItems({
                   id: item.id || Date.now() + Math.random(),
+                  itemId: item.itemId,
                   name: item.name,
+                  modifiers: item.modifiers || [],
+                  instructions: item.instructions,
                   pricePerQuantity:
                     item.pricePerQuantity || item.price / item.quantity,
                   quantity: item.quantity,
@@ -104,6 +108,7 @@ const Menu = () => {
         // Update just the table info in customer data
         dispatch(
           setCustomer({
+            orderType: "Dine-in",
             table: {
               tableId: tableData.tableId,
               tableNo: tableData.tableNo,

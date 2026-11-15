@@ -7,12 +7,14 @@ const {
     updateCategory,
     deleteCategory
 } = require('../controllers/categoryController');
-const { isVerifiedUser } = require('../middlewares/tokenVerification');
+const { isVerifiedUser, requirePermission } = require('../middlewares/tokenVerification');
 
-router.route('/').post(isVerifiedUser, createCategory);
+const manage = [isVerifiedUser, requirePermission('menu.manage')];
+
+router.route('/').post(manage, createCategory);
 router.route('/').get(getCategories);
 router.route('/:id').get(getCategoryById);
-router.route('/:id').put(isVerifiedUser, updateCategory);
-router.route('/:id').delete(isVerifiedUser, deleteCategory);
+router.route('/:id').put(manage, updateCategory);
+router.route('/:id').delete(manage, deleteCategory);
 
 module.exports = router;

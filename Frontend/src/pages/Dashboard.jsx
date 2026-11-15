@@ -8,7 +8,8 @@ import Modal from "../components/dashboard/Modal";
 import RecentOrders from "../components/dashboard/RecentOrders";
 import AddItemModal from "../components/ui/AddItemModal";
 import CategoryModal from "../components/ui/CategoryModal";
-import { getItems } from "../https";
+import { getItems, updateItem } from "../https";
+import { enqueueSnackbar } from "notistack";
 import {
   fetchCategories,
   selectCategories,
@@ -20,7 +21,7 @@ const buttons = [
   { label: "Add Dishes", icon: <BiSolidDish />, action: "dishes" },
 ];
 
-const tabs = ["Orders", "Payment", "Manage Menu"];
+const tabs = ["Metrics", "Orders", "Manage Menu"];
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -50,7 +51,7 @@ const Dashboard = () => {
   const [deletingItem, setDeletingItem] = useState(null);
   const [deletingCategory, setDeletingCategory] = useState(null);
 
-  const [activeTab, setActiveTab] = useState("Orders");
+  const [activeTab, setActiveTab] = useState("Metrics");
 
   // Fetch categories and items
   const { data: itemsData, refetch: refetchItems } = useQuery({
@@ -245,6 +246,17 @@ const Dashboard = () => {
                           <p className="font-medium mt-2 text-[var(--text-color)]">
                             ₹{item.price.toFixed(2)}
                           </p>
+                          <button
+                            onClick={() =>
+                              updateItem(item._id, { available: item.available === false })
+                                .then(() => refetchItems())
+                                .catch((e) => enqueueSnackbar(e.response?.data?.message || "Could not update", { variant: "error" }))
+                            }
+                            aria-pressed={item.available === false}
+                            className={`mt-2 px-3 py-1 rounded-full text-xs text-white ${item.available === false ? "bg-red-600" : "bg-green-600"}`}
+                          >
+                            {item.available === false ? "Sold out — tap to restock" : "Available"}
+                          </button>
                         </div>
                         <div className="flex space-x-2">
                           <button

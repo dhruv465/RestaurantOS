@@ -1,10 +1,14 @@
 import React, { useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getSettings } from "../../https";
+import { printHtml, receiptHtml } from "../../utils/print";
 import { motion } from "framer-motion";
 import { FaCheck } from "react-icons/fa6";
 import { Receipt, Share2, Shield, CheckCircle2, Lock } from "lucide-react";
 
 const Invoice = ({ orderInfo, setShowInvoice }) => {
   const invoiceRef = useRef(null);
+  const { data: settingsRes } = useQuery({ queryKey: ["settings"], queryFn: getSettings });
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center p-4">
@@ -43,7 +47,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
             <div className="flex items-center gap-2 justify-center">
               <Receipt className="h-3 w-3 text-primary" />
               <span className="font-medium">
-                #{Math.floor(new Date(orderInfo.orderDate).getTime())}
+                #{orderInfo.orderNo || Math.floor(new Date(orderInfo.orderDate).getTime())}
               </span>
             </div>
           </div>
@@ -58,9 +62,10 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
                     <span className="flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3 text-green-500" />{" "}
                       {item.quantity}x {item.name}
+                      {item.modifiers?.length > 0 && ` (${item.modifiers.map((m) => m.name).join(", ")})`}
                     </span>
                     <span className="font-medium">
-                      ₹{(item.quantity * item.price).toFixed(2)}
+                      ₹{Number(item.price).toFixed(2)}
                     </span>
                   </div>
                 ))}
@@ -70,12 +75,24 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
             <div className="bg-gray-100 p-3 rounded-lg space-y-1">
               <div className="flex justify-between text-xs">
                 <span>Subtotal</span>
-                <span>₹{orderInfo.bills.total.toFixed(2)}</span>
+                <span>₹{((orderInfo.bills.subtotalPaise ?? orderInfo.bills.total * 100) / 100).toFixed(2)}</span>
               </div>
+              {orderInfo.bills.discountPaise > 0 && (
+                <div className="flex justify-between text-xs">
+                  <span>Discount{orderInfo.adjustments?.discountReason ? ` (${orderInfo.adjustments.discountReason})` : ""}</span>
+                  <span>− ₹{(orderInfo.bills.discountPaise / 100).toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-xs">
                 <span>Tax</span>
                 <span>₹{orderInfo.bills.tax.toFixed(2)}</span>
               </div>
+              {orderInfo.bills.tipPaise > 0 && (
+                <div className="flex justify-between text-xs">
+                  <span>Tip</span>
+                  <span>₹{(orderInfo.bills.tipPaise / 100).toFixed(2)}</span>
+                </div>
+              )}
               <hr className="my-1" />
               <div className="flex justify-between font-semibold">
                 <span>Total</span>
@@ -90,7 +107,13 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
                   <span className="font-semibold">Method:</span>{" "}
                   {orderInfo.paymentMethod}
                 </p>
-                {orderInfo.paymentMethod !== "Cash" && (
+                {(orderInfo.payments || []).map((p, i) => (
+                  <p key={i} className="text-xs mt-1">
+                    {p.method}: ₹{(p.amountPaise / 100).toFixed(2)}
+                    {p.changePaise > 0 && ` (given ₹${(p.tenderedPaise / 100).toFixed(2)}, change ₹${(p.changePaise / 100).toFixed(2)})`}
+                  </p>
+                ))}
+                {orderInfo.paymentData?.razorpay_payment_id && (
                   <>
                     <p className="text-xs mt-1">
                       <span className="font-semibold">Razorpay Order ID:</span>{" "}
@@ -113,14 +136,14 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
               onClick={() => setShowInvoice(false)}
               className="w-full bg-black text-white py-2 rounded-md flex items-center justify-center text-sm"
             >
-              <Lock className="mr-2 h-3 w-3" /> Pay Now
+              <Lock className="mr-2 h-3 w-3" /> Done
             </button>
             <div className="flex gap-2 justify-center">
               <button
                 className="border border-gray-300 py-2 px-4 rounded-md text-sm font-bold"
                 variant="outline"
                 size="sm"
-                onClick={() => window.print()}
+                onClick={() => printHtml(`Bill ${orderInfo.orderNo || ""}`, receiptHtml(orderInfo, settingsRes?.data?.data))}
               >
                 Print
               </button>

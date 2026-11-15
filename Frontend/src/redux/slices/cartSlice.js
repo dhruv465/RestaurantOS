@@ -10,9 +10,12 @@ const cartSlice = createSlice({
             const newItem = action.payload;
             
             // Check if this item already exists in the cart
+            // Same dish with the same add-ons merges into one line; different add-ons stay separate.
+            const sameModifiers = (a = [], b = []) =>
+                a.map((m) => m.optionId).sort().join() === b.map((m) => m.optionId).sort().join();
             const existingItemIndex = state.findIndex(
-                item => item.name === newItem.name && 
-                       item.pricePerQuantity === newItem.pricePerQuantity
+                item => (item.itemId ? item.itemId === newItem.itemId : item.name === newItem.name) &&
+                       sameModifiers(item.modifiers, newItem.modifiers)
             );
             
             if (existingItemIndex >= 0) {

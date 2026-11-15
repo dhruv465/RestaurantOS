@@ -43,7 +43,6 @@ const RegisterForm = ({ onToggleForm }) => {
     phone: "",
     email: "",
     password: "",
-    role: "",
   });
   const [randomQuote] = useState(
     () => hotelQuotes[Math.floor(Math.random() * hotelQuotes.length)]
@@ -51,10 +50,6 @@ const RegisterForm = ({ onToggleForm }) => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const hadleRoleSelection = (selectedRole) => {
-    setFormData({ ...formData, role: selectedRole });
   };
 
   const handleSubmit = (e) => {
@@ -72,10 +67,8 @@ const RegisterForm = ({ onToggleForm }) => {
         phone: "",
         email: "",
         password: "",
-        role: "",
       });
-
-      setTimeout(() => {}, 1500);
+      onToggleForm(); // back to sign in
     },
     onError: (error) => {
       const { response } = error;
@@ -114,7 +107,7 @@ const RegisterForm = ({ onToggleForm }) => {
             >
               RestOS
             </h1>
-            <p className="text-[#ababab] text-sm mb-4">Create your account</p>
+            <p className="text-[#ababab] text-sm mb-4">Create the owner account. You can add staff from Settings afterwards.</p>
             <p className="text-sm italic text-[var(--text-color)] opacity-75 px-4">
               "{randomQuote}"
             </p>
@@ -123,7 +116,7 @@ const RegisterForm = ({ onToggleForm }) => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <Input
               icon={FaUser}
-              label="Employee Name"
+              label="Owner Name"
               type="text"
               name="name"
               placeholder="Enter your full name"
@@ -157,30 +150,6 @@ const RegisterForm = ({ onToggleForm }) => {
               value={formData.password}
               onChange={handleChange}
             />
-
-            <div className="space-y-2">
-              <label className="block text-[#ababab] text-sm font-medium">
-                Role
-              </label>
-              <div className="flex item-center gap-3 mt-4">
-              {["Waiter", "Cashier", "Admin"].map((role) => {
-                  const isSelected = formData.role === role;
-                  return (
-                    <button
-                      key={role}
-                      type="button"
-                      onClick={() => hadleRoleSelection(role)}
-                      className={`px-4 py-3 w-full rounded-lg text-[var(--text-color)] transition-all duration-200 
-                        ${isSelected 
-                          ? 'bg-[#F6b100] text-white font-medium' 
-                          : 'bg-[var(--main-bg)] hover:bg-[var(--input-bg)]'}`}
-                    >
-                      {role}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
 
             <button
               type="submit"

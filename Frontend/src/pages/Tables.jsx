@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import TableCard from "../components/tables/TableCard";
+import FloorPlan from "../components/tables/FloorPlan";
+import { can } from "../utils";
 import BackButton from "../components/ui/BackButton";
 import BottomNav from "../components/ui/BottomNav";
 import { deleteTable, getTables } from "../https";
@@ -14,6 +16,23 @@ const Tables = () => {
   }, []);
 
   const [status, setStatus] = useState("all");
+  const [area, setArea] = useState("");
+  const [view, setView] = useState(() => {
+    try {
+      return localStorage.getItem("tables.view") || "grid";
+    } catch {
+      return "grid";
+    }
+  });
+  const pickView = (v) => {
+    setView(v);
+    try {
+      localStorage.setItem("tables.view", v);
+    } catch {
+      // per-screen convenience only
+    }
+  };
+  const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const location = useLocation();
   const customerData = useSelector((state) => state.customer);
@@ -49,8 +68,10 @@ const Tables = () => {
   };
 
   // Filter tables based on status and navigation source
+  const areas = [...new Set((resData?.data.data || []).map((t) => t.area || "Main"))];
   const filteredTables =
     resData?.data.data.filter((table) => {
+      if (area && (table.area || "Main") !== area) return false;
       // When coming from create order, only show available tables
       if (isFromCreateOrder) {
         return table.status === "Available";
@@ -117,6 +138,42 @@ const Tables = () => {
         )}
       </div>
 
+      <div className="flex flex-wrap items-center gap-2 px-4 sm:px-6 md:px-8">
+        <div role="radiogroup" aria-label="Table view" className="flex p-1 bg-[var(--card-bg)] rounded-lg">
+          {[["grid", "Cards"], ["floor", "Floor plan"]].map(([v, label]) => (
+            <button
+              key={v}
+              role="radio"
+              aria-checked={view === v}
+              onClick={() => pickView(v)}
+              className={`px-3 py-1 rounded-md text-sm ${view === v ? "bg-[var(--nav-bg)] text-[var(--text-color)] font-semibold" : "text-[#ababab]"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {areas.length > 1 &&
+          ["", ...areas].map((a) => (
+            <button
+              key={a || "all"}
+              onClick={() => setArea(a)}
+              aria-pressed={area === a}
+              className={`px-3 py-1 rounded-full text-sm ${area === a ? "bg-[#F6b100] text-white" : "bg-[var(--card-bg)] text-[var(--text-color)]"}`}
+            >
+              {a || "All areas"}
+            </button>
+          ))}
+      </div>
+
+      {view === "floor" ? (
+        <div className="pt-4">
+          <FloorPlan
+            tables={filteredTables}
+            canEdit={can(user, "tables.manage") && !isFromCreateOrder}
+            canChangeStatus={can(user, "orders.manage") && !isFromCreateOrder}
+          />
+        </div>
+      ) : (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 sm:p-6 md:p-8">
         {tablesWithShape.length === 0 ? (
           <div className="col-span-full h-[calc(100vh-200px)] flex items-center justify-center text-gray-500">
@@ -207,6 +264,7 @@ const Tables = () => {
           })
         )}
       </div>
+      )}
 
       <BottomNav />
     </section>

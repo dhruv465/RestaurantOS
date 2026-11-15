@@ -5,13 +5,22 @@ import {
   CircleUserRound,
   Ghost,
   LayoutDashboard,
+  ChefHat,
+  CalendarDays,
+  Contact,
+  BarChart3,
+  Boxes,
   LogOut,
+  MonitorSmartphone,
   Moon,
   Search,
   Sun,
   Trash2,
+  Users,
+  Wallet,
+  Bike,
+  UserRoundCog,
   X,
-  
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,10 +28,13 @@ import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import { getOrders, logout } from "../../https";
 import { removeUser } from "../../redux/slices/userSlice";
+import { can } from "../../utils";
+import SwitchUserModal from "./SwitchUserModal";
 
 const Header = () => {
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showSwitch, setShowSwitch] = useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
@@ -47,33 +59,34 @@ const Header = () => {
   // Fetch orders using React Query
   const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ["orders"],
-    queryFn: getOrders,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    queryFn: getOrders, // kept fresh by useRealtime (server push), no polling
+    enabled: can(userData, "orders.view"), // riders have no order list
   });
 
   // Generate notifications from orders
   useEffect(() => {
     // Make sure ordersData exists and data is an array before proceeding
-    if (ordersData?.data && Array.isArray(ordersData.data)) {
-      const currentOrderCount = ordersData.data.length;
+    const orders = ordersData?.data?.data; // axios response -> { data: [...] }
+    if (Array.isArray(orders)) {
+      const currentOrderCount = orders.length;
 
       // Map orders to notification format
-      const orderNotifications = ordersData.data.map((order) => ({
+      const orderNotifications = orders.map((order) => ({
         id: order._id,
         type: "order",
-        user: order.customerName || "Customer",
+        user: order.customerDetails?.name || "Customer",
         avatar: `https://i.pravatar.cc/150?img=${Math.floor(
           Math.random() * 70
         )}`,
         action: "placed a new order",
-        project: `Table ${order.tableNumber}`,
+        project: order.table?.tableNo ? `Table ${order.table.tableNo}` : `Order ${order.orderNo || ""}`,
         orderStatus: order.orderStatus,
         time: new Date(order.createdAt).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         }),
         date: new Date(order.createdAt).toLocaleDateString(),
-        amount: order.totalAmount,
+        amount: (order.bills?.totalPaise || 0) / 100,
         items: order.items,
         read: false,
       }));
@@ -89,9 +102,6 @@ const Header = () => {
       }
 
       setLastOrderCount(currentOrderCount);
-    } else if (ordersData?.data) {
-      // Log error if data exists but is not in the expected format
-      console.error("Orders data is not an array:", ordersData.data);
     }
   }, [ordersData, lastOrderCount]);
 
@@ -334,11 +344,11 @@ const Header = () => {
         </div>
       )}
 
-      {/* Mobile Menu */}
+      {/* Menu: full screen on phones, a drop-down panel under the profile button on desktop */}
       {isMenuOpen && (
         <div
           ref={menuRef}
-          className="md:hidden fixed inset-0 bg-[var(--header-bg)] z-40"
+          className="fixed inset-0 bg-[var(--header-bg)] z-40 md:inset-auto md:top-16 md:right-4 md:w-80 md:max-h-[80vh] md:overflow-y-auto md:rounded-lg md:shadow-lg md:border md:border-[var(--border-color)]"
           tabIndex={0}
         >
           <div className="p-4 space-y-4">
@@ -391,7 +401,106 @@ const Header = () => {
               </span>
             </button>
 
-            {userData.role === "Admin" && (
+            {can(userData, "orders.manage") && (
+              <button
+                onClick={() => handleNavigation("/reservations")}
+                className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
+                aria-label="Reservations"
+              >
+                <CalendarDays size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
+                <span className="text-[var(--text-color)]">Reservations</span>
+              </button>
+            )}
+            {can(userData, "payments.collect") && (
+              <button
+                onClick={() => window.open("/display", "restos-display", "popup,width=1024,height=768")}
+                className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
+                aria-label="Open customer display"
+              >
+                <MonitorSmartphone size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
+                <span className="text-[var(--text-color)]">Customer display</span>
+              </button>
+            )}
+            {(can(userData, "inventory.manage") || can(userData, "inventory.waste")) && (
+              <button
+                onClick={() => handleNavigation("/inventory")}
+                className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
+                aria-label="Inventory"
+              >
+                <Boxes size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
+                <span className="text-[var(--text-color)]">Inventory</span>
+              </button>
+            )}
+            <button
+              onClick={() => handleNavigation("/team")}
+              className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
+              aria-label="Team"
+            >
+              <Users size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
+              <span className="text-[var(--text-color)]">Team</span>
+            </button>
+            <button
+              onClick={() => {
+                setIsMenuOpen(false);
+                setShowSwitch(true);
+              }}
+              className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
+              aria-label="Switch user"
+            >
+              <UserRoundCog size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
+              <span className="text-[var(--text-color)]">Switch user</span>
+            </button>
+            {(can(userData, "delivery.manage") || can(userData, "delivery.rider")) && (
+              <button
+                onClick={() => handleNavigation(can(userData, "delivery.manage") ? "/deliveries" : "/my-deliveries")}
+                className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
+                aria-label="Deliveries"
+              >
+                <Bike size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
+                <span className="text-[var(--text-color)]">{can(userData, "delivery.manage") ? "Deliveries" : "My deliveries"}</span>
+              </button>
+            )}
+            {can(userData, "accounting.manage") && (
+              <button
+                onClick={() => handleNavigation("/accounting")}
+                className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
+                aria-label="Accounting"
+              >
+                <Wallet size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
+                <span className="text-[var(--text-color)]">Accounting</span>
+              </button>
+            )}
+            {can(userData, "dashboard.view") && (
+              <button
+                onClick={() => handleNavigation("/reports")}
+                className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
+                aria-label="Reports"
+              >
+                <BarChart3 size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
+                <span className="text-[var(--text-color)]">Reports</span>
+              </button>
+            )}
+            {can(userData, "orders.view") && (
+              <button
+                onClick={() => handleNavigation("/customers")}
+                className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
+                aria-label="Customers"
+              >
+                <Contact size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
+                <span className="text-[var(--text-color)]">Customers</span>
+              </button>
+            )}
+            {can(userData, "kitchen.manage") && (
+              <button
+                onClick={() => handleNavigation("/kitchen")}
+                className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
+                aria-label="Kitchen"
+              >
+                <ChefHat size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
+                <span className="text-[var(--text-color)]">Kitchen</span>
+              </button>
+            )}
+            {can(userData, "dashboard.view") && (
               <button
                 onClick={() => handleNavigation("/dashboard")}
                 className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
@@ -474,7 +583,34 @@ const Header = () => {
         </form> */}
 
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-          {userData.role === "Admin" && (
+          {can(userData, "orders.manage") && (
+            <button
+              onClick={() => navigate("/reservations")}
+              className="flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
+              aria-label="Reservations"
+            >
+              <CalendarDays size={20} className="text-xl" />
+            </button>
+          )}
+          {can(userData, "orders.view") && (
+            <button
+              onClick={() => navigate("/customers")}
+              className="flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
+              aria-label="Customers"
+            >
+              <Contact size={20} className="text-xl" />
+            </button>
+          )}
+          {can(userData, "kitchen.manage") && (
+            <button
+              onClick={() => navigate("/kitchen")}
+              className="flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
+              aria-label="Kitchen"
+            >
+              <ChefHat size={20} className="text-xl" />
+            </button>
+          )}
+          {can(userData, "dashboard.view") && (
             <button
               onClick={() => navigate("/dashboard")}
               className="flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
@@ -518,6 +654,9 @@ const Header = () => {
           <button
             className="profile flex items-center gap-2 cursor-pointer bg-[var(--card-bg)] p-2 rounded-lg"
             aria-label="User profile"
+            aria-expanded={isMenuOpen}
+            onClick={toggleMenu}
+            onMouseDown={(e) => e.stopPropagation()} // keep the outside-click handler from closing then reopening
           >
             <CircleUserRound size={20}
               className="text-2xl text-[var(--text-color)]"
@@ -691,7 +830,7 @@ const Header = () => {
                                 {item.name} x {item.quantity}
                               </span>
                               <span className="text-[var(--text-color)]/70">
-                                ₹{(item.price * item.quantity).toFixed(2)}
+                                ₹{Number(item.price || 0).toFixed(2)}
                               </span>
                             </div>
                           ))}
@@ -713,6 +852,7 @@ const Header = () => {
           </div>
         </div>
       )}
+      {showSwitch && <SwitchUserModal onClose={() => setShowSwitch(false)} />}
     </header>
   );
 };

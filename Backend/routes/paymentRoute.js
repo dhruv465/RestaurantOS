@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { isVerifiedUser } = require('../middlewares/tokenVerification');
-const { createOrder, verifyPayment, webHookVerfication } = require('../controllers/paymentController');
+const { isVerifiedUser, requirePermission } = require('../middlewares/tokenVerification');
+const { createOrder, verifyPayment, webHookVerfication, refundOrder } = require('../controllers/paymentController');
 
+const collect = [isVerifiedUser, requirePermission('payments.collect')];
 
-router.route("/create-order").post(isVerifiedUser, createOrder);
-router.route("/verify-payment").post(isVerifiedUser, verifyPayment);
+router.route("/create-order").post(collect, createOrder);
+router.route("/verify-payment").post(collect, verifyPayment);
 router.route("/webhook-verification").post(webHookVerfication);
+router.post("/refund", isVerifiedUser, requirePermission('refunds.process'), refundOrder);
 
 
 module.exports = router;

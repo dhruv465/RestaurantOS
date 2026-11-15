@@ -67,7 +67,7 @@ const RecentOrders = () => {
   // RecentOrders.jsx
   const filteredOrders = resData?.data.data.filter(
     (order) =>
-      order.orderStatus !== "Completed" && order.table?.status !== "Available" // Optional chaining here
+      !["Completed", "Cancelled"].includes(order.orderStatus) && order.table?.status !== "Available"
   );
 
   return (
@@ -98,7 +98,7 @@ const RecentOrders = () => {
                   className="border-b border-gray-600 text-[var(--text-color)] cursor-pointer"
                 >
                   <td className="p-4">
-                    #{Math.floor(new Date(order.orderDate).getTime())}
+                    #{order.orderNo}
                   </td>
                   <td className="p-4">{order.customerDetails.name}</td>
                   <td className="p-4">
@@ -125,6 +125,7 @@ const RecentOrders = () => {
                     </select>
                   </td>
                   <td className="p-4">
+                    {order.table ? (
                     <select
                       className={`bg-[#1a1a1a] text-[#f5f5f5] border border-gray-500 p-2 rounded-lg focus:outline-none cursor-pointer ${
                         order.table.status === "Available"
@@ -147,11 +148,14 @@ const RecentOrders = () => {
                         Booked
                       </option>
                     </select>
+                    ) : (
+                      order.type
+                    )}
                   </td>
                   <td className="p-4">{formatDateAndTime(order.createdAt)}</td>
                   <td className="p-4">{order.items.length} Items</td>
-                  <td className="p-4">Table - {order.table.tableNo}</td>
-                  <td className="p-4">₹{order.bills.grandTotal}</td>
+                  <td className="p-4">{order.table ? `Table - ${order.table.tableNo}` : "—"}</td>
+                  <td className="p-4">₹{((order.bills?.totalPaise || 0) / 100).toFixed(2)}</td>
                   <td className="p-4 text-center">
                     <button className="text-blue-400 hover:text-blue-500 transition text-sm md:text-md">
                       <GrUpdate size={20} />

@@ -4,29 +4,18 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { updateTable, removeCustomer } from "../../redux/slices/customerSlice";
 import { removeAllItems } from "../../redux/slices/cartSlice";
-import { Users, Utensils, Clock, User } from "lucide-react";
+import { Users, Utensils, Clock, User, QrCode } from "lucide-react";
+import { can } from "../../utils";
+import GuestAccessModal from "./GuestAccessModal";
 import { getOrderById } from "../../https";
 import { enqueueSnackbar } from "notistack";
 
-const TableCard = ({
-  id,
-  name,
-  status,
-  initials,
-  seats,
-  currentOrder,
-  isAdmin,
-  onDelete,
-  shape = "square", // Default shape
-}) => {
-  const userData = useSelector((state) => state.user);
+// Open a table on the menu screen: loads its current order (if any) into the cart flow.
+export const useOpenTable = () => {
   const customerData = useSelector((state) => state.customer);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-
-  const handleClick = async (name) => {
+  return async ({ id, tableNo: name, currentOrder }) => {
     // Clear previous cart and customer data when selecting a new table
     dispatch(removeCustomer());
     dispatch(removeAllItems());
@@ -69,6 +58,26 @@ const TableCard = ({
     dispatch(updateTable({ table }));
     navigate("/menu", { state: { table } });
   };
+};
+
+const TableCard = ({
+  id,
+  name,
+  status,
+  initials,
+  seats,
+  currentOrder,
+  isAdmin,
+  onDelete,
+  shape = "square", // Default shape
+}) => {
+  const userData = useSelector((state) => state.user);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [showGuestAccess, setShowGuestAccess] = useState(false);
+
+  const openTable = useOpenTable();
+  const handleClick = () => openTable({ id, tableNo: name, currentOrder });
 
   const handleConfirmDelete = async (e) => {
     e.stopPropagation();
@@ -305,6 +314,20 @@ const TableCard = ({
             )}
           </div>
 
+          {can(userData, "orders.manage") && (
+            <button
+              aria-label={`Guest QR ordering for table ${name}`}
+              title="Guest QR ordering"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowGuestAccess(true);
+              }}
+              className="absolute bottom-2 right-2 z-20 bg-white p-1.5 rounded-full shadow-sm border hover:bg-gray-50"
+            >
+              <QrCode className="h-4 w-4 text-gray-700" />
+            </button>
+          )}
+
           {/* Status indicator with customer initials if available */}
           <div className="absolute bottom-2 left-0 right-0 flex justify-center">
             <span
@@ -365,6 +388,16 @@ const TableCard = ({
             </div>
           )}
         </>
+      )}
+      {showGuestAccess && (
+        // Stop clicks inside the dialog from also opening the table's order.
+        <div onClick={(e) => e.stopPropagation()}>
+          <GuestAccessModal
+            table={{ id, tableNo: name }}
+            canManageTables={can(userData, "tables.manage")}
+            onClose={() => setShowGuestAccess(false)}
+          />
+        </div>
       )}
     </div>
   );

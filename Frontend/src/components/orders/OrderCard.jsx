@@ -2,12 +2,12 @@ import React from "react";
 import { FaCheckDouble, FaCheckCircle } from "react-icons/fa"; // Import FaCheckCircle
 import { formatDateAndTime, getAvatarName } from "../../utils/index";
 
-const OrderCard = ({ key, order }) => {
+const OrderCard = ({ order, onTakePayment, actions = [], onAction }) => {
   // console.log(order);
 
   const cardClass =
-    order.orderStatus === "Completed"
-      ? "opacity-80 blur-sm" // Add opacity and blur for completed orders
+    order.orderStatus === "Completed" || order.orderStatus === "Cancelled"
+      ? "opacity-70" // closed orders stay readable, just dimmed
       : "";
 
   return (
@@ -24,12 +24,27 @@ const OrderCard = ({ key, order }) => {
               {order.customerDetails.name}
             </h1>
             <p className="text-[var(--text-color)] text-xs md:text-sm opacity-80 mb-2">
-              #{Math.floor(new Date(order.orderDate).getTime())}/ Dine in
+              #{order.orderNo || Math.floor(new Date(order.orderDate).getTime())} / {order.type || "Dine-in"}
             </p>
-            <div className="text-sm text-[var(--text-color)] ">
-              <span className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold">
-                Table No → {order.table?.tableNo}
+            <div className="text-sm text-[var(--text-color)] flex flex-wrap gap-1">
+              {order.table && (
+                <span className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold">
+                  Table No → {order.table?.tableNo}
+                </span>
+              )}
+              <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">
+                {order.paymentStatus || (order.paymentMethod ? "Paid" : "Unpaid")}
               </span>
+              {order.scheduledFor && (
+                <span className="inline-flex items-center rounded-full border border-[#F6b100] px-2.5 py-0.5 text-xs font-semibold">
+                  {order.kitchenHeld ? "Scheduled" : "For"} {formatDateAndTime(order.scheduledFor)}
+                </span>
+              )}
+              {order.delivery?.status && (
+                <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">
+                  Delivery: {order.delivery.status}{order.delivery.riderName ? ` · ${order.delivery.riderName}` : ""}
+                </span>
+              )}
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
@@ -67,6 +82,29 @@ const OrderCard = ({ key, order }) => {
           ₹{order.bills.grandTotal.toFixed(2)}
         </p>
       </div>
+      {order.refundedPaise > 0 && (
+        <p className="text-xs text-red-500 mt-2">Refunded ₹{(order.refundedPaise / 100).toFixed(2)}</p>
+      )}
+      {order.orderStatus === "Cancelled" && (
+        <p className="text-xs text-red-500 mt-2">Cancelled: {order.cancel?.reason}</p>
+      )}
+      {actions.length > 0 && (
+        <div className="flex gap-3 mt-2 text-sm">
+          {actions.map((a) => (
+            <button key={a.mode} onClick={() => onAction(a.mode)} className={`underline ${a.mode === "cancel" ? "text-red-500" : "text-[var(--text-color)]"}`}>
+              {a.label}
+            </button>
+          ))}
+        </div>
+      )}
+      {onTakePayment && order.paymentStatus !== "Paid" && !["Completed", "Cancelled"].includes(order.orderStatus) && (
+        <button
+          onClick={onTakePayment}
+          className="w-full mt-2 py-2 rounded-lg bg-[#F6b100] text-white font-semibold hover:bg-[#F6b100]/90"
+        >
+          Take payment
+        </button>
+      )}
     </div>
   );
 };

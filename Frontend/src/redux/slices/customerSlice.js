@@ -6,6 +6,9 @@ const initialState = {
   customerPhone: "",
   guests: 0,
   table: null,
+  orderType: "Dine-in",
+  delivery: null, // { zoneId, zoneName, feePaise, minOrderPaise, address, note }
+  scheduledFor: "", // ISO time, takeaway/delivery only
 }
 
 const customerSlice = createSlice({
@@ -14,18 +17,21 @@ const customerSlice = createSlice({
   reducers: {
     setCustomer: (state, action) => {
       // Destructure only the fields that are being updated
-      const { orderId, customerName, customerPhone, guests, table } = action.payload;
+      const { orderId, customerName, customerPhone, guests, table, orderType, delivery, scheduledFor } = action.payload;
       
       // Only update fields that exist in the payload
       if (orderId !== undefined) state.orderId = orderId;
       if (customerName !== undefined) state.customerName = customerName;
       if (customerPhone !== undefined) state.customerPhone = customerPhone;
       if (guests !== undefined) state.guests = guests;
+      if (orderType !== undefined) state.orderType = orderType;
+      if (delivery !== undefined) state.delivery = delivery;
+      if (scheduledFor !== undefined) state.scheduledFor = scheduledFor;
       
       // Preserve table data if it's not in the payload
       if (table !== undefined) {
         // Make sure we don't lose any existing table data if only partial data is provided
-        state.table = { ...state.table, ...table };
+        state.table = table === null ? null : { ...state.table, ...table };
       }
       
       console.log("Customer state updated in reducer:", state);
@@ -36,6 +42,9 @@ const customerSlice = createSlice({
       state.customerPhone = "";
       state.guests = 0;
       state.table = null;
+      state.orderType = "Dine-in";
+      state.delivery = null;
+      state.scheduledFor = "";
     },
     updateTable: (state, action) => {
       // Check if we're switching to a new table

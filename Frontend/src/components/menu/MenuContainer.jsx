@@ -23,9 +23,10 @@ import {
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import img from "../../assets/images/image.png";
-import { getCategories, getItems } from "../../https";
+import { getCategories, getItems, getModifierGroups } from "../../https";
+import ModifierPicker from "./ModifierPicker";
 import { addItems } from "../../redux/slices/cartSlice";
-import { getRandomColor } from "../../utils/index";
+import { assetUrl, getRandomColor } from "../../utils/index";
 
 const MenuContainer = () => {
   const [selected, setSelected] = useState(null);
@@ -38,6 +39,10 @@ const MenuContainer = () => {
   const [allItems, setAllItems] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const dispatch = useDispatch();
+  const [picking, setPicking] = useState(null); // { menu, quantity } while choosing add-ons
+  const { data: groupsData } = useQuery({ queryKey: ["modifier-groups"], queryFn: getModifierGroups });
+  const groupsFor = (menu) =>
+    (menu.modifierGroups || []).map((id) => groupsData?.data?.data?.find((g) => g._id === id)).filter(Boolean);
 
   useEffect(() => {
     document.title = "RestOS | Menu";
@@ -140,6 +145,11 @@ const MenuContainer = () => {
         price: item.price,
         image: item.image || null,
         itemCategory: item.itemCategory || "veg",
+        description: item.description,
+        available: item.available !== false,
+        spiceLevel: item.spiceLevel || 0,
+        allergens: item.allergens || [],
+        modifierGroups: item.modifierGroups || [],
         categoryId: item.category?._id,
         categoryName:
           menuCategories.find((cat) => cat.id === item.category?._id)?.name ||
@@ -158,6 +168,11 @@ const MenuContainer = () => {
             price: item.price,
             image: item.image || null,
             itemCategory: item.itemCategory || "veg",
+            description: item.description,
+            available: item.available !== false,
+            spiceLevel: item.spiceLevel || 0,
+            allergens: item.allergens || [],
+            modifierGroups: item.modifierGroups || [],
           }));
 
         return {
@@ -201,16 +216,26 @@ const MenuContainer = () => {
 
     if (quantity === 0) return; // Don't add items with zero quantity
 
-    const { name, price } = menu;
-    const newObj = {
-      id: Date.now(),
-      name,
-      pricePerQuantity: price,
-      quantity: quantity,
-      price: price * quantity,
-    };
+    if (groupsFor(menu).length) {
+      setPicking({ menu, quantity });
+      return;
+    }
+    addLine(menu, quantity, [], menu.price);
+  };
 
-    dispatch(addItems(newObj));
+  // pricePerQuantity here is only for the cart display; the server prices every line itself.
+  const addLine = (menu, quantity, modifiers, unitPrice) => {
+    dispatch(
+      addItems({
+        id: Date.now() + Math.random(),
+        itemId: menu.id,
+        name: menu.name,
+        modifiers,
+        pricePerQuantity: unitPrice,
+        quantity,
+        price: Math.round(unitPrice * quantity * 100) / 100,
+      })
+    );
 
     // Reset only this item's count, not all counts
     setItemCount((prev) => ({
@@ -270,7 +295,7 @@ const MenuContainer = () => {
       <div className="relative">
         {menu.image ? (
           <img
-            src={menu.image}
+            src={assetUrl(menu.image)}
             alt={menu.name}
             className="w-full h-32 object-cover"
           />
@@ -304,10 +329,22 @@ const MenuContainer = () => {
           </div>
         )}
 
+        {!menu.available && (
+          <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded">Sold out</div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
           <div className="p-3 text-white">
-            <h3 className="font-medium">{menu.name}</h3>
+            <h3 className="font-medium">
+              {menu.name}
+              {menu.spiceLevel > 0 && (
+                <span aria-label={`Spice level ${menu.spiceLevel} of 3`}> {"🌶".repeat(menu.spiceLevel)}</span>
+              )}
+            </h3>
             <p className="text-sm">₹{menu.price}</p>
+            {menu.description && <p className="text-xs text-white/80 line-clamp-2">{menu.description}</p>}
+            {menu.allergens.length > 0 && (
+              <p className="text-[10px] text-white/70 capitalize">Contains: {menu.allergens.join(", ")}</p>
+            )}
             {isSearching && (
               <p className="text-xs text-white/80 mt-1">{menu.categoryName}</p>
             )}
@@ -330,6 +367,8 @@ const MenuContainer = () => {
           <button
             className="h-8 w-8 rounded-full flex items-center justify-center border border-[var(--border-color)] text-[var(--text-color)]"
             onClick={() => increment(menu.id)}
+            disabled={!menu.available}
+            aria-label={`Add one ${menu.name}`}
           >
             <Plus className="h-4 w-4" />
           </button>
@@ -337,6 +376,8 @@ const MenuContainer = () => {
         <button
           className="h-8 w-8 flex items-center justify-center text-[var(--text-color)]"
           onClick={() => handleAddToCart(menu)}
+          disabled={!menu.available}
+          aria-label={`Add ${menu.name} to cart`}
         >
           <ShoppingCart className="h-4 w-4" />
         </button>
@@ -346,6 +387,18 @@ const MenuContainer = () => {
 
   return (
     <>
+      {picking && (
+        <ModifierPicker
+          item={picking.menu}
+          groups={groupsFor(picking.menu)}
+          quantity={picking.quantity}
+          onClose={() => setPicking(null)}
+          onConfirm={(modifiers, unitPrice) => {
+            addLine(picking.menu, picking.quantity, modifiers, unitPrice);
+            setPicking(null);
+          }}
+        />
+      )}
       {/* Categories Section - Always show */}
       <div className="w-full px-4 py-6 relative">
   <h2 className="text-lg font-bold mb-4 text-[var(--text-color)]">

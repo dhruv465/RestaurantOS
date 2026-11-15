@@ -2,6 +2,7 @@ const createHttpError = require('http-errors');
 const jwt = require('jsonwebtoken');
 const config = require('../config/config');
 const User = require('../models/userModel');
+const { can } = require('../config/permissions');
 
 
 const isVerifiedUser = async (req, res, next) => {
@@ -22,6 +23,10 @@ const isVerifiedUser = async (req, res, next) => {
             return next(error);
         }
 
+        if (user.active === false) {
+            return next(createHttpError(401, "Account is deactivated"));
+        }
+
         req.user = user;
         next();
 
@@ -32,6 +37,20 @@ const isVerifiedUser = async (req, res, next) => {
     }
 }
 
+// Use after isVerifiedUser.
+const requirePermission = (...permissions) => (req, res, next) => {
+    if (permissions.every((p) => can(req.user, p))) return next();
+    next(createHttpError(403, "You do not have permission to do this"));
+};
+
+// Use after isVerifiedUser: passes if the user has at least one of these.
+const requireAnyPermission = (...permissions) => (req, res, next) => {
+    if (permissions.some((p) => can(req.user, p))) return next();
+    next(createHttpError(403, "You do not have permission to do this"));
+};
+
 module.exports = {
-    isVerifiedUser
+    isVerifiedUser,
+    requirePermission,
+    requireAnyPermission
 };

@@ -18,7 +18,7 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
-      <SnackbarProvider maxSnack={3} autoHideDuration={3000} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
+      <SnackbarProvider maxSnack={5} autoHideDuration={3000} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
         <QueryClientProvider client={queryClient}>
             <App /> 
         </QueryClientProvider>

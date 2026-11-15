@@ -1,9 +1,13 @@
 const Category = require('../models/categoryModel');
 const createHttpError = require('http-errors');
+const { record } = require('../utils/audit');
+const { emit } = require('../utils/realtime');
 
 const createCategory = async (req, res, next) => {
     try {
         const newCategory = await Category.create(req.body);
+        record(req.user, 'category.create', 'category', newCategory._id, { name: newCategory.name });
+        emit('menu');
         res.status(201).json({ success: true, message: 'Category created', data: newCategory });
     } catch (error) {
         next(error);
@@ -25,6 +29,10 @@ const getCategoryById = async (req, res, next) => {
         if (!category) {
             return next(createHttpError(404, 'Category not found'));
         }
+        record(req.user, 'category.delete', 'category', deletedCategory._id, { name: deletedCategory.name });
+        emit('menu');
+        record(req.user, 'category.update', 'category', updatedCategory._id, { name: updatedCategory.name });
+        emit('menu');
         res.status(200).json({ message: 'Category fetched', data: category });
     } catch (error) {
         next(error);

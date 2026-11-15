@@ -1,19 +1,35 @@
 import React, { useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query"; // Import useMutation for updating order status
+import { useSelector } from "react-redux";
 import BottomNav from "../components/ui/BottomNav";
 import OrderCard from "../components/orders/OrderCard";
+import GuestInbox from "../components/orders/GuestInbox";
 import BackButton from "../components/ui/BackButton";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
-import { getOrders } from "../https/index";
+import { getOrders, releaseOrder } from "../https/index";
 import { FaKitchenSet } from "react-icons/fa6";
+import CheckoutModal from "../components/checkout/CheckoutModal";
+import Invoice from "../components/invoice/Invoice";
+import OrderActionsModal from "../components/orders/OrderActionsModal";
+import { can } from "../utils";
 
 const Orders = () => {
-  const mutation = useMutation((orderId) => {
-    return updateOrderStatus(orderId); // Function to update order status
-  });
-
+  const user = useSelector((state) => state.user);
   const [status, setStatus] = useState("all");
+  const [checkoutId, setCheckoutId] = useState(null);
+  const [paidOrder, setPaidOrder] = useState(null);
+  const [acting, setActing] = useState(null); // { order, mode }
+  const queryClient = useQueryClient();
+  const release = useMutation({
+    mutationFn: releaseOrder,
+    onSuccess: () => {
+      enqueueSnackbar("Sent to the kitchen", { variant: "success" });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+    },
+    onError: (e) => enqueueSnackbar(e.response?.data?.message || "Could not send", { variant: "error" }),
+  });
+  const isOpen = (o) => !["Completed", "Cancelled"].includes(o.orderStatus);
+  const unpaid = (o) => !(o.paidPaise > 0) && o.paymentStatus !== "Paid";
 
   useEffect(() => {
     document.title = "RestOS | Orders";
@@ -31,22 +47,17 @@ const Orders = () => {
     enqueueSnackbar("Something went wrong!", { variant: "error" });
   }
 
-  // Filter orders based on the selected status
-  const handleUpdateOrderStatus = (orderId) => {
-    mutation.mutate(orderId); // Call mutation to update order status
-  };
-
+  // Guest QR orders waiting for staff live in GuestInbox, not the main list.
   const filteredOrders = resData?.data.data.filter(
     (order) =>
-      status === "all" ||
+      order.acceptance !== "Pending" && (status === "all" ||
       (status === "progress" &&
         order.orderStatus.toLowerCase() === "in progress") ||
       (status === "ready" && order.orderStatus.toLowerCase() === "ready") ||
       (status === "completed" &&
-        order.orderStatus.toLowerCase() === "completed")
+        order.orderStatus.toLowerCase() === "completed") ||
+      (status === "cancelled" && order.orderStatus === "Cancelled"))
   );
-
-  console.log(filteredOrders); // Debugging line to check filtered orders
 
   return (
     <section className="bg-[var(--main-bg)] min-h-screen">
@@ -90,8 +101,17 @@ const Orders = () => {
           >
             Completed
           </button>
+          <button
+            onClick={() => setStatus("cancelled")}
+            className={`text-[var(--text-color)] text-sm md:text-base ${
+              status === "cancelled" && "bg-[var(--card-bg)]"
+            } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
+          >
+            Cancelled
+          </button>
         </div>
       </div>
+      <GuestInbox orders={resData?.data.data || []} canManage={can(user, "orders.manage")} />
       <div className="grid grid-cols-1 h-[calc(100vh-5rem-7rem)] sm:grid-cols-2 xl:grid-cols-3 gap-4 px-4 md:px-8 lg:px-16 py-4 overflow-y-auto  scrollbar-hide">
         {/* h-[calc(100vh-5rem-7rem)] */}
         {filteredOrders?.length > 0 ? (
@@ -100,7 +120,15 @@ const Orders = () => {
               <OrderCard
                 key={order._id}
                 order={order}
-                onUpdateStatus={handleUpdateOrderStatus} // Pass update handler to OrderCard
+                onTakePayment={can(user, "payments.collect") ? () => setCheckoutId(order._id) : undefined}
+                actions={[
+                  order.kitchenHeld && can(user, "orders.manage") && { label: "Send to kitchen now", mode: "release" },
+                  order.paidPaise > 0 && (order.refundedPaise || 0) < order.paidPaise && can(user, "refunds.process") && { label: "Refund", mode: "refund" },
+                  isOpen(order) && can(user, "orders.manage") && order.type !== "Takeaway" && order.type !== "Delivery" && { label: "Move table", mode: "move" },
+                  isOpen(order) && unpaid(order) && can(user, "orders.manage") && { label: "Merge in", mode: "merge" },
+                  isOpen(order) && unpaid(order) && can(user, "orders.cancel") && { label: "Cancel", mode: "cancel" },
+                ].filter(Boolean)}
+                onAction={(mode) => (mode === "release" ? release.mutate(order._id) : setActing({ order, mode }))}
               />
             );
           })
@@ -133,6 +161,25 @@ const Orders = () => {
           </div>
         )}
       </div>
+      {checkoutId && (
+        <CheckoutModal
+          orderId={checkoutId}
+          onClose={() => setCheckoutId(null)}
+          onPaid={(order) => {
+            setCheckoutId(null);
+            setPaidOrder(order);
+          }}
+        />
+      )}
+      {acting && (
+        <OrderActionsModal
+          order={acting.order}
+          mode={acting.mode}
+          openOrders={(resData?.data.data || []).filter((o) => o._id !== acting.order._id && isOpen(o) && unpaid(o))}
+          onClose={() => setActing(null)}
+        />
+      )}
+      {paidOrder && <Invoice orderInfo={paidOrder} setShowInvoice={() => setPaidOrder(null)} />}
       <BottomNav />
     </section>
   );

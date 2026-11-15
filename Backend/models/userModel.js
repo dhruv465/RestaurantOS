@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const { ROLES } = require('../config/permissions');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -29,20 +30,28 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, 'Password is required']
+        required: [true, 'Password is required'],
+        select: false
     },
     role: {
         type: String,
-        required: true
-    }
+        required: true,
+        enum: Object.keys(ROLES)
+    },
+    active: {
+        type: Boolean,
+        default: true
+    },
+    // Quick switch on a shared till: 4–6 digit PIN, stored hashed.
+    pinHash: { type: String, select: false },
+    pinFailures: { type: Number, default: 0, select: false }, // wrong PINs in a row; PIN is removed at PIN_MAX_FAILURES
 }, {
     timestamps: true
 })
 
-userSchema.pre('save', async function (next){
-    if(!this.isModified('password')){
-        next();
-    }
+userSchema.pre('save', async function () {
+    // Without this early return every save re-hashed the existing hash and locked the user out.
+    if (!this.isModified('password')) return;
 
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
