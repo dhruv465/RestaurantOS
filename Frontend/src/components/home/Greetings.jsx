@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 
 const Greetings = () => {
   const [dateTime, setDateTime] = useState(new Date());
+  const name = useSelector((state) => state.user.name);
 
   useEffect(() => {
-    const timer = setInterval(() => setDateTime(new Date()), 1000);
+    const timer = setInterval(() => setDateTime(new Date()), 15000);
     return () => clearInterval(timer);
   }, []);
 
@@ -32,15 +34,15 @@ const Greetings = () => {
   const formatTime = (date) =>
     `${String(date.getHours()).padStart(2, "0")}:${String(
       date.getMinutes()
-    ).padStart(2, "0")}:${String(date.getSeconds()).padStart(2, "0")}`;
+    ).padStart(2, "0")}`;
   return (
     <div className="flex flex-row justify-between items-center py-4 px-4 md:px-8">
       <div>
         <h1 className="text-[var(--text-color)] text-lg md:text-2xl font-semibold tracking-wide">
-          Welcome to RestOS
+          {name ? `Hello, ${name}` : "Welcome to RestOS"}
         </h1>
         <p className="text-[var(--text-color)] text-xs md:text-sm opacity-80">
-          Manage your restaurant with ease
+          Pick a job below, or tap the bell to start a new order
         </p>
       </div>
       <div>

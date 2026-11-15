@@ -124,7 +124,7 @@ const Menu = () => {
   }, []);
 
   return (
-    <section className="bg-[var(--main-bg)] min-h-screen pb-20 overflow-auto flex flex-col md:flex-row gap-3 px-2 sm:px-4">
+    <section className="bg-[var(--main-bg)] min-h-screen pb-20 flex flex-col md:flex-row gap-3 px-2 sm:px-4">
       <div className="w-full md:flex-[3] md:overflow-y-auto">
         <div className="flex flex-col md:flex-row items-center justify-between px-2 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 gap-3 sm:gap-4">
           <div className="flex items-center gap-4">

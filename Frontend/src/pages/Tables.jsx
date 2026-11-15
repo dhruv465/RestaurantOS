@@ -97,7 +97,7 @@ const Tables = () => {
   });
 
   return (
-    <section className="bg-[var(--main-bg)] min-h-screen overflow-auto pb-20">
+    <section className="bg-[var(--main-bg)] min-h-screen pb-20">
       <div className="flex flex-col md:flex-row items-center justify-between px-4 md:px-8 lg:px-10 py-4 gap-4">
         <div className="flex items-center gap-4">
           <BackButton />

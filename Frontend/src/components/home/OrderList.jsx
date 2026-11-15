@@ -4,14 +4,14 @@ import { getAvatarName } from "../../utils";
 
 const OrderList = ({ order }) => {
   return (
-    <div className="flex items-center gap-4 md:gap-6 mb-4 p-4 border-b border-[var(--border-color)]">
-      <button className="bg-amber-400 p-3 md:p-4 text-lg md:text-xl font-bold text-white rounded-full items-center justify-center">
-        {getAvatarName(order.customerDetails.name)}
-      </button>
+    <div className="flex items-center gap-3 md:gap-6 py-3 md:p-4 border-b border-[var(--border-color)]">
+      <span aria-hidden="true" className="hidden sm:flex bg-amber-400 p-3 md:p-4 text-lg md:text-xl font-bold text-white rounded-full items-center justify-center">
+        {getAvatarName(order.customerDetails?.name || "Guest")}
+      </span>
       <div className="flex items-center justify-between w-full gap-4">
         <div className="flex flex-col items-start gap-1">
-          <h1 className="text-[var(--text-color)] text-base md:text-lg font-semibold tracking-wide">
-            {order.customerDetails.name}
+          <h1 className="text-[var(--text-color)] text-base md:text-lg font-semibold tracking-wide whitespace-nowrap">
+            {order.customerDetails?.name || "Guest"}
           </h1>
           <p className="text-[var(--text-color)] text-xs md:text-sm opacity-80">
             {order.items.length} Items
@@ -19,8 +19,8 @@ const OrderList = ({ order }) => {
         </div>
 
         <div className="text-sm text-[var(--text-color)] ">
-          <span className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold">
-            Table No → {order.table.tableNo}
+          <span className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap">
+            {order.table ? `Table ${order.table.tableNo}` : order.type || "Takeaway"}
           </span>
         </div>
         <div className="flex flex-col items-end gap-2">

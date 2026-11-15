@@ -70,15 +70,8 @@
   mask-image: linear-gradient(to right, black 85%, transparent);
 }
 
-/* Prevent scroll bounce/overscroll effect */
-html, body {
-  height: 100%;
-  width: 100%;
-  overflow: auto;
-  overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-* {
-  overscroll-behavior: none;
+/* No pull-to-refresh or bounce on the page itself. Inner lists keep the default, so the wheel or a swipe
+   passes on to the page when a list reaches its end (setting none on every element made scrolling stick). */
+html {
+  overscroll-behavior-y: none;
 }

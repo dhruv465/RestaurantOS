@@ -591,37 +591,37 @@ const Header = () => {
           {can(userData, "orders.manage") && (
             <button
               onClick={() => navigate("/reservations")}
-              className="flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
-              aria-label="Reservations"
+              className="flex items-center justify-center gap-2 bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 px-4 text-sm font-medium cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
             >
-              <CalendarDays size={20} className="text-xl" />
+              <CalendarDays size={18} aria-hidden="true" />
+              Reservations
             </button>
           )}
           {can(userData, "orders.view") && (
             <button
               onClick={() => navigate("/customers")}
-              className="flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
-              aria-label="Customers"
+              className="flex items-center justify-center gap-2 bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 px-4 text-sm font-medium cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
             >
-              <Contact size={20} className="text-xl" />
+              <Contact size={18} aria-hidden="true" />
+              Customers
             </button>
           )}
           {can(userData, "kitchen.manage") && (
             <button
               onClick={() => navigate("/kitchen")}
-              className="flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
-              aria-label="Kitchen"
+              className="flex items-center justify-center gap-2 bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 px-4 text-sm font-medium cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
             >
-              <ChefHat size={20} className="text-xl" />
+              <ChefHat size={18} aria-hidden="true" />
+              Kitchen
             </button>
           )}
           {can(userData, "dashboard.view") && (
             <button
               onClick={() => navigate("/dashboard")}
-              className="flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
-              aria-label="Dashboard"
+              className="flex items-center justify-center gap-2 bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 px-4 text-sm font-medium cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
             >
-              <LayoutDashboard size={20} className="text-xl" />
+              <LayoutDashboard size={18} aria-hidden="true" />
+              Dashboard
             </button>
           )}
           <button
