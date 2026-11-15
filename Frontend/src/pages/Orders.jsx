@@ -15,7 +15,7 @@ import { can } from "../utils";
 
 const Orders = () => {
   const user = useSelector((state) => state.user);
-  const [status, setStatus] = useState("all");
+  const [status, setStatus] = useState("open");
   const [checkoutId, setCheckoutId] = useState(null);
   const [paidOrder, setPaidOrder] = useState(null);
   const [acting, setActing] = useState(null); // { order, mode }
@@ -47,17 +47,15 @@ const Orders = () => {
     enqueueSnackbar("Something went wrong!", { variant: "error" });
   }
 
-  // Guest QR orders waiting for staff live in GuestInbox, not the main list.
-  const filteredOrders = resData?.data.data.filter(
-    (order) =>
-      order.acceptance !== "Pending" && (status === "all" ||
-      (status === "progress" &&
-        order.orderStatus.toLowerCase() === "in progress") ||
-      (status === "ready" && order.orderStatus.toLowerCase() === "ready") ||
-      (status === "completed" &&
-        order.orderStatus.toLowerCase() === "completed") ||
-      (status === "cancelled" && order.orderStatus === "Cancelled"))
-  );
+  // Three simple views. Guest QR orders waiting for staff live in GuestInbox, not the main list.
+  const VIEWS = [
+    ["open", "Open", isOpen],
+    ["ready", "Ready to serve", (o) => o.orderStatus === "Ready"],
+    ["done", "Done", (o) => !isOpen(o)],
+  ];
+  const listed = (resData?.data.data || []).filter((o) => o.acceptance !== "Pending");
+  const countOf = (test) => listed.filter(test).length;
+  const filteredOrders = listed.filter(VIEWS.find(([v]) => v === status)[2]);
 
   return (
     <section className="bg-[var(--main-bg)] min-h-screen">
@@ -68,47 +66,20 @@ const Orders = () => {
             Orders
           </h1>
         </div>
-        <div className="flex items-center justify-center flex-wrap gap-2 md:gap-4">
-          <button
-            onClick={() => setStatus("all")}
-            className={`text-[var(--text-color)] text-sm md:text-base ${
-              status === "all" && "bg-[var(--card-bg)]"
-            } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setStatus("progress")}
-            className={`text-[var(--text-color)] text-sm md:text-base ${
-              status === "progress" && "bg-[var(--card-bg)]"
-            } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
-          >
-            In Progress
-          </button>
-          <button
-            onClick={() => setStatus("ready")}
-            className={`text-[var(--text-color)] text-sm md:text-base ${
-              status === "ready" && "bg-[var(--card-bg)]"
-            } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
-          >
-            Ready
-          </button>
-          <button
-            onClick={() => setStatus("completed")}
-            className={`text-[var(--text-color)] text-sm md:text-base ${
-              status === "completed" && "bg-[var(--card-bg)]"
-            } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
-          >
-            Completed
-          </button>
-          <button
-            onClick={() => setStatus("cancelled")}
-            className={`text-[var(--text-color)] text-sm md:text-base ${
-              status === "cancelled" && "bg-[var(--card-bg)]"
-            } rounded-lg px-3 md:px-5 py-1 md:py-2 font-semibold hover:bg-[var(--card-bg)] transition-colors duration-200`}
-          >
-            Cancelled
-          </button>
+        <div role="tablist" aria-label="Which orders" className="flex items-center gap-1 p-1 bg-[var(--card-bg)] rounded-lg">
+          {VIEWS.map(([v, label, test]) => (
+            <button
+              key={v}
+              role="tab"
+              aria-selected={status === v}
+              onClick={() => setStatus(v)}
+              className={`px-3 md:px-4 py-1.5 rounded-md text-sm md:text-base font-semibold ${
+                status === v ? "bg-[#F6b100] text-white" : "text-[var(--text-color)]"
+              }`}
+            >
+              {label} <span className="opacity-80">({countOf(test)})</span>
+            </button>
+          ))}
         </div>
       </div>
       <GuestInbox orders={resData?.data.data || []} canManage={can(user, "orders.manage")} />
@@ -142,18 +113,14 @@ const Orders = () => {
                   </div>
                 </div>
                 <h2 className="mt-4 text-xl font-semibold text-[var(--text-color)]">
-                  No Orders Available
+                  No orders
                 </h2>
               </div>
 
               {/* Card Content */}
               <div className="px-6 py-4">
                 <p className="text-[var(--text-color)] opacity-50">
-                  You don&apos;t have any {status !== "all" ? status : ""}{" "}
-                  orders yet.
-                  {status === "all"
-                    ? " Start processing sales to see orders here."
-                    : ""}
+                  {status === "open" ? "No open orders. Tap the bell at the bottom to start one." : "Nothing here yet."}
                 </p>
               </div>
             </div>

@@ -221,7 +221,7 @@ const RotaTab = ({ canEdit }) => {
                 <li key={s._id} className="text-xs bg-[var(--nav-bg)] rounded p-1">
                   <span className="font-semibold">{s.user?.name}</span> {time(s.start)}–{time(s.end)}
                   {s.note && <span className="block text-[#ababab]">{s.note}</span>}
-                  {canEdit && <button className="text-red-500 ml-1" aria-label={`Remove ${s.user?.name}'s shift`} onClick={() => remove.mutate(s._id)}>×</button>}
+                  {canEdit && <button className="text-red-500 ml-1" aria-label={`Remove ${s.user?.name}'s shift`} title={`Remove ${s.user?.name}'s shift`} onClick={() => remove.mutate(s._id)}>×</button>}
                 </li>
               ))}
             </ul>

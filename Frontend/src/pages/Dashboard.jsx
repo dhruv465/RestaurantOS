@@ -222,7 +222,7 @@ const Dashboard = () => {
                         setDeletingCategory(categoryObj._id);
                       }
                     }}
-                    aria-label={`Delete ${category} category`}
+                    aria-label={`Delete ${category} category`} title={`Delete ${category} category`}
                   >
                     <MdDelete className="h-4 w-4" />
                   </button>
@@ -262,14 +262,14 @@ const Dashboard = () => {
                           <button
                             className="p-2 bg-[var(--main-bg)] rounded-lg text-blue-500 hover:text-blue-700"
                             onClick={() => handleEditItem(item)}
-                            aria-label={`Edit ${item.name}`}
+                            aria-label={`Edit ${item.name}`} title={`Edit ${item.name}`}
                           >
                             <MdEdit className="h-4 w-4" />
                           </button>
                           <button
                             className="p-2 bg-[var(--main-bg)] rounded-lg text-red-500 hover:text-red-700"
                             onClick={() => setDeletingItem(item._id)}
-                            aria-label={`Delete ${item.name}`}
+                            aria-label={`Delete ${item.name}`} title={`Delete ${item.name}`}
                           >
                             <MdDelete className="h-4 w-4" />
                           </button>

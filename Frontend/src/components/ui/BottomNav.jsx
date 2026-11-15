@@ -141,7 +141,7 @@ const BottomNav = () => {
           </button>
           <button
             onClick={openModal}
-            aria-label="New order"
+            aria-label="New order" title="New order"
             className="bg-[var(--card-bg)] text-[var(--text-color)] rounded-full p-3 shadow-lg hover:bg-[var(--card-bg)]/90 transition-all duration-200 animate-glow"
           >
             <BiSolidDish className="text-xl" />
@@ -177,7 +177,7 @@ const BottomNav = () => {
           <button
             disabled={isActive("/tables") || isActive("/menu")}
             onClick={openModal}
-            aria-label="New order"
+            aria-label="New order" title="New order"
             className="bg-[#F6b100] text-white rounded-full p-3 sm:p-4 shadow-lg hover:bg-[#F6b100]/90 transition-colors duration-200 animate-glow"
           >
             <BiSolidDish className="text-2xl sm:text-3xl" />

@@ -291,7 +291,7 @@ const Header = () => {
             className="p-1 text-[var(--text-color)]"
             onClick={toggleSearch}
             aria-expanded={isSearchExpanded}
-            aria-label="Open search"
+            aria-label="Open search" title="Open search"
           >
             <Search size={20} className="text-xl" />
           </button>
@@ -299,7 +299,7 @@ const Header = () => {
           <button
             className="p-1 text-[var(--text-color)] relative"
             onClick={toggleNotifications}
-            aria-label="Notifications"
+            aria-label="Notifications" title="Notifications"
           >
             <Bell size={20} className="text-xl" />
             {hasNewNotifications && (
@@ -311,7 +311,7 @@ const Header = () => {
             onClick={toggleMenu}
             className="p-1 text-[var(--text-color)]"
             aria-expanded={isMenuOpen}
-            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"} title={isMenuOpen ? "Close menu" : "Open menu"}
           >
             <AlignJustify size={20} className="text-2xl" />
           </button>
@@ -327,7 +327,7 @@ const Header = () => {
             </h2>
             <button
               onClick={toggleSearch}
-              aria-label="Close search"
+              aria-label="Close search" title="Close search"
               className="p-1 text-[var(--text-color)]"
             >
               <X size={20} className="text-2xl" />
@@ -363,7 +363,7 @@ const Header = () => {
               </h2>
               <button
                 onClick={toggleMenu}
-                aria-label="Close menu"
+                aria-label="Close menu" title="Close menu"
                 className="p-1 text-[var(--text-color)]"
               >
                 <X size={20} className="text-2xl" />
@@ -388,6 +388,8 @@ const Header = () => {
               className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
               aria-label={
                 isDarkMode ? "Switch to light theme" : "Switch to dark theme"
+              } title={
+                isDarkMode ? "Switch to light theme" : "Switch to dark theme"
               }
             >
               {isDarkMode ? (
@@ -410,7 +412,7 @@ const Header = () => {
               <button
                 onClick={() => handleNavigation("/reservations")}
                 className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
-                aria-label="Reservations"
+                aria-label="Reservations" title="Reservations"
               >
                 <CalendarDays size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
                 <span className="text-[var(--text-color)]">Reservations</span>
@@ -420,7 +422,7 @@ const Header = () => {
               <button
                 onClick={() => window.open("/display", "restos-display", "popup,width=1024,height=768")}
                 className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
-                aria-label="Open customer display"
+                aria-label="Open customer display" title="Open customer display"
               >
                 <MonitorSmartphone size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
                 <span className="text-[var(--text-color)]">Customer display</span>
@@ -430,7 +432,7 @@ const Header = () => {
               <button
                 onClick={() => handleNavigation("/inventory")}
                 className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
-                aria-label="Inventory"
+                aria-label="Inventory" title="Inventory"
               >
                 <Boxes size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
                 <span className="text-[var(--text-color)]">Inventory</span>
@@ -439,7 +441,7 @@ const Header = () => {
             <button
               onClick={() => handleNavigation("/team")}
               className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
-              aria-label="Team"
+              aria-label="Team" title="Team"
             >
               <Users size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
               <span className="text-[var(--text-color)]">Team</span>
@@ -450,7 +452,7 @@ const Header = () => {
                 setShowSwitch(true);
               }}
               className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
-              aria-label="Switch user"
+              aria-label="Switch user" title="Switch user"
             >
               <UserRoundCog size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
               <span className="text-[var(--text-color)]">Switch user</span>
@@ -459,7 +461,7 @@ const Header = () => {
               <button
                 onClick={() => handleNavigation(can(userData, "delivery.manage") ? "/deliveries" : "/my-deliveries")}
                 className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
-                aria-label="Deliveries"
+                aria-label="Deliveries" title="Deliveries"
               >
                 <Bike size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
                 <span className="text-[var(--text-color)]">{can(userData, "delivery.manage") ? "Deliveries" : "My deliveries"}</span>
@@ -469,7 +471,7 @@ const Header = () => {
               <button
                 onClick={() => handleNavigation("/accounting")}
                 className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
-                aria-label="Accounting"
+                aria-label="Accounting" title="Accounting"
               >
                 <Wallet size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
                 <span className="text-[var(--text-color)]">Accounting</span>
@@ -479,7 +481,7 @@ const Header = () => {
               <button
                 onClick={() => handleNavigation("/reports")}
                 className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
-                aria-label="Reports"
+                aria-label="Reports" title="Reports"
               >
                 <BarChart3 size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
                 <span className="text-[var(--text-color)]">Reports</span>
@@ -489,7 +491,7 @@ const Header = () => {
               <button
                 onClick={() => handleNavigation("/customers")}
                 className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
-                aria-label="Customers"
+                aria-label="Customers" title="Customers"
               >
                 <Contact size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
                 <span className="text-[var(--text-color)]">Customers</span>
@@ -499,7 +501,7 @@ const Header = () => {
               <button
                 onClick={() => handleNavigation("/kitchen")}
                 className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
-                aria-label="Kitchen"
+                aria-label="Kitchen" title="Kitchen"
               >
                 <ChefHat size={20} className="text-xl text-[var(--text-color)]" aria-hidden="true" />
                 <span className="text-[var(--text-color)]">Kitchen</span>
@@ -509,7 +511,7 @@ const Header = () => {
               <button
                 onClick={() => handleNavigation("/dashboard")}
                 className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
-                aria-label="Dashboard"
+                aria-label="Dashboard" title="Dashboard"
               >
                 <LayoutDashboard size={20}
                   className="text-xl text-[var(--text-color)]"
@@ -520,7 +522,7 @@ const Header = () => {
             )}
             {/* <button
               className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
-              aria-label="Notifications"
+              aria-label="Notifications" title="Notifications"
               onClick={toggleNotifications}
             >
               <Bell size={20}
@@ -539,7 +541,7 @@ const Header = () => {
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
-              aria-label="Lock screen"
+              aria-label="Lock screen" title="Lock screen"
             >
               <Lock size={20}
                 className="text-xl text-[var(--text-color)]"
@@ -629,6 +631,8 @@ const Header = () => {
             className="p-2 rounded-full hover:bg-[var(--card-bg)] transition-colors"
             aria-label={
               isDarkMode ? "Switch to light theme" : "Switch to dark theme"
+            } title={
+              isDarkMode ? "Switch to light theme" : "Switch to dark theme"
             }
           >
             {isDarkMode ? (
@@ -645,7 +649,7 @@ const Header = () => {
           </button>
           <button
             className="bell flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer relative"
-            aria-label="Notifications"
+            aria-label="Notifications" title="Notifications"
             onClick={toggleNotifications}
           >
             <Bell size={20}
@@ -658,7 +662,7 @@ const Header = () => {
           </button>
           <button
             className="profile flex items-center gap-2 cursor-pointer bg-[var(--card-bg)] p-2 rounded-lg"
-            aria-label="User profile"
+            aria-label="User profile" title="User profile"
             aria-expanded={isMenuOpen}
             onClick={toggleMenu}
             onMouseDown={(e) => e.stopPropagation()} // keep the outside-click handler from closing then reopening
@@ -796,7 +800,7 @@ const Header = () => {
                         <button
                           onClick={() => removeNotification(notification.id)}
                           className="text-[var(--text-color)]/70 hover:text-[var(--text-color)]"
-                          aria-label="Remove notification"
+                          aria-label="Remove notification" title="Remove notification"
                         >
                           <Trash2 className="text-sm" />
                         </button>

@@ -212,9 +212,7 @@ const MenuContainer = () => {
   };
 
   const handleAddToCart = (menu) => {
-    const quantity = itemCount[menu.id] || 0;
-
-    if (quantity === 0) return; // Don't add items with zero quantity
+    const quantity = itemCount[menu.id] || 1; // Add without picking a count adds one
 
     if (groupsFor(menu).length) {
       setPicking({ menu, quantity });
@@ -358,6 +356,7 @@ const MenuContainer = () => {
             className="h-8 w-8 rounded-full flex items-center justify-center border border-[var(--border-color)] text-[var(--text-color)]"
             onClick={() => decrement(menu.id)}
             disabled={!itemCount[menu.id]}
+            aria-label={`One less ${menu.name}`} title={`One less ${menu.name}`}
           >
             <Minus className="h-4 w-4" />
           </button>
@@ -368,18 +367,18 @@ const MenuContainer = () => {
             className="h-8 w-8 rounded-full flex items-center justify-center border border-[var(--border-color)] text-[var(--text-color)]"
             onClick={() => increment(menu.id)}
             disabled={!menu.available}
-            aria-label={`Add one ${menu.name}`}
+            aria-label={`Add one ${menu.name}`} title={`Add one ${menu.name}`}
           >
             <Plus className="h-4 w-4" />
           </button>
         </div>
         <button
-          className="h-8 w-8 flex items-center justify-center text-[var(--text-color)]"
+          className="h-8 px-3 rounded-lg flex items-center gap-1 bg-[#F6b100] text-white text-sm font-semibold disabled:opacity-50"
           onClick={() => handleAddToCart(menu)}
           disabled={!menu.available}
-          aria-label={`Add ${menu.name} to cart`}
+          title={`Add ${menu.name} to this order`}
         >
-          <ShoppingCart className="h-4 w-4" />
+          <ShoppingCart className="h-4 w-4" aria-hidden="true" /> Add
         </button>
       </div>
     </div>

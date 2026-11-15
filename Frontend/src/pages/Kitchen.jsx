@@ -42,25 +42,27 @@ const TicketCard = ({ ticket, now, onMove, onPriority, busy }) => {
         <div>
           <p className="text-[var(--text-color)] font-bold text-lg">#{ticket.ticketNo}</p>
           <p className="text-xs text-[#ababab]">
-            {where} · {ticket.orderNo}
+            {where} · order #{String(ticket.orderNo || "").split("-").pop()}
           </p>
         </div>
         <div className="text-right">
           <p className={`text-sm font-semibold ${late ? "text-red-500" : "text-[var(--text-color)]"}`}>{age} min</p>
           <button
             onClick={() => onPriority(ticket)}
-            aria-label={ticket.isPriority ? "Remove rush" : "Mark as rush"}
+            title={ticket.isPriority ? "Rush: cook this first. Tap to make it normal again" : "Mark as rush: cook this first"}
             aria-pressed={ticket.isPriority}
-            className={`mt-1 p-1 rounded ${ticket.isPriority ? "text-[#F6b100]" : "text-[#ababab]"}`}
+            className={`mt-1 inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold border ${
+              ticket.isPriority ? "text-[#F6b100] border-[#F6b100]" : "text-[#ababab] border-[var(--border-color)]"
+            }`}
           >
-            <Flame size={18} />
+            <Flame size={16} aria-hidden="true" /> Rush
           </button>
           <button
             onClick={() => printHtml(`KOT ${ticket.ticketNo}`, kotHtml(ticket))}
-            aria-label="Print ticket"
-            className="mt-1 ml-1 p-1 rounded text-[#ababab]"
+            title="Print this kitchen ticket"
+            className="mt-1 ml-1 inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold border border-[var(--border-color)] text-[#ababab]"
           >
-            <Printer size={18} />
+            <Printer size={16} aria-hidden="true" /> Print
           </button>
         </div>
       </div>

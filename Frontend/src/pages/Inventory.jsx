@@ -295,7 +295,7 @@ const RecipesTab = () => {
                   {ingredients.map((i) => <option key={i._id} value={i._id}>{i.name} ({i.unit})</option>)}
                 </select>
                 <input aria-label="Amount" type="number" min="0" step="any" className={`${inputClass} w-28`} value={l.qty} onChange={(e) => setLine(n, { qty: e.target.value })} />
-                <button aria-label="Remove line" className={secondary} onClick={() => setEditing({ ...editing, lines: editing.lines.filter((_, i) => i !== n) })}>×</button>
+                <button aria-label="Remove line" title="Remove line" className={secondary} onClick={() => setEditing({ ...editing, lines: editing.lines.filter((_, i) => i !== n) })}>×</button>
               </div>
             ))}
             <button className={secondary} onClick={() => setEditing({ ...editing, lines: [...editing.lines, { ingredient: "", qty: "" }] })}>Add ingredient</button>
@@ -402,7 +402,7 @@ const PurchaseOrdersTab = () => {
                 </select>
                 <label className="text-xs text-[#ababab]">Qty ({PACK[unitOf(l.ingredient)][1]})<input type="number" min="0" step="any" className={inputClass} value={l.qty} onChange={(e) => setLine(n, { qty: e.target.value })} /></label>
                 <label className="text-xs text-[#ababab]">₹/{PACK[unitOf(l.ingredient)][1]}<input type="number" min="0" step="0.01" className={inputClass} value={l.packCost} onChange={(e) => setLine(n, { packCost: e.target.value })} /></label>
-                <button aria-label="Remove line" className={secondary} onClick={() => setDraft({ ...draft, lines: draft.lines.filter((_, i) => i !== n) })}>×</button>
+                <button aria-label="Remove line" title="Remove line" className={secondary} onClick={() => setDraft({ ...draft, lines: draft.lines.filter((_, i) => i !== n) })}>×</button>
               </div>
             ))}
             <button className={secondary} onClick={() => setDraft({ ...draft, lines: [...draft.lines, { ingredient: "", qty: "", packCost: "" }] })}>Add line</button>

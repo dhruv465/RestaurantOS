@@ -64,6 +64,7 @@ const Modal = ({ isOpen, onClose, defaultArea = "Main", newFloor = false, onAdde
           <button
             onClick={handleCloseModal}
             className="text-[var(--text-color)]"
+            aria-label="Close" title="Close"
           >
             <IoMdClose size={24} />
           </button>

@@ -11,6 +11,7 @@ const Modal = ({ title, onClose, isOpen, children }) => {
           <button
             className="text-[var(--text-color)] text-2xl hover:text-[var(--text-color)]/70"
             onClick={onClose}
+            aria-label="Close" title="Close"
           >
             &times;
           </button>

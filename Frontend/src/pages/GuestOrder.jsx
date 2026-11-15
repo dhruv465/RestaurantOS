@@ -277,9 +277,9 @@ const GuestOrder = ({ kiosk = false }) => {
                     {l.item.name}
                     {l.modifiers.length > 0 && <span className="text-[#ababab]"> · {l.modifiers.map((m) => m.name).join(", ")}</span>}
                   </span>
-                  <button aria-label={`One less ${l.item.name}`} onClick={() => changeQty(l.key, -1)} className="p-1 rounded bg-[var(--card-bg)]"><Minus size={14} /></button>
+                  <button aria-label={`One less ${l.item.name}`} title={`One less ${l.item.name}`} onClick={() => changeQty(l.key, -1)} className="p-1 rounded bg-[var(--card-bg)]"><Minus size={14} /></button>
                   <span className="w-5 text-center">{l.quantity}</span>
-                  <button aria-label={`One more ${l.item.name}`} onClick={() => changeQty(l.key, 1)} className="p-1 rounded bg-[var(--card-bg)]"><Plus size={14} /></button>
+                  <button aria-label={`One more ${l.item.name}`} title={`One more ${l.item.name}`} onClick={() => changeQty(l.key, 1)} className="p-1 rounded bg-[var(--card-bg)]"><Plus size={14} /></button>
                 </div>
                 <input
                   value={l.instructions}

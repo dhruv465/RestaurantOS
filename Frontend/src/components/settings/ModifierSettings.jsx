@@ -47,7 +47,7 @@ const GroupForm = ({ initial, onSave, onCancel, saving }) => {
         <div key={i} className="grid grid-cols-[1fr_120px_auto] gap-2">
           <input aria-label="Option name" placeholder="Option (e.g. Full)" className={inputClass} value={o.name} onChange={(e) => setOption(i, "name", e.target.value)} />
           <input aria-label="Extra price in rupees" type="number" min="0" placeholder="+₹" className={inputClass} value={o.price} onChange={(e) => setOption(i, "price", e.target.value)} />
-          <button type="button" aria-label="Remove option" className="text-red-500 px-2" onClick={() => setForm({ ...form, options: form.options.filter((_, j) => j !== i) })}>
+          <button type="button" aria-label="Remove option" title="Remove option" className="text-red-500 px-2" onClick={() => setForm({ ...form, options: form.options.filter((_, j) => j !== i) })}>
             ✕
           </button>
         </div>

@@ -120,7 +120,7 @@ const FloorPlan = ({ tables, canEdit, canChangeStatus }) => {
               dragConstraints={room}
               onDragEnd={(e) => onDragEnd(t, e)}
               onTap={() => onTap(t)}
-              aria-label={`Table ${t.tableNo}, ${t.status === "Booked" ? "occupied" : t.status.toLowerCase()}`}
+              aria-label={`Table ${t.tableNo}, ${t.status === "Booked" ? "occupied" : t.status.toLowerCase()}`} title={`Table ${t.tableNo}, ${t.status === "Booked" ? "occupied" : t.status.toLowerCase()}`}
               style={{ left: `${posX}%`, top: `${posY}%` }}
               className={`absolute -ml-10 -mt-8 w-20 h-16 rounded-lg text-white shadow-md flex flex-col items-center justify-center ${COLORS[t.status] || "bg-gray-500"} ${
                 t.seats <= 2 ? "rounded-full" : ""
