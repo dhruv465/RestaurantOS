@@ -61,7 +61,7 @@ const useRealtime = (enabled) => {
         queryClient.invalidateQueries({ queryKey })
       );
       const me = userRef.current;
-      if (event.type === "order" && event.guest && isFloor(me)) shout("New table QR order waiting. Open Orders to accept it.", "info");
+      if (event.type === "order" && event.guest && isFloor(me)) shout(`${event.tableNo ? `Table ${event.tableNo}` : "The kiosk"} sent a new order. Open Orders to accept it.`, "info");
       const alert = event.type === "alert" && ALERTS[event.kind]?.(event);
       if (!alert || event.actorId === me._id) return;
       // Kitchen progress goes to the waiter who took the order; table calls and unowned orders go to all floor staff.

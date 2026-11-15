@@ -20,6 +20,7 @@ import {
   UtensilsCrossed,
   Wine,
 } from "lucide-react";
+import { enqueueSnackbar } from "notistack";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import img from "../../assets/images/image.png";
@@ -235,6 +236,8 @@ const MenuContainer = () => {
       })
     );
 
+    // On a phone the cart is off-screen, so say what was added.
+    enqueueSnackbar(`Added ${quantity} × ${menu.name}`, { variant: "success", autoHideDuration: 1500 });
     // Reset only this item's count, not all counts
     setItemCount((prev) => ({
       ...prev,
@@ -410,8 +413,10 @@ const MenuContainer = () => {
     <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar scroll-container">
       {menuCategories.map((category, index) => {
         return (
-          <div
+          <button
+            type="button"
             key={category.id}
+            aria-pressed={!isSearching && selected?.id === category.id}
             className={`
               flex-shrink-0 w-auto
               flex items-center gap-2 p-2 px-4 rounded-full mb-2 mt-2 ml-1 mr-1 cursor-pointer 
@@ -456,7 +461,7 @@ const MenuContainer = () => {
             >
               {category.items ? category.items.length : 0}{" "}
             </div>
-          </div>
+          </button>
         );
       })}
     </div>

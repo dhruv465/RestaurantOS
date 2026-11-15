@@ -170,7 +170,7 @@ const placeOrder = async (req, res, next) => {
             }
             throw error;
         }
-        emit('order', { orderId: order._id, guest: true });
+        emit('order', { orderId: order._id, guest: true, tableNo: table.tableNo });
         res.status(201).json({ success: true, data: await guestView(order) });
     } catch (error) {
         next(error);

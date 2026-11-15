@@ -2,40 +2,28 @@ import { useEffect, useState } from "react";
 import { getUserData } from "../https";
 import { useDispatch } from "react-redux";
 import { removeUser, setUser } from "../redux/slices/userSlice";
-import { Navigate } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 
-
+// Restores the signed-in person on page load. Signed out: ProtectedRoutes sends them to /auth.
 const useLoadData = () => {
-
     const dispatch = useDispatch();
-    const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchUser = async () => {
             try {
-
                 const { data } = await getUserData();
-                // console.log(data);
                 const { _id, name, email, phone, role, permissions } = data.data;
                 dispatch(setUser({ _id, name, email, phone, role, permissions }));
-
-            }
-            catch (error) {
+            } catch {
                 dispatch(removeUser());
-                Navigate("/auth");
-                console.error(error);
-            }
-            finally {
+            } finally {
                 setIsLoading(false);
             }
         };
-
         fetchUser();
-    }, [dispatch, navigate]);
+    }, [dispatch]);
 
     return isLoading;
-}
+};
 
 export default useLoadData;

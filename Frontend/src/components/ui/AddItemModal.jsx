@@ -135,6 +135,7 @@ const AddItemModal = ({ isOpen, onClose, initialItem = {} }) => {
       </div>
       <div className="mb-4">
         <select
+          aria-label="Category"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
           className="w-full bg-[var(--input-bg)] text-[var(--text-color)] rounded-lg p-2 focus:ring-2 focus:ring-[var(--border-color)] focus:outline-none transition-all border border-[var(--border-color)]"
