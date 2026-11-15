@@ -6,7 +6,7 @@ import { can } from "../utils";
 
 // Server pushes "X changed" over Server-Sent Events; we refetch the matching queries.
 const QUERIES_BY_EVENT = {
-  order: [["orders"], ["tables"], ["dashboard"]],
+  order: [["orders"], ["tables"], ["dashboard"], ["stockUsage"], ["ingredients"]], // a paid bill takes stock out
   table: [["tables"], ["orders"], ["dashboard"]],
   menu: [["items"], ["categories"]],
   settings: [["settings"], ["price"]],
@@ -14,7 +14,7 @@ const QUERIES_BY_EVENT = {
   reservation: [["reservations"], ["waitlist"]],
   request: [["tableRequests"]],
   delivery: [["deliveryBoard"], ["myDeliveries"], ["orders"]],
-  inventory: [["ingredients"], ["movements"], ["shoppingList"], ["purchaseOrders"]],
+  inventory: [["ingredients"], ["movements"], ["shoppingList"], ["purchaseOrders"], ["stockUsage"]],
 };
 
 const where = (e) => (e.tableNo ? `Table ${e.tableNo}` : `Order ${e.orderNo}`);

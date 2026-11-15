@@ -65,5 +65,7 @@ app.use(globalErrorHandler);
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     require('./utils/scheduler').start();
+    // One-time: the users' email index becomes sparse so several PIN-only staff (no email) can exist.
+    require('./models/userModel').syncIndexes().catch((error) => console.error('User index sync failed', error));
 }
 );

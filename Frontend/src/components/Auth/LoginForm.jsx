@@ -31,7 +31,7 @@ const Input = ({ icon: Icon, label, ...props }) => (
   </div>
 );
 
-const LoginForm = ({ onToggleForm }) => {
+const LoginForm = ({ onToggleForm, onUsePin }) => {
   const { theme, toggleTheme } = useTheme();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [randomQuote] = useState(
@@ -53,23 +53,15 @@ const LoginForm = ({ onToggleForm }) => {
     mutationFn: (reqData) => login(reqData),
     onSuccess: (res) => {
       const { data } = res;
-      console.log(data);
       const { _id, name, email, phone, role, permissions } = data.data;
       dispatch(setUser({ _id, name, email, phone, role, permissions }));
       navigate("/");
     },
     onError: (error) => {
       const { response } = error;
-      enqueueSnackbar(response.data.message, { variant: "error" });
+      enqueueSnackbar(response?.data?.message || "Could not sign in", { variant: "error" });
     },
   });
-
-  const fillTestCredentials = () => {
-    setFormData({
-      email: "dhruvsathe11@gmail.com",
-      password: "password123",
-    });
-  };
 
   return (
     <div
@@ -136,13 +128,11 @@ const LoginForm = ({ onToggleForm }) => {
             >
               Sign In
             </button>
-            <button
-              type="button"
-              onClick={fillTestCredentials}
-              className="w-full py-2 px-4 rounded-lg font-medium bg-black text-white hover:bg-gray-700 transition-colors duration-200 mb-3"
-            >
-              Get Test Credentials
-            </button>
+            {onUsePin && (
+              <button type="button" onClick={onUsePin} className="w-full py-2 px-4 rounded-lg font-medium bg-[var(--nav-bg)] text-[var(--text-color)]">
+                Use my PIN instead
+              </button>
+            )}
           </form>
 
           {onToggleForm && <div className="mt-6 text-center">

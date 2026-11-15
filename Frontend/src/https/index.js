@@ -115,6 +115,8 @@ export const getIngredients = () => api.get('/api/inventory/ingredients');
 export const createIngredient = (data) => api.post('/api/inventory/ingredients', data);
 export const updateIngredient = (id, data) => api.patch(`/api/inventory/ingredients/${id}`, data);
 export const adjustStock = (id, data) => api.post(`/api/inventory/ingredients/${id}/adjust`, data);
+export const receiveStock = (id, data) => api.post(`/api/inventory/ingredients/${id}/receive`, data);
+export const getStockUsage = (params) => api.get('/api/inventory/usage', { params });
 export const logWaste = (data) => api.post('/api/inventory/waste', data);
 export const stockTake = (data) => api.post('/api/inventory/stock-take', data);
 export const getMovements = (params) => api.get('/api/inventory/movements', { params });
@@ -137,6 +139,11 @@ export const setKotPriority = ({ id, isPriority }) => api.patch(`/api/kds/ticket
 export const setOwnPin = (data) => api.post('/api/hr/pin', data);
 export const getPinUsers = () => api.get('/api/hr/pin-users');
 export const pinSwitch = (data) => api.post('/api/hr/pin-switch', data);
+// Trusted-device PIN sign-in (works without a staff session)
+export const getDevicePinUsers = () => api.get('/api/user/pin-users');
+export const pinLogin = (data) => api.post('/api/user/pin-login', data);
+export const pinClock = (data) => api.post('/api/user/pin-clock', data);
+export const forgetDevice = () => api.post('/api/user/forget-device');
 export const getHrStaff = () => api.get('/api/hr/staff');
 export const getMyAttendance = () => api.get('/api/hr/attendance/me');
 export const clockIn = () => api.post('/api/hr/attendance/clock-in');

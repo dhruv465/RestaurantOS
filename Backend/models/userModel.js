@@ -7,10 +7,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Name is required']
     },
+    // Optional: kitchen and floor staff without email sign in with a PIN on a trusted device.
     email: {
         type: String,
-        required: [true, 'Email is required'],
         unique: true,
+        sparse: true,
+        set: (v) => (v ? String(v).trim().toLowerCase() : undefined),
         validate: {
             validator: function (v) {
                 return /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/.test(v);
@@ -30,7 +32,7 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, 'Password is required'],
+        required: [function () { return !!this.email; }, 'Password is required'],
         select: false
     },
     role: {

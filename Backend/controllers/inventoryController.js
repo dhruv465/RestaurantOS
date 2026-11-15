@@ -3,7 +3,11 @@ const mongoose = require('mongoose');
 const { Ingredient, StockMovement, Supplier, PurchaseOrder, UNITS, WASTE_REASONS, MOVEMENT_TYPES } = require('../models/inventoryModels');
 const Item = require('../models/itemModel');
 const Counter = require('../models/counterModel');
-const { move, recipeCost, round3 } = require('../utils/stock');
+const { move, recipeCost, round3, usageSummary } = require('../utils/stock');
+const Settings = require('../models/settingsModel');
+const { dayRange } = require('./reservationController');
+const { Expense, CashClosing, EXPENSE_METHODS, STOCK_CATEGORY } = require('../models/accountingModels');
+const { localParts } = require('../utils/reports');
 const { record } = require('../utils/audit');
 const { emit } = require('../utils/realtime');
 
@@ -82,6 +86,34 @@ const adjustStock = handle(async (req, res) => {
     if (!note(req.body.note)) throw createHttpError(400, 'Give a reason');
     const ingredient = await move(req.params.id, qty, { type: 'adjust', note: note(req.body.note), by: req.user._id });
     record(req.user, 'inventory.adjust', 'ingredient', ingredient._id, { qty, note: note(req.body.note) });
+    emit('inventory');
+    res.json({ success: true, data: ingredient });
+});
+
+// POST /ingredients/:id/receive { qty, unitCostPaise, method?: Cash|Card|UPI|Bank, fromTill?, note }
+// Stock bought outside a purchase order (e.g. the market). With a method it is also written to Expenses as paid.
+const receiveStock = handle(async (req, res) => {
+    idOk(req.params.id, 'Ingredient');
+    const qty = qtyOk(req.body.qty);
+    if (qty <= 0) throw createHttpError(400, 'Quantity must be more than 0');
+    const unitCostPaise = Number(req.body.unitCostPaise);
+    if (!Number.isFinite(unitCostPaise) || unitCostPaise < 0 || unitCostPaise > 1e7) throw createHttpError(400, 'Price must be 0 or more');
+    const { method } = req.body;
+    const fromTill = req.body.fromTill === true;
+    if (method !== undefined && !EXPENSE_METHODS.includes(method)) throw createHttpError(400, `Paid by must be one of: ${EXPENSE_METHODS.join(', ')}`);
+    if (fromTill && method !== 'Cash') throw createHttpError(400, 'Only cash can come from the till');
+    const amountPaise = Math.round(qty * unitCostPaise);
+    const { timezone } = await Settings.load();
+    const day = localParts(new Date(), timezone).day;
+    // Check before touching stock, so a refused payment leaves nothing half done.
+    if (fromTill && (await CashClosing.exists({ day }))) throw createHttpError(409, `Cash for ${day} is already closed`);
+    if (method && amountPaise < 1) throw createHttpError(400, 'Enter the price to record a payment');
+
+    const ingredient = await move(req.params.id, qty, { type: 'purchase', unitCostPaise, note: note(req.body.note) || 'Stock received', by: req.user._id });
+    if (method) {
+        await Expense.create({ day, category: STOCK_CATEGORY, amountPaise, method, fromTill, note: `${ingredient.name} ${qty} ${ingredient.unit}${note(req.body.note) ? ` · ${note(req.body.note)}` : ''}`.slice(0, 200), by: req.user._id });
+    }
+    record(req.user, 'inventory.receive', 'ingredient', ingredient._id, { qty, unitCostPaise, amountPaise, method: method || 'unpaid' });
     emit('inventory');
     res.json({ success: true, data: ingredient });
 });
@@ -303,7 +335,39 @@ const receivePurchaseOrder = handle(async (req, res) => {
     res.json({ success: true, data: after });
 });
 
+// GET /usage?from=YYYY-MM-DD&to=YYYY-MM-DD — per ingredient: start, bought, used (and by which dishes), wasted, left.
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+const usageReport = handle(async (req, res) => {
+    const { from, to } = req.query;
+    if (!DAY.test(from || '') || !DAY.test(to || '')) throw createHttpError(400, 'from and to must be YYYY-MM-DD');
+    const { timezone } = await Settings.load();
+    const [start] = dayRange(from, timezone);
+    const [, end] = dayRange(to, timezone);
+    if (end <= start) throw createHttpError(400, 'to must be on or after from');
+    if (end - start > 92 * 86400000) throw createHttpError(400, 'Pick at most 92 days');
+
+    const [ingredients, movements, before] = await Promise.all([
+        Ingredient.find().select('name unit active avgCostPaise').lean(),
+        StockMovement.find({ createdAt: { $gte: start, $lt: end } }).sort({ createdAt: 1, _id: 1 }).lean(),
+        // shortcut: scans all older movements to find each ingredient's last balance; add a daily snapshot if this gets slow.
+        StockMovement.aggregate([
+            { $match: { createdAt: { $lt: start } } },
+            { $sort: { createdAt: -1, _id: -1 } },
+            { $group: { _id: '$ingredient', balance: { $first: '$balanceAfter' } } },
+        ]),
+    ]);
+    const startOf = Object.fromEntries(before.map((b) => [String(b._id), b.balance || 0]));
+    const byIngredient = {};
+    for (const m of movements) (byIngredient[String(m.ingredient)] ||= []).push(m);
+    const rows = ingredients
+        .map((i) => ({ ingredient: { _id: i._id, name: i.name, unit: i.unit }, ...usageSummary(startOf[String(i._id)] || 0, byIngredient[String(i._id)] || []) }))
+        .filter((r) => r.start || byIngredient[String(r.ingredient._id)])
+        .sort((a, b) => a.ingredient.name.localeCompare(b.ingredient.name));
+    res.json({ success: true, data: rows });
+});
+
 module.exports = {
+    usageReport, receiveStock,
     listIngredients, createIngredient, updateIngredient, adjustStock, logWaste, stockTake, listMovements, shoppingList,
     listRecipes, saveRecipe, listSuppliers, createSupplier, updateSupplier,
     listPurchaseOrders, createPurchaseOrder, updatePurchaseOrder, receivePurchaseOrder,

@@ -6,7 +6,14 @@ import { createStaff, getStaff, updateStaff } from "../../https";
 
 const inputClass =
   "w-full px-3 py-2 rounded-lg bg-[var(--input-bg)] text-[var(--text-color)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-[var(--border-color)]";
-const EMPTY = { name: "", email: "", phone: "", password: "", role: "Waiter" };
+const EMPTY = { name: "", email: "", phone: "", password: "", pin: "", role: "Waiter" };
+const FIELDS = [
+  ["name", "Name", "text", true],
+  ["phone", "Phone (10 digits)", "tel", true],
+  ["pin", "PIN (4-6 digits)", "password", false],
+  ["email", "Email (optional)", "email", false],
+  ["password", "Password (with email)", "password", false],
+];
 
 const StaffSettings = () => {
   const queryClient = useQueryClient();
@@ -42,27 +49,32 @@ const StaffSettings = () => {
     const password = window.prompt(`New password for ${member.name} (min 6 characters):`);
     if (password) updateMutation.mutate({ id: member._id, password });
   };
+  const setPin = (member) => {
+    const pin = window.prompt(`New PIN for ${member.name} (4-6 digits):`);
+    if (pin) updateMutation.mutate({ id: member._id, pin });
+  };
 
   return (
     <div className="space-y-6 max-w-5xl">
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          createMutation.mutate(form);
+          // Send only what was filled in: a PIN-only person has no email or password.
+          createMutation.mutate(Object.fromEntries(Object.entries(form).filter(([, v]) => v !== "")));
         }}
-        className="bg-[var(--card-bg)] rounded-lg p-6 grid grid-cols-1 md:grid-cols-6 gap-3 items-end"
+        className="bg-[var(--card-bg)] rounded-lg p-6 grid grid-cols-1 md:grid-cols-4 gap-3 items-end"
       >
-        {[
-          ["name", "Name", "text"],
-          ["email", "Email", "email"],
-          ["phone", "Phone (10 digits)", "tel"],
-          ["password", "Password", "password"],
-        ].map(([key, label, type]) => (
+        <p className="md:col-span-4 text-xs text-[#ababab]">
+          Give a PIN for staff who only use the restaurant&apos;s devices. Add an email and password for anyone who signs in from elsewhere.
+        </p>
+        {FIELDS.map(([key, label, type, required]) => (
           <label key={key} className="space-y-1 block">
             <span className="block text-[#ababab] text-xs font-medium">{label}</span>
             <input
               type={type}
-              required
+              required={required}
+              inputMode={key === "pin" ? "numeric" : undefined}
+              autoComplete={type === "password" ? "new-password" : undefined}
               className={inputClass}
               value={form[key]}
               onChange={(e) => setForm({ ...form, [key]: e.target.value })}
@@ -113,7 +125,10 @@ const StaffSettings = () => {
               return (
                 <tr key={member._id} className="border-t border-[var(--border-color)]">
                   <td className="p-3">{member.name}{isMe && " (you)"}</td>
-                  <td className="p-3">{member.email}</td>
+                  <td className="p-3">
+                    {member.email || <span className="text-[#ababab]">PIN only</span>}
+                    {member.hasPin && member.email && <span className="ml-2 text-xs text-[#ababab]">· PIN</span>}
+                  </td>
                   <td className="p-3">{member.phone}</td>
                   <td className="p-3">
                     <select
@@ -138,13 +153,21 @@ const StaffSettings = () => {
                       {member.active ? "Active" : "Inactive"}
                     </button>
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 space-x-3 whitespace-nowrap">
                     <button
-                      onClick={() => resetPassword(member)}
+                      onClick={() => setPin(member)}
                       className="text-xs underline text-[#ababab] hover:text-[var(--text-color)]"
                     >
-                      Reset password
+                      {member.hasPin ? "Reset PIN" : "Set PIN"}
                     </button>
+                    {member.email && (
+                      <button
+                        onClick={() => resetPassword(member)}
+                        className="text-xs underline text-[#ababab] hover:text-[var(--text-color)]"
+                      >
+                        Reset password
+                      </button>
+                    )}
                   </td>
                 </tr>
               );

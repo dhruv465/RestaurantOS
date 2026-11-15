@@ -31,6 +31,27 @@ const issueSession = (res, user) => {
     });
 };
 
+// Remembers this device for 90 days (from a manager's password sign-in) so staff can sign in with their PIN after a lock.
+// shortcut: no per-device list to revoke; changing JWT_SECRET forgets every device.
+const issueDevice = (res) => {
+    const isProduction = config.nodeEnv === 'production';
+    res.cookie('deviceToken', jwt.sign({}, config.accessTokenSecret, { audience: 'device', expiresIn: '90d' }), {
+        maxAge: 1000 * 60 * 60 * 24 * 90,
+        httpOnly: true,
+        sameSite: isProduction ? 'none' : 'lax',
+        secure: isProduction,
+    });
+};
+
+// POST /api/user/forget-device — this device stops offering PIN sign-in until someone signs in with a password.
+const forgetDevice = (req, res) => {
+    const isProduction = config.nodeEnv === 'production';
+    res.clearCookie('deviceToken', { httpOnly: true, sameSite: isProduction ? 'none' : 'lax', secure: isProduction });
+    res.json({ success: true, message: 'This device no longer offers PIN sign-in' });
+};
+
+const PIN_RE = /^\d{4,6}$/;
+
 const getSetupStatus = async (req, res, next) => {
     try {
         const needsOwner = (await User.countDocuments()) === 0;
@@ -75,9 +96,9 @@ const login = async (req, res, next) => {
             return next(createHttpError(400, 'Please provide email and password'));
         }
 
-        const isUserPresent = await User.findOne({ email: String(email) }).select('+password');
-        if (!isUserPresent) {
-            return next(createHttpError.NotFound('User not found'));
+        const isUserPresent = await User.findOne({ email: String(email).trim().toLowerCase() }).select('+password');
+        if (!isUserPresent || !isUserPresent.password) {
+            return next(createHttpError.Unauthorized('Invalid credentials'));
         }
 
         const isMatch = await bcrypt.compare(String(password), isUserPresent.password);
@@ -90,6 +111,8 @@ const login = async (req, res, next) => {
         }
 
         issueSession(res, isUserPresent);
+        // Only a manager or owner signing in makes this a shared restaurant device; a waiter's own phone stays untrusted.
+        if (['Admin', 'Manager'].includes(isUserPresent.role)) issueDevice(res);
 
         record(isUserPresent, 'user.login', 'user', isUserPresent._id);
 
@@ -138,8 +161,8 @@ const logout = async (req, res, next) => {
 
 const listStaff = async (req, res, next) => {
     try {
-        const users = await User.find().sort({ createdAt: 1 });
-        res.status(200).json({ success: true, data: users.map(publicUser), roles: Object.keys(ROLES) });
+        const users = await User.find().select('+pinHash').sort({ createdAt: 1 });
+        res.status(200).json({ success: true, data: users.map((u) => ({ ...publicUser(u), hasPin: !!u.pinHash })), roles: Object.keys(ROLES) });
     } catch (error) {
         next(error);
     }
@@ -147,16 +170,22 @@ const listStaff = async (req, res, next) => {
 
 const createStaff = async (req, res, next) => {
     try {
-        const { name, email, phone, password, role } = req.body;
-        if (!name || !email || !phone || !password || !role) {
-            return next(createHttpError(400, 'Please provide name, email, phone, password and role'));
-        }
+        const { name, phone, password, role, pin } = req.body;
+        const email = req.body.email ? String(req.body.email).trim().toLowerCase() : '';
+        if (!name || !phone || !role) return next(createHttpError(400, 'Please provide name, phone and role'));
         if (!ROLES[role]) return next(createHttpError(400, 'Unknown role'));
-        if (String(password).length < 6) return next(createHttpError(400, 'Password must be at least 6 characters'));
-        if (await User.exists({ email: String(email) })) return next(createHttpError(400, 'User already exists'));
+        // Either an email + password login, or a PIN for the restaurant's devices (or both).
+        if (!email && !pin) return next(createHttpError(400, 'Give an email and password, or a PIN'));
+        if (email && String(password || '').length < 6) return next(createHttpError(400, 'Password must be at least 6 characters'));
+        if (pin && !PIN_RE.test(String(pin))) return next(createHttpError(400, 'PIN must be 4 to 6 digits'));
+        if (email && (await User.exists({ email }))) return next(createHttpError(400, 'User already exists'));
 
-        const user = await User.create({ name, email: String(email), phone, password: String(password), role });
-        record(req.user, 'staff.create', 'user', user._id, { name, email: user.email, role });
+        const user = await User.create({
+            name, phone, role,
+            ...(email && { email, password: String(password) }),
+            ...(pin && { pinHash: await bcrypt.hash(String(pin), 10) }),
+        });
+        record(req.user, 'staff.create', 'user', user._id, { name, email: user.email, role, pin: !!pin });
         res.status(201).json({ success: true, message: 'Staff member created', data: publicUser(user) });
     } catch (error) {
         next(error);
@@ -171,7 +200,7 @@ const updateStaff = async (req, res, next) => {
         const user = await User.findById(id);
         if (!user) return next(createHttpError(404, 'User not found'));
 
-        const { name, phone, role, active, password } = req.body;
+        const { name, phone, role, active, password, pin } = req.body;
         if (role !== undefined && !ROLES[role]) return next(createHttpError(400, 'Unknown role'));
 
         const isSelf = String(user._id) === String(req.user._id);
@@ -194,10 +223,16 @@ const updateStaff = async (req, res, next) => {
             if (String(password).length < 6) return next(createHttpError(400, 'Password must be at least 6 characters'));
             user.password = String(password);
         }
+        // A manager setting a new PIN also clears a lockout.
+        if (pin) {
+            if (!PIN_RE.test(String(pin))) return next(createHttpError(400, 'PIN must be 4 to 6 digits'));
+            user.pinHash = await bcrypt.hash(String(pin), 10);
+            user.pinFailures = 0;
+        }
         await user.save();
 
         record(req.user, 'staff.update', 'user', user._id, {
-            name: user.name, role: user.role, active: user.active, passwordReset: !!password,
+            name: user.name, role: user.role, active: user.active, passwordReset: !!password, pinReset: !!pin,
         });
         res.status(200).json({ success: true, message: 'Staff member updated', data: publicUser(user) });
     } catch (error) {
@@ -207,6 +242,8 @@ const updateStaff = async (req, res, next) => {
 
 module.exports = {
     issueSession,
+    issueDevice,
+    forgetDevice,
     publicUser,
     register,
     login,

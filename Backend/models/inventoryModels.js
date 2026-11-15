@@ -27,6 +27,7 @@ const stockMovementSchema = new Schema({
     note: { type: String, maxlength: 200 },
     order: { type: Schema.Types.ObjectId, ref: 'Order' },
     orderNo: String,
+    dishes: { type: [{ _id: false, name: String, quantity: Number, qty: Number }], default: undefined }, // consumption: which dishes used it
     purchaseOrder: { type: Schema.Types.ObjectId, ref: 'PurchaseOrder' },
     by: { type: Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });

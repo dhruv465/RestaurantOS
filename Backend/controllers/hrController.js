@@ -41,6 +41,7 @@ const setOwnPin = handle(async (req, res) => {
     const pin = String(req.body.pin ?? '');
     if (!/^\d{4,6}$/.test(pin)) throw createHttpError(400, 'PIN must be 4 to 6 digits');
     const me = await User.findById(req.user._id).select('+password');
+    if (!me.password) throw createHttpError(400, 'You sign in with a PIN only. Ask a manager to change it in Settings → Staff.');
     if (!(await bcrypt.compare(String(req.body.password ?? ''), me.password))) throw createHttpError(401, 'Password is wrong');
     me.pinHash = await bcrypt.hash(pin, 10);
     me.pinFailures = 0;
@@ -55,30 +56,63 @@ const pinUsers = handle(async (req, res) => {
     res.json({ success: true, data: users });
 });
 
-// POST /api/hr/pin-switch { userId, pin } — swap the logged-in user on a shared till.
-const pinSwitch = handle(async (req, res) => {
+// Checks a PIN with both limits; returns the user or throws. actor = who to blame in the audit log.
+const checkPin = async (req, actor) => {
     idOk(req.body.userId, 'User');
-    // 5 tries per person per minute, from any till.
-    if (tooMany(`pin:${req.body.userId}`, 5, 60000)) throw createHttpError(429, 'Too many tries. Wait a minute.');
+    // 5 tries per person per minute from anywhere, 20 per device address per minute.
+    if (tooMany(`pin:${req.body.userId}`, 5, 60000) || tooMany(`pinip:${req.ip}`, 20, 60000)) throw createHttpError(429, 'Too many tries. Wait a minute.');
     const user = await User.findById(req.body.userId).select('+pinHash +pinFailures');
     const ok = user && user.active !== false && user.pinHash && (await bcrypt.compare(String(req.body.pin ?? ''), user.pinHash));
     if (!ok) {
         // Persistent count, so a slow guesser (or a server restart) can't get past the per-minute limit.
-        // At the limit the PIN is removed; only the owner can set a new one, and that needs their password.
+        // At the limit the PIN is removed; the owner (with their password) or a manager must set a new one.
         if (user?.pinHash) {
             const after = await User.findOneAndUpdate({ _id: user._id, pinHash: user.pinHash }, { $inc: { pinFailures: 1 } }, { new: true }).select('+pinFailures');
             if (after && after.pinFailures >= PIN_MAX_FAILURES) {
                 await User.updateOne({ _id: user._id, pinHash: user.pinHash }, { $unset: { pinHash: 1 }, $set: { pinFailures: 0 } });
-                record(req.user, 'user.pin_locked', 'user', user._id, { failures: after.pinFailures });
-                throw createHttpError(423, `Too many wrong PINs. ${user.name} must log in with their password and set a new PIN.`);
+                record(actor || user, 'user.pin_locked', 'user', user._id, { failures: after.pinFailures });
+                throw createHttpError(423, `Too many wrong PINs. ${user.name}'s PIN is switched off. A manager can set a new one in Settings → Staff.`);
             }
         }
         throw createHttpError(401, 'Wrong PIN');
     }
     if (user.pinFailures) await User.updateOne({ _id: user._id }, { $set: { pinFailures: 0 } });
+    return user;
+};
+
+// POST /api/hr/pin-switch { userId, pin } — swap the logged-in user on a shared till.
+const pinSwitch = handle(async (req, res) => {
+    const user = await checkPin(req, req.user);
     issueSession(res, user);
     record(user, 'user.pin_switch', 'user', user._id, { from: String(req.user._id) });
     res.json({ success: true, data: publicUser(user) });
+});
+
+// POST /api/user/pin-login { userId, pin } — sign in on a trusted device (after a lock or logout).
+const pinLogin = handle(async (req, res) => {
+    const user = await checkPin(req);
+    issueSession(res, user);
+    record(user, 'user.pin_login', 'user', user._id);
+    res.json({ success: true, data: publicUser(user) });
+});
+
+// POST /api/user/pin-clock { userId, pin, breakMinutes? } — clock in, or out if already in, without signing in.
+const pinClock = handle(async (req, res) => {
+    const user = await checkPin(req);
+    const breakMinutes = Math.max(0, Math.min(600, parseInt(req.body.breakMinutes, 10) || 0));
+    const out = await Attendance.findOneAndUpdate({ user: user._id, open: true }, { clockOut: new Date(), breakMinutes, $unset: { open: 1 } }, { new: true });
+    if (out) {
+        record(user, 'attendance.clock_out', 'attendance', out._id, { breakMinutes, by: 'pin' });
+        return res.json({ success: true, data: { action: 'out', name: user.name, entry: out } });
+    }
+    try {
+        const entry = await Attendance.create({ user: user._id, clockIn: new Date(), open: true });
+        record(user, 'attendance.clock_in', 'attendance', entry._id, { by: 'pin' });
+        res.status(201).json({ success: true, data: { action: 'in', name: user.name, entry } });
+    } catch (error) {
+        if (error.code === 11000) throw createHttpError(409, 'Already clocked in. Try again.');
+        throw error;
+    }
 });
 
 // ---------- Attendance ----------
@@ -300,6 +334,7 @@ const deleteRun = handle(async (req, res) => {
 });
 
 module.exports = {
+    pinLogin, pinClock,
     setOwnPin, pinUsers, pinSwitch, staffList, myAttendance, clockIn, clockOut, listAttendance, addAttendance, editAttendance,
     listShifts, saveShift, deleteShift, listLeave, requestLeave, decideLeave,
     listProfiles, saveProfile, listRuns, createRun, runAction, deleteRun,

@@ -10,7 +10,7 @@ import {
   Contact,
   BarChart3,
   Boxes,
-  LogOut,
+  Lock,
   MonitorSmartphone,
   Moon,
   Search,
@@ -28,6 +28,8 @@ import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import { getOrders, logout } from "../../https";
 import { removeUser } from "../../redux/slices/userSlice";
+import { removeCustomer } from "../../redux/slices/customerSlice";
+import { removeAllItems } from "../../redux/slices/cartSlice";
 import { can } from "../../utils";
 import SwitchUserModal from "./SwitchUserModal";
 
@@ -107,8 +109,11 @@ const Header = () => {
 
   const logoutMutation = useMutation({
     mutationFn: () => logout(),
-    onSuccess: (data) => {
-      console.log(data);
+    onSuccess: () => {
+      // Lock: the next person signs in with their PIN on this device; nothing of this person's stays loaded.
+      queryClient.clear();
+      dispatch(removeCustomer());
+      dispatch(removeAllItems());
       dispatch(removeUser());
       setIsMenuOpen(false);
       navigate("/auth");
@@ -534,13 +539,13 @@ const Header = () => {
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 w-full p-3 rounded-lg bg-[var(--menu-item-bg)] hover:bg-[var(--menu-item-bg-hover)]"
-              aria-label="Logout"
+              aria-label="Lock screen"
             >
-              <LogOut size={20}
+              <Lock size={20}
                 className="text-xl text-[var(--text-color)]"
                 aria-hidden="true"
               />
-              <span className="text-[var(--text-color)]">Logout</span>
+              <span className="text-[var(--text-color)]">Lock screen</span>
             </button>
           </div>
         </div>
@@ -675,9 +680,10 @@ const Header = () => {
           <button
             onClick={handleLogout}
             className="flex items-center justify-center bg-[var(--card-bg)] text-[var(--text-color)] rounded-full h-10 w-10 cursor-pointer hover:bg-[var(--menu-item-bg-hover)] transition-colors"
-            aria-label="Logout"
+            aria-label="Lock screen"
+            title="Lock screen"
           >
-            <LogOut size={20} className="text-xl" />
+            <Lock size={20} className="text-xl" />
           </button>
         </div>
       </div>

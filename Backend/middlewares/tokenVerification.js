@@ -49,7 +49,18 @@ const requireAnyPermission = (...permissions) => (req, res, next) => {
     next(createHttpError(403, "You do not have permission to do this"));
 };
 
+// A device where someone signed in with a password: PIN sign-in and PIN clock-in work only here.
+const isTrustedDevice = (req, res, next) => {
+    try {
+        jwt.verify(req.cookies?.deviceToken || '', config.accessTokenSecret, { audience: 'device' });
+        next();
+    } catch {
+        next(createHttpError(401, 'PIN sign-in is not set up on this device. Sign in once with email and password.'));
+    }
+};
+
 module.exports = {
+    isTrustedDevice,
     isVerifiedUser,
     requirePermission,
     requireAnyPermission

@@ -10,9 +10,11 @@ router.get('/ingredients', requireAnyPermission('inventory.manage', 'inventory.w
 router.post('/ingredients', manage, c.createIngredient);
 router.patch('/ingredients/:id', manage, c.updateIngredient);
 router.post('/ingredients/:id/adjust', manage, c.adjustStock);
+router.post('/ingredients/:id/receive', manage, c.receiveStock);
 router.post('/waste', requireAnyPermission('inventory.manage', 'inventory.waste'), c.logWaste);
 router.post('/stock-take', manage, c.stockTake);
 router.get('/movements', manage, c.listMovements);
+router.get('/usage', manage, c.usageReport);
 router.get('/shopping-list', manage, c.shoppingList);
 router.get('/recipes', manage, c.listRecipes);
 router.put('/recipes/:itemId', manage, c.saveRecipe);

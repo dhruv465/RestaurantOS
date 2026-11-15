@@ -3,7 +3,7 @@ const createHttpError = require('http-errors');
 const mongoose = require('mongoose');
 const Order = require('../models/orderModel');
 const Settings = require('../models/settingsModel');
-const { Expense, CashClosing, EXPENSE_CATEGORIES, EXPENSE_METHODS } = require('../models/accountingModels');
+const { Expense, CashClosing, EXPENSE_CATEGORIES, EXPENSE_METHODS, STOCK_CATEGORY } = require('../models/accountingModels');
 const { PayrollRun } = require('../models/hrModels');
 const { StockMovement } = require('../models/inventoryModels');
 const { dayRange } = require('./reservationController');
@@ -76,6 +76,7 @@ const findExpense = async (id) => {
     if (!mongoose.isValidObjectId(id)) throw createHttpError(404, 'Expense not found');
     const exp = await Expense.findById(id);
     if (!exp) throw createHttpError(404, 'Expense not found');
+    if (exp.category === STOCK_CATEGORY) throw createHttpError(409, 'This came from Inventory → Stock received. Correct the stock there.');
     return exp;
 };
 
@@ -157,7 +158,7 @@ const pnl = handle(async (req, res) => {
     const { start, end, timezone } = await range(from, to);
     const [orders, expenses, runs, movements] = await Promise.all([
         Order.find({ createdAt: { $gte: start, $lt: end } }).select(ORDER_FIELDS).lean(),
-        Expense.aggregate([{ $match: { day: { $gte: from, $lte: to } } }, { $group: { _id: '$category', amountPaise: { $sum: '$amountPaise' } } }, { $sort: { amountPaise: -1 } }]),
+        Expense.aggregate([{ $match: { day: { $gte: from, $lte: to }, category: { $ne: STOCK_CATEGORY } } }, { $group: { _id: '$category', amountPaise: { $sum: '$amountPaise' } } }, { $sort: { amountPaise: -1 } }]),
         PayrollRun.find({ status: { $in: ['Finalized', 'Paid'] }, from: { $lte: to }, to: { $gte: from } }).select('status from to totalPaise tipsPaise').lean(),
         StockMovement.find({ createdAt: { $gte: start, $lt: end }, qty: { $lt: 0 } }).select('type qty unitCostPaise').lean(),
     ]);

@@ -18,7 +18,9 @@ const scheduler = require('../utils/scheduler');
 const ORDER_TYPES = Order.schema.path('type').enumValues;
 
 // Cancelled is only set by POST /:id/cancel, never by a plain status change.
-const STATUSES = ['In Progress', 'Ready', 'Completed'];
+// Clients may only move kitchen progress. Completed is set by payment (completeIfDone), never by a plain update,
+// otherwise an unpaid order could be closed and drop out of the open list.
+const STATUSES = ['In Progress', 'Ready'];
 const OPEN = { $nin: ['Completed', 'Cancelled'] };
 const assertAccepted = (order) => {
   if (order.acceptance === 'Pending') throw createHttpError(409, 'Accept or decline this guest order first');
@@ -92,6 +94,7 @@ const deliveryAndSchedule = async (body, fields) => {
 const addOrder = async (req, res, next) => {
   try {
     const fields = pickOrderFields(req.body, req.user);
+    fields.customerDetails ||= { name: 'Guest', phone: '', guests: 1 };
     if (!Array.isArray(req.body.items) || req.body.items.length === 0) {
       return next(createHttpError(400, 'Order needs at least one item'));
     }

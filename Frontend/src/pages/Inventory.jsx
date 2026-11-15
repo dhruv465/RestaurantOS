@@ -5,7 +5,7 @@ import { enqueueSnackbar } from "notistack";
 import BackButton from "../components/ui/BackButton";
 import Modal from "../components/ui/Modal";
 import {
-  adjustStock, createIngredient, createPurchaseOrder, createSupplier, getIngredients, getMovements, getPurchaseOrders,
+  adjustStock, receiveStock, getStockUsage, createIngredient, createPurchaseOrder, createSupplier, getIngredients, getMovements, getPurchaseOrders,
   getRecipes, getShoppingList, getSuppliers, logWaste, receivePurchaseOrder, saveRecipe, stockTake, updateIngredient,
   updatePurchaseOrder,
 } from "../https";
@@ -24,11 +24,22 @@ const WASTE_REASONS = ["expired", "spoiled", "dropped", "overcooked", "returned"
 const PACK = { g: [1000, "kg"], ml: [1000, "L"], pcs: [1, "pc"] };
 const packCost = (unit, paisePerUnit) => rupees(paisePerUnit * PACK[unit][0]);
 const toUnitPaise = (unit, rupeesPerPack) => (Number(rupeesPerPack) * 100) / PACK[unit][0];
-const qty = (n, unit) => `${Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 3 })} ${unit}`;
+// Big amounts read in kg / L; small ones (a recipe's 60 g) stay in g / ml.
+const qty = (n, unit) => {
+  const [size, big] = PACK[unit] || [1, unit];
+  const v = Number(n || 0);
+  const show = size > 1 && Math.abs(v) >= size ? [v / size, big] : [v, unit];
+  return `${show[0].toLocaleString("en-IN", { maximumFractionDigits: 3 })} ${show[1]}`;
+};
+// What staff type is in kg / L / pc; the server keeps g / ml / pcs.
+const toBase = (unit, v) => Number(v) * PACK[unit][0];
+const fromBase = (unit, v) => Number(v || 0) / PACK[unit][0];
+const today = () => new Date().toLocaleDateString("en-CA");
+const PAID = [["", "Not paid yet"], ["till", "Cash from the till"], ["Cash", "Cash (not from the till)"], ["UPI", "UPI"], ["Card", "Card"], ["Bank", "Bank transfer"]];
 
 const useInvalidate = () => {
   const queryClient = useQueryClient();
-  return () => ["ingredients", "movements", "shoppingList", "recipes", "purchaseOrders"].forEach((k) => queryClient.invalidateQueries({ queryKey: [k] }));
+  return () => ["ingredients", "movements", "shoppingList", "recipes", "purchaseOrders", "stockUsage"].forEach((k) => queryClient.invalidateQueries({ queryKey: [k] }));
 };
 const useAct = (fn, done = "Saved", after) => {
   const invalidate = useInvalidate();
@@ -51,15 +62,15 @@ const StockTab = ({ canManage }) => {
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ name: "", unit: "g", parLevel: "", openingStock: "", packCost: "" });
   const [acting, setActing] = useState(null); // { mode: 'waste'|'adjust'|'edit', ingredient }
-  const [entry, setEntry] = useState({ qty: "", reason: "spoiled", note: "", parLevel: "", supplier: "" });
+  const [entry, setEntry] = useState({ qty: "", reason: "spoiled", note: "", parLevel: "", supplier: "", price: "", paid: "" });
   const [counting, setCounting] = useState(null); // { [id]: counted }
 
   const create = useAct(
     () => createIngredient({
       name: form.name,
       unit: form.unit,
-      parLevel: Number(form.parLevel) || 0,
-      openingStock: Number(form.openingStock) || 0,
+      parLevel: toBase(form.unit, form.parLevel || 0),
+      openingStock: toBase(form.unit, form.openingStock || 0),
       unitCostPaise: toUnitPaise(form.unit, form.packCost || 0),
     }),
     "Ingredient added",
@@ -69,17 +80,28 @@ const StockTab = ({ canManage }) => {
     }
   );
   const close = () => setActing(null);
-  const waste = useAct(() => logWaste({ ingredient: acting.ingredient._id, qty: Number(entry.qty), reason: entry.reason, note: entry.note }), "Waste logged", close);
-  const adjust = useAct(() => adjustStock(acting.ingredient._id, { qty: Number(entry.qty), note: entry.note }), "Stock adjusted", close);
-  const edit = useAct(() => updateIngredient(acting.ingredient._id, { parLevel: Number(entry.parLevel) || 0, supplier: entry.supplier || null }), "Saved", close);
+  const unit = acting?.ingredient.unit;
+  const waste = useAct(() => logWaste({ ingredient: acting.ingredient._id, qty: toBase(unit, entry.qty), reason: entry.reason, note: entry.note }), "Waste logged", close);
+  const adjust = useAct(() => adjustStock(acting.ingredient._id, { qty: toBase(unit, entry.qty), note: entry.note }), "Stock adjusted", close);
+  const edit = useAct(() => updateIngredient(acting.ingredient._id, { parLevel: toBase(unit, entry.parLevel || 0), supplier: entry.supplier || null }), "Saved", close);
+  const receive = useAct(
+    () => receiveStock(acting.ingredient._id, {
+      qty: toBase(unit, entry.qty),
+      unitCostPaise: toUnitPaise(unit, entry.price || 0),
+      ...(entry.paid && { method: entry.paid === "till" ? "Cash" : entry.paid, fromTill: entry.paid === "till" }),
+      note: entry.note,
+    }),
+    "Stock added",
+    close
+  );
   const count = useAct(
-    () => stockTake({ counts: Object.entries(counting).filter(([, v]) => v !== "").map(([ingredient, counted]) => ({ ingredient, counted: Number(counted) })) }),
+    () => stockTake({ counts: Object.entries(counting).filter(([, v]) => v !== "").map(([ingredient, counted]) => ({ ingredient, counted: toBase(list.find((i) => i._id === ingredient).unit, counted) })) }),
     "Stock take saved",
     () => setCounting(null)
   );
 
   const open = (mode, ingredient) => {
-    setEntry({ qty: "", reason: "spoiled", note: "", parLevel: String(ingredient.parLevel || ""), supplier: ingredient.supplier?._id || "" });
+    setEntry({ qty: "", reason: "spoiled", note: "", parLevel: ingredient.parLevel ? String(fromBase(ingredient.unit, ingredient.parLevel)) : "", supplier: ingredient.supplier?._id || "", price: ingredient.avgCostPaise ? (ingredient.avgCostPaise * PACK[ingredient.unit][0] / 100).toFixed(2) : "", paid: "" });
     setActing({ mode, ingredient });
   };
 
@@ -119,11 +141,11 @@ const StockTab = ({ canManage }) => {
                 <td className={`p-2 ${i.stock < 0 ? "text-red-500" : ""}`}>
                   {counting ? (
                     <input
-                      aria-label={`Counted ${i.name} in ${i.unit}`}
+                      aria-label={`Counted ${i.name} in ${PACK[i.unit][1]}`}
                       type="number"
                       min="0"
                       className={`${inputClass} w-28`}
-                      placeholder={String(i.stock)}
+                      placeholder={String(fromBase(i.unit, i.stock))}
                       value={counting[i._id]}
                       onChange={(e) => setCounting({ ...counting, [i._id]: e.target.value })}
                     />
@@ -135,6 +157,7 @@ const StockTab = ({ canManage }) => {
                 <td className="p-2">{packCost(i.unit, i.avgCostPaise)}/{PACK[i.unit][1]}</td>
                 <td className="p-2">{i.supplier?.name || "—"}</td>
                 <td className="p-2 whitespace-nowrap space-x-1">
+                  {canManage && <button className={primary} onClick={() => open("receive", i)}>Stock received</button>}
                   <button className={secondary} onClick={() => open("waste", i)}>Waste</button>
                   {canManage && <button className={secondary} onClick={() => open("adjust", i)}>Adjust</button>}
                   {canManage && <button className={secondary} onClick={() => open("edit", i)}>Edit</button>}
@@ -158,8 +181,8 @@ const StockTab = ({ canManage }) => {
               </select>
             </label>
             <div className="grid grid-cols-3 gap-2">
-              <label className="text-xs text-[#ababab]">Low at ({form.unit})<input type="number" min="0" className={inputClass} value={form.parLevel} onChange={(e) => setForm({ ...form, parLevel: e.target.value })} /></label>
-              <label className="text-xs text-[#ababab]">Opening stock ({form.unit})<input type="number" min="0" className={inputClass} value={form.openingStock} onChange={(e) => setForm({ ...form, openingStock: e.target.value })} /></label>
+              <label className="text-xs text-[#ababab]">Low at ({PACK[form.unit][1]})<input type="number" min="0" step="any" className={inputClass} value={form.parLevel} onChange={(e) => setForm({ ...form, parLevel: e.target.value })} /></label>
+              <label className="text-xs text-[#ababab]">Opening stock ({PACK[form.unit][1]})<input type="number" min="0" step="any" className={inputClass} value={form.openingStock} onChange={(e) => setForm({ ...form, openingStock: e.target.value })} /></label>
               <label className="text-xs text-[#ababab]">Cost ₹/{PACK[form.unit][1]}<input type="number" min="0" step="0.01" className={inputClass} value={form.packCost} onChange={(e) => setForm({ ...form, packCost: e.target.value })} /></label>
             </div>
             <button className={`${primary} w-full`} disabled={!form.name.trim() || create.isPending}>Add</button>
@@ -168,19 +191,34 @@ const StockTab = ({ canManage }) => {
       )}
 
       {acting && (
-        <Modal isOpen onClose={close} title={`${acting.mode === "waste" ? "Log waste" : acting.mode === "adjust" ? "Adjust stock" : "Edit"}: ${acting.ingredient.name}`}>
+        <Modal isOpen onClose={close} title={`${{ waste: "Log waste", adjust: "Adjust stock", receive: "Stock received", edit: "Edit" }[acting.mode]}: ${acting.ingredient.name}`}>
           <form
             className="space-y-3"
             onSubmit={(e) => {
               e.preventDefault();
-              ({ waste, adjust, edit })[acting.mode].mutate();
+              ({ waste, adjust, edit, receive })[acting.mode].mutate();
             }}
           >
             {acting.mode !== "edit" && (
               <label className="block text-xs text-[#ababab]">
-                {acting.mode === "adjust" ? `Change (${acting.ingredient.unit}, use − to remove)` : `Amount wasted (${acting.ingredient.unit})`}
-                <input type="number" step="any" className={inputClass} value={entry.qty} onChange={(e) => setEntry({ ...entry, qty: e.target.value })} />
+                {{ adjust: `Change (${PACK[unit][1]}, use − to remove)`, waste: `Amount wasted (${PACK[unit][1]})`, receive: `Amount received (${PACK[unit][1]})` }[acting.mode]}
+                <input type="number" step="any" required className={inputClass} value={entry.qty} onChange={(e) => setEntry({ ...entry, qty: e.target.value })} />
               </label>
+            )}
+            {acting.mode === "receive" && (
+              <div className="grid grid-cols-2 gap-2">
+                <label className="text-xs text-[#ababab]">Price ₹/{PACK[unit][1]}
+                  <input type="number" min="0" step="0.01" className={inputClass} value={entry.price} onChange={(e) => setEntry({ ...entry, price: e.target.value })} />
+                </label>
+                <label className="text-xs text-[#ababab]">Paid
+                  <select className={inputClass} value={entry.paid} onChange={(e) => setEntry({ ...entry, paid: e.target.value })}>
+                    {PAID.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                </label>
+                <p className="col-span-2 text-xs text-[#ababab]">
+                  Total {rupees(toBase(unit, entry.qty || 0) * toUnitPaise(unit, entry.price || 0))}. Paid stock shows in Accounting → Expenses and the cash close; profit counts it when it is used.
+                </p>
+              </div>
             )}
             {acting.mode === "waste" && (
               <label className="block text-xs text-[#ababab]">Reason
@@ -190,14 +228,14 @@ const StockTab = ({ canManage }) => {
               </label>
             )}
             {acting.mode !== "edit" && (
-              <label className="block text-xs text-[#ababab]">{acting.mode === "adjust" ? "Reason (required)" : "Note"}
+              <label className="block text-xs text-[#ababab]">{acting.mode === "adjust" ? "Reason (required)" : acting.mode === "receive" ? "Note (e.g. from where)" : "Note"}
                 <input className={inputClass} value={entry.note} onChange={(e) => setEntry({ ...entry, note: e.target.value })} />
               </label>
             )}
             {acting.mode === "edit" && (
               <>
-                <label className="block text-xs text-[#ababab]">Low at ({acting.ingredient.unit})
-                  <input type="number" min="0" className={inputClass} value={entry.parLevel} onChange={(e) => setEntry({ ...entry, parLevel: e.target.value })} />
+                <label className="block text-xs text-[#ababab]">Low at ({PACK[unit][1]})
+                  <input type="number" min="0" step="any" className={inputClass} value={entry.parLevel} onChange={(e) => setEntry({ ...entry, parLevel: e.target.value })} />
                 </label>
                 <label className="block text-xs text-[#ababab]">Usual supplier
                   <select className={inputClass} value={entry.supplier} onChange={(e) => setEntry({ ...entry, supplier: e.target.value })}>
@@ -286,7 +324,7 @@ const PurchaseOrdersTab = () => {
     (status) => createPurchaseOrder({
       supplier: draft.supplier,
       status,
-      lines: draft.lines.filter((l) => l.ingredient).map((l) => ({ ingredient: l.ingredient, qty: Number(l.qty), unitCostPaise: toUnitPaise(unitOf(l.ingredient), l.packCost || 0) })),
+      lines: draft.lines.filter((l) => l.ingredient).map((l) => ({ ingredient: l.ingredient, qty: toBase(unitOf(l.ingredient), l.qty), unitCostPaise: toUnitPaise(unitOf(l.ingredient), l.packCost || 0) })),
     }),
     "Purchase order saved",
     () => setDraft(null)
@@ -296,7 +334,7 @@ const PurchaseOrdersTab = () => {
     () => receivePurchaseOrder(receiving.po._id, {
       requestId: receiving.requestId,
       invoiceNo: receiving.invoiceNo,
-      lines: receiving.lines.filter((l) => Number(l.qty) > 0).map((l) => ({ ingredient: l.ingredient, qty: Number(l.qty), unitCostPaise: toUnitPaise(l.unit, l.packCost || 0) })),
+      lines: receiving.lines.filter((l) => Number(l.qty) > 0).map((l) => ({ ingredient: l.ingredient, qty: toBase(l.unit, l.qty), unitCostPaise: toUnitPaise(l.unit, l.packCost || 0) })),
     }),
     "Goods received; stock updated",
     () => setReceiving(null)
@@ -333,7 +371,7 @@ const PurchaseOrdersTab = () => {
                         ingredient: l.ingredient?._id,
                         name: l.ingredient?.name,
                         unit: l.ingredient?.unit || "g",
-                        qty: String(Math.max(0, l.qty - l.receivedQty)),
+                        qty: String(fromBase(l.ingredient?.unit || "g", Math.max(0, l.qty - l.receivedQty))),
                         packCost: String(((l.unitCostPaise * PACK[l.ingredient?.unit || "g"][0]) / 100).toFixed(2)),
                       })),
                     })
@@ -362,7 +400,7 @@ const PurchaseOrdersTab = () => {
                   <option value="">Ingredient</option>
                   {ingredients.map((i) => <option key={i._id} value={i._id}>{i.name}</option>)}
                 </select>
-                <label className="text-xs text-[#ababab]">Qty ({unitOf(l.ingredient)})<input type="number" min="0" className={inputClass} value={l.qty} onChange={(e) => setLine(n, { qty: e.target.value })} /></label>
+                <label className="text-xs text-[#ababab]">Qty ({PACK[unitOf(l.ingredient)][1]})<input type="number" min="0" step="any" className={inputClass} value={l.qty} onChange={(e) => setLine(n, { qty: e.target.value })} /></label>
                 <label className="text-xs text-[#ababab]">₹/{PACK[unitOf(l.ingredient)][1]}<input type="number" min="0" step="0.01" className={inputClass} value={l.packCost} onChange={(e) => setLine(n, { packCost: e.target.value })} /></label>
                 <button aria-label="Remove line" className={secondary} onClick={() => setDraft({ ...draft, lines: draft.lines.filter((_, i) => i !== n) })}>×</button>
               </div>
@@ -382,8 +420,8 @@ const PurchaseOrdersTab = () => {
             {receiving.lines.map((l, n) => (
               <div key={n} className="grid grid-cols-[1fr_6rem_6rem] gap-2 items-end text-sm text-[var(--text-color)]">
                 <span>{l.name}</span>
-                <label className="text-xs text-[#ababab]">Arrived ({l.unit})
-                  <input type="number" min="0" className={inputClass} value={l.qty} onChange={(e) => setReceiving({ ...receiving, lines: receiving.lines.map((x, i) => (i === n ? { ...x, qty: e.target.value } : x)) })} />
+                <label className="text-xs text-[#ababab]">Arrived ({PACK[l.unit][1]})
+                  <input type="number" min="0" step="any" className={inputClass} value={l.qty} onChange={(e) => setReceiving({ ...receiving, lines: receiving.lines.map((x, i) => (i === n ? { ...x, qty: e.target.value } : x)) })} />
                 </label>
                 <label className="text-xs text-[#ababab]">Paid ₹/{PACK[l.unit][1]}
                   <input type="number" min="0" step="0.01" className={inputClass} value={l.packCost} onChange={(e) => setReceiving({ ...receiving, lines: receiving.lines.map((x, i) => (i === n ? { ...x, packCost: e.target.value } : x)) })} />
@@ -488,11 +526,59 @@ const HistoryTab = () => {
   );
 };
 
+// ---------- Usage: what came in, what the dishes used, what was wasted, what is left ----------
+const UsageTab = () => {
+  const [range, setRange] = useState({ from: today(), to: today() });
+  const { data, isLoading, error } = useQuery({ queryKey: ["stockUsage", range], queryFn: () => getStockUsage(range), enabled: range.from <= range.to });
+  const rows = data?.data?.data || [];
+  const Line = ({ label, value, tone = "" }) => (
+    <div className="flex justify-between"><span className="text-[#ababab]">{label}</span><span className={`font-semibold ${tone}`}>{value}</span></div>
+  );
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="text-xs text-[#ababab]">From<input type="date" className={inputClass} value={range.from} max={range.to} onChange={(e) => setRange({ ...range, from: e.target.value })} /></label>
+        <label className="text-xs text-[#ababab]">To<input type="date" className={inputClass} value={range.to} min={range.from} onChange={(e) => setRange({ ...range, to: e.target.value })} /></label>
+        <button className={secondary} onClick={() => setRange({ from: today(), to: today() })}>Today</button>
+      </div>
+      {isLoading && <p className="text-[var(--text-color)]">Loading…</p>}
+      {error && <p className="text-red-500">{errorText(error, "Could not load usage")}</p>}
+      {!isLoading && !error && rows.length === 0 && <p className="text-[#ababab]">No stock moved in these days.</p>}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+        {rows.map((r) => {
+          const u = r.ingredient.unit;
+          const dishes = Object.entries(r.dishes || {}).sort((a, b) => b[1].qty - a[1].qty);
+          return (
+            <article key={r.ingredient._id} className="bg-[var(--card-bg)] rounded-lg p-4 text-sm text-[var(--text-color)] space-y-1">
+              <h3 className="text-base font-semibold mb-1">{r.ingredient.name}</h3>
+              <Line label="At the start" value={qty(r.start, u)} />
+              <Line label="+ Added (bought)" value={qty(r.bought, u)} tone="text-green-600" />
+              <Line label="− Used in dishes" value={`${qty(r.used, u)} · ${rupees(r.usedCostPaise)}`} />
+              {dishes.length > 0 && (
+                <ul className="pl-3 border-l-2 border-[var(--border-color)] my-1">
+                  {dishes.map(([name, d]) => (
+                    <li key={name} className="flex justify-between text-xs"><span>{d.quantity} × {name}</span><span>{qty(d.qty, u)}</span></li>
+                  ))}
+                </ul>
+              )}
+              <Line label="− Wasted" value={`${qty(r.wasted, u)} · ${rupees(r.wastedCostPaise)}`} tone={r.wasted ? "text-red-500" : ""} />
+              {r.corrected !== 0 && <Line label="± Counts and fixes" value={qty(r.corrected, u)} />}
+              <div className="border-t border-[var(--border-color)] pt-1"><Line label="Left" value={qty(r.left, u)} tone={r.left < 0 ? "text-red-500" : ""} /></div>
+            </article>
+          );
+        })}
+      </div>
+      <p className="text-xs text-[#ababab]">Dishes take stock out when their bill is paid, using each dish&apos;s recipe. Dishes without a recipe use nothing.</p>
+    </div>
+  );
+};
+
 const Inventory = () => {
   const user = useSelector((state) => state.user);
   const canManage = can(user, "inventory.manage");
   const tabs = [
     ["stock", "Stock", true],
+    ["usage", "Usage", canManage],
     ["recipes", "Recipes & cost", canManage],
     ["po", "Purchase orders", canManage],
     ["suppliers", "Suppliers", canManage],
@@ -525,6 +611,7 @@ const Inventory = () => {
         ))}
       </div>
       {tab === "stock" && <StockTab canManage={canManage} />}
+      {tab === "usage" && <UsageTab />}
       {tab === "recipes" && <RecipesTab />}
       {tab === "po" && <PurchaseOrdersTab />}
       {tab === "suppliers" && <SuppliersTab />}
