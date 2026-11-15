@@ -2,7 +2,7 @@ import React from "react";
 import { formatDateAndTime } from "../../utils/index";
 
 // Plain words for where the order is: what the staff needs to do next.
-const STATUS = {
+export const STATUS = {
   "In Progress": ["In the kitchen", "bg-amber-100 text-amber-800"],
   Ready: ["Ready to serve", "bg-green-100 text-green-800"],
   Completed: ["Done", "bg-gray-200 text-gray-700"],

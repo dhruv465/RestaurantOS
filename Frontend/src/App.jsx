@@ -6,7 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Home, Auth, Orders, Tables, Menu, NotFound, Dashboard, Settings, Kitchen, Reservations, GuestOrder, Customers, CustomerDisplay, Reports, Inventory, Team, Accounting, Deliveries, MyDeliveries } from "./pages";
-import Header from "./components/ui/Header";
+import AppShell from "./components/ui/AppShell";
 import { ThemeProvider } from "./context/ThemeContext";
 import { useSelector } from "react-redux";
 import useLoadData from "./hooks/useLoadData";
@@ -17,15 +17,12 @@ import { can } from "./utils";
 function Layout() {
   const location = useLocation();
   const isLoading = useLoadData();
-  const hideHeaderRoutes = ["/auth", "*"];
   const { isAuth } = useSelector((state) => state.user);
   useRealtime(isAuth);
 
   if (isLoading) return <Loader />;
 
-  return (
-    <>
-      {hideHeaderRoutes.includes(location.pathname) ? null : <Header />}
+  const routes = (
       <Routes>
         <Route path="/menu/:id" element={<Menu />} />
         
@@ -152,8 +149,9 @@ function Layout() {
           }
         />
       </Routes>
-    </>
   );
+  // Signed-in staff get the sidebar / bottom bar; the sign-in screen stays bare.
+  return isAuth && location.pathname !== "/auth" ? <AppShell>{routes}</AppShell> : routes;
 }
 
 // Riders have no POS screens; their home is their delivery list.

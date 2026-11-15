@@ -4,7 +4,6 @@ import { enqueueSnackbar } from "notistack";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import BackButton from "../components/ui/BackButton";
-import BottomNav from "../components/ui/BottomNav";
 import { addToWaitlist, createReservation, getReservations, getWaitlist, updateReservation, updateWaitlist } from "../https";
 import { setCustomer } from "../redux/slices/customerSlice";
 import { removeAllItems } from "../redux/slices/cartSlice";
@@ -54,7 +53,7 @@ const Reservations = () => {
     });
 
   return (
-    <section className="bg-[var(--main-bg)] min-h-screen pb-24 px-2 sm:px-4 md:px-6">
+    <section className="bg-[var(--main-bg)] px-4 md:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3 py-4">
         <div className="flex items-center gap-4">
           <BackButton />
@@ -168,9 +167,6 @@ const Reservations = () => {
         </aside>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0">
-        <BottomNav />
-      </div>
     </section>
   );
 };

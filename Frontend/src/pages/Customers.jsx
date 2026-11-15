@@ -191,7 +191,7 @@ const Customers = () => {
   });
 
   return (
-    <div className="bg-[var(--main-bg)] min-h-screen px-2 sm:px-4 md:px-6 pb-8">
+    <div className="bg-[var(--main-bg)] px-4 md:px-6 pb-8">
       <div className="flex items-center gap-4 py-4">
         <BackButton />
         <h1 className="text-lg sm:text-xl md:text-2xl text-[var(--text-color)] tracking-wider font-bold">Customers</h1>

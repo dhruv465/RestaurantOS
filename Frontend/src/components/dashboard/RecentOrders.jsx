@@ -1,5 +1,3 @@
-import React from "react";
-import { GrUpdate } from "react-icons/gr";
 import {
   keepPreviousData,
   useMutation,
@@ -9,6 +7,9 @@ import {
 import { enqueueSnackbar } from "notistack";
 import { getOrders, updateOrderStatus, updateTable } from "../../https/index";
 import { formatDateAndTime } from "../../utils/index";
+import { StatusPill } from "../home/Widgets";
+
+const select = "bg-[var(--main-bg)] text-[var(--text-color)] border border-[var(--border-color)] p-1.5 rounded-lg text-sm cursor-pointer";
 
 const RecentOrders = () => {
   const queryClient = useQueryClient();
@@ -17,11 +18,11 @@ const RecentOrders = () => {
   const orderStatusUpdateMutation = useMutation({
     mutationFn: ({ orderId, orderStatus }) =>
       updateOrderStatus({ orderId, orderStatus }),
-    onSuccess: (data) => {
+    onSuccess: () => {
       enqueueSnackbar("Order status updated successfully", {
         variant: "success",
       });
-      queryClient.invalidateQueries(["orders"]);
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
     onError: () => {
       enqueueSnackbar("Failed to update order status", { variant: "error" });
@@ -32,11 +33,11 @@ const RecentOrders = () => {
   const tableStatusUpdateMutation = useMutation({
     mutationFn: ({ tableId, status, orderId }) =>
       updateTable({ tableId, status, orderId }),
-    onSuccess: (data) => {
+    onSuccess: () => {
       enqueueSnackbar("Table status updated successfully", {
         variant: "success",
       });
-      queryClient.invalidateQueries(["orders"]);
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
     onError: () => {
       enqueueSnackbar("Failed to update table status", { variant: "error" });
@@ -63,51 +64,46 @@ const RecentOrders = () => {
     enqueueSnackbar("Something went wrong!", { variant: "error" });
   }
 
-  // Filter out orders where the table status is "Available"
-  // RecentOrders.jsx
-  const filteredOrders = resData?.data.data.filter(
-    (order) =>
-      !["Completed", "Cancelled"].includes(order.orderStatus) && order.table?.status !== "Available"
-  );
+  // Newest first; open orders can be moved on from here, closed ones just show where they ended.
+  const filteredOrders = [...(resData?.data.data || [])]
+    .filter((order) => order.acceptance !== "Pending")
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 50);
+  const isOpen = (order) => !["Completed", "Cancelled"].includes(order.orderStatus);
 
   return (
-    <div className="flex flex-col w-full p-4">
-      <div className="container mx-auto bg-[var(--card-bg)] text-[var(--text-color)] p-4 rounded-lg overflow-x-auto">
-        <h2 className="text-[var(--text-color)] text-xl font-semibold mb-4">
-          Recent Orders
-        </h2>
+    <div className="w-full">
+      <div className="bg-[var(--card-bg)] text-[var(--text-color)] p-4 rounded-xl border border-[var(--border-color)]">
+        <h2 className="text-lg font-semibold">Recent orders</h2>
+        <p className="text-sm text-[var(--muted)] mb-3">The latest 50. Change an open order&apos;s status or its table here if it got stuck.</p>
+        {/* Wide table: it scrolls sideways inside its card on a phone, the page does not. */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-[#f5f5f5]">
-            <thead className="bg[var(--main-bg)] text-[#ababab]">
+          <table className="w-full text-left text-sm">
+            <thead className="text-[var(--muted)] border-b border-[var(--border-color)]">
               <tr>
-                <th className="p-3">Order ID</th>
-                <th className="p-3">Customer</th>
-                <th className="p-3">Order Status</th>
-                <th className="p-3">Table Status</th>
-                <th className="p-3">Date & Time</th>
-                <th className="p-3">Items</th>
-                <th className="p-3">Table No</th>
-                <th className="p-3">Total</th>
-                <th className="p-3 text-center">Action</th>
+                <th className="p-2">Order</th>
+                <th className="p-2">Customer</th>
+                <th className="p-2">Status</th>
+                <th className="p-2">Table</th>
+                <th className="p-2">Time</th>
+                <th className="p-2">Items</th>
+                <th className="p-2 text-right">Total</th>
+                <th className="p-2">Paid</th>
               </tr>
             </thead>
             <tbody>
               {filteredOrders?.map((order, index) => (
                 <tr
-                  key={index}
-                  className="border-b border-gray-600 text-[var(--text-color)] cursor-pointer"
+                  key={order._id || index}
+                  className="border-b border-[var(--border-color)] last:border-0"
                 >
-                  <td className="p-4">
-                    #{order.orderNo}
-                  </td>
-                  <td className="p-4">{order.customerDetails.name}</td>
-                  <td className="p-4">
+                  <td className="p-2 whitespace-nowrap">#{String(order.orderNo || "").split("-").pop()}</td>
+                  <td className="p-2">{order.customerDetails?.name || "Guest"}</td>
+                  <td className="p-2">
+                    {!isOpen(order) ? <StatusPill status={order.orderStatus} /> : (
                     <select
-                      className={`bg-[#1a1a1a] text-[#f5f5f5] border border-gray-500 p-2 rounded-lg focus:outline-none cursor-pointer ${
-                        order.orderStatus === "Ready"
-                          ? "text-green-500"
-                          : "text-yellow-500"
-                      }`}
+                      aria-label={`Status of order ${order.orderNo}`}
+                      className={select}
                       value={order.orderStatus}
                       onChange={(e) =>
                         handleOrderStatusChange({
@@ -116,22 +112,16 @@ const RecentOrders = () => {
                         })
                       }
                     >
-                      <option className="text-yellow-500" value="In Progress">
-                        In Progress
-                      </option>
-                      <option className="text-green-500" value="Ready">
-                        Ready
-                      </option>
+                      <option value="In Progress">In the kitchen</option>
+                      <option value="Ready">Ready to serve</option>
                     </select>
+                    )}
                   </td>
-                  <td className="p-4">
-                    {order.table ? (
+                  <td className="p-2 whitespace-nowrap">
+                    {order.table && isOpen(order) ? (
                     <select
-                      className={`bg-[#1a1a1a] text-[#f5f5f5] border border-gray-500 p-2 rounded-lg focus:outline-none cursor-pointer ${
-                        order.table.status === "Available"
-                          ? "text-green-500"
-                          : "text-red-500"
-                      }`}
+                      aria-label={`Table ${order.table.tableNo} status`}
+                      className={select}
                       value={order.table.status}
                       onChange={(e) =>
                         handleTableStatusChange({
@@ -141,26 +131,19 @@ const RecentOrders = () => {
                         })
                       }
                     >
-                      <option className="text-green-500" value="Available">
-                        Available
-                      </option>
-                      <option className="text-red-500" value="Booked">
-                        Booked
-                      </option>
+                      <option value="Available">Table {order.table.tableNo}: free</option>
+                      <option value="Booked">Table {order.table.tableNo}: in use</option>
                     </select>
+                    ) : order.table ? (
+                      `Table ${order.table.tableNo}`
                     ) : (
                       order.type
                     )}
                   </td>
-                  <td className="p-4">{formatDateAndTime(order.createdAt)}</td>
-                  <td className="p-4">{order.items.length} Items</td>
-                  <td className="p-4">{order.table ? `Table - ${order.table.tableNo}` : "—"}</td>
-                  <td className="p-4">₹{((order.bills?.totalPaise || 0) / 100).toFixed(2)}</td>
-                  <td className="p-4 text-center">
-                    <button className="text-blue-400 hover:text-blue-500 transition text-sm md:text-md">
-                      <GrUpdate size={20} />
-                    </button>
-                  </td>
+                  <td className="p-2 whitespace-nowrap text-[var(--muted)]">{formatDateAndTime(order.createdAt)}</td>
+                  <td className="p-2">{order.items.length}</td>
+                  <td className="p-2 text-right tabular-nums">₹{((order.bills?.totalPaise || 0) / 100).toFixed(2)}</td>
+                  <td className="p-2">{order.paymentStatus === "Paid" ? "Paid" : "No"}</td>
                 </tr>
               ))}
             </tbody>

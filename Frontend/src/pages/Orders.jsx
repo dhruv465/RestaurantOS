@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import BottomNav from "../components/ui/BottomNav";
 import OrderCard from "../components/orders/OrderCard";
 import GuestInbox from "../components/orders/GuestInbox";
 import BackButton from "../components/ui/BackButton";
@@ -58,7 +57,7 @@ const Orders = () => {
   const filteredOrders = listed.filter(VIEWS.find(([v]) => v === status)[2]);
 
   return (
-    <section className="bg-[var(--main-bg)] min-h-screen">
+    <section className="bg-[var(--main-bg)]">
       <div className="flex flex-col md:flex-row items-center justify-between px-4 md:px-8 lg:px-10 py-4 gap-4">
         <div className="flex items-center gap-4">
           <BackButton />
@@ -83,7 +82,7 @@ const Orders = () => {
         </div>
       </div>
       <GuestInbox orders={resData?.data.data || []} canManage={can(user, "orders.manage")} />
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 px-4 md:px-8 lg:px-16 py-4 pb-24">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 px-4 md:px-8 lg:px-10 py-4">
         {filteredOrders?.length > 0 ? (
           filteredOrders.map((order) => {
             return (
@@ -120,7 +119,7 @@ const Orders = () => {
               {/* Card Content */}
               <div className="px-6 py-4">
                 <p className="text-[var(--text-color)] opacity-50">
-                  {status === "open" ? "No open orders. Tap the bell at the bottom to start one." : "Nothing here yet."}
+                  {status === "open" ? "No open orders. Tap New order to start one." : "Nothing here yet."}
                 </p>
               </div>
             </div>
@@ -146,7 +145,6 @@ const Orders = () => {
         />
       )}
       {paidOrder && <Invoice orderInfo={paidOrder} setShowInvoice={() => setPaidOrder(null)} />}
-      <BottomNav />
     </section>
   );
 };

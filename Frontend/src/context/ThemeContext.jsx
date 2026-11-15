@@ -34,12 +34,14 @@ export const ThemeProvider = ({ children }) => {
       document.documentElement.style.setProperty("--main-bg", "#f0f0f0");
       document.documentElement.style.setProperty("--nav-bg", "#f1f5f9");
       document.documentElement.style.setProperty("--card-bg", "#f8fafc");
+      document.documentElement.style.setProperty("--muted", "#5f6672");
     } else {
       // Reset to original dark mode colors
       document.documentElement.style.setProperty("--header-bg", "#1a1a1a");
       document.documentElement.style.setProperty("--main-bg", "#1f1f1f");
       document.documentElement.style.setProperty("--nav-bg", "#262626");
       document.documentElement.style.setProperty("--card-bg", "#1a1a1a");
+      document.documentElement.style.setProperty("--muted", "#a3a3a3");
     }
   }, [theme]);
 

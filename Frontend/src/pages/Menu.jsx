@@ -8,7 +8,6 @@ import CartInfo from "../components/menu/CartInfo";
 import CustomerInfo from "../components/menu/CustomerInfo";
 import MenuContainer from "../components/menu/MenuContainer";
 import BackButton from "../components/ui/BackButton";
-import BottomNav from "../components/ui/BottomNav";
 import { addItems, removeAllItems } from "../redux/slices/cartSlice";
 import { removeCustomer, setCustomer } from "../redux/slices/customerSlice";
 
@@ -124,9 +123,9 @@ const Menu = () => {
   }, []);
 
   return (
-    <section className="bg-[var(--main-bg)] min-h-screen pb-20 flex flex-col md:flex-row gap-3 px-2 sm:px-4">
-      <div className="w-full md:flex-[3] md:overflow-y-auto">
-        <div className="flex flex-col md:flex-row items-center justify-between px-2 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 gap-3 sm:gap-4">
+    <section className="bg-[var(--main-bg)] flex flex-col md:flex-row gap-3 px-4 md:px-4">
+      <div className="w-full md:flex-[3] min-w-0">
+        <div className="flex flex-col md:flex-row items-center justify-between md:px-2 py-3 sm:py-4 gap-3 sm:gap-4">
           <div className="flex items-center gap-4">
             <BackButton />
             <h1 className="text-lg sm:text-xl md:text-2xl text-[var(--text-color)] tracking-wider font-bold">
@@ -150,17 +149,13 @@ const Menu = () => {
       </div>
 
       {/* Right Div */}
-      <div className="w-full md:w-auto md:flex-[1] bg-[var(--card-bg)] mt-2 md:mt-4 mx-2 md:mr-2 rounded-lg pt-2 px-2 sm:px-4 border border-[var(--border-color)]">
+      <div className="w-full md:w-auto md:flex-[1] bg-[var(--card-bg)] mt-2 md:mt-4 rounded-lg pt-2 px-2 sm:px-4 border border-[var(--border-color)]">
         <CustomerInfo />
         <hr className="border-t-2 border-[var(--border-color)] m-2" />
         {/* Order Items */}
         <CartInfo />
         {/* Bill */}
         <Bill />
-      </div>
-
-      <div className="fixed bottom-0 left-0 right-0">
-        <BottomNav />
       </div>
     </section>
   );

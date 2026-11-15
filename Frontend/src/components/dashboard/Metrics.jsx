@@ -1,103 +1,150 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getDashboard } from "../../https";
+/* eslint-disable react/prop-types -- the app does not use PropTypes */
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { getDashboard, getOrders } from "../../https";
+import { rupees } from "../../utils";
+import { BillCell, Empty, OrderRow, Panel, Stat } from "../home/Widgets";
 
-const rupees = (paise) => `₹${((paise || 0) / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
-const card = "bg-[var(--card-bg)] rounded-lg p-4 text-[var(--text-color)]";
-
-// Today vs yesterday, as text so it does not rely on colour alone.
-const Change = ({ now, before }) => {
-  if (!before) return <span className="text-xs text-[#ababab]">no sales yesterday</span>;
+// Today vs yesterday in words and an arrow, so it does not rely on colour alone.
+const change = (now, before) => {
+  if (!before) return "Nothing yesterday to compare";
   const pct = Math.round(((now - before) / before) * 100);
-  return (
-    <span className={`text-xs ${pct >= 0 ? "text-green-500" : "text-red-500"}`}>
-      {pct >= 0 ? "▲" : "▼"} {Math.abs(pct)}% vs yesterday
-    </span>
-  );
+  return `${pct >= 0 ? "▲" : "▼"} ${Math.abs(pct)}% vs yesterday`;
 };
+const dayLabel = (key, short) => new Date(`${key}T00:00`).toLocaleDateString("en-IN", short ? { weekday: "narrow" } : { weekday: "short", day: "numeric", month: "short" });
 
-const Kpi = ({ label, value, now, before }) => (
-  <div className={card}>
-    <p className="text-xs text-[#ababab]">{label}</p>
-    <p className="text-2xl font-bold">{value}</p>
-    {before !== undefined && <Change now={now} before={before} />}
-  </div>
-);
-
-const List = ({ title, rows }) => (
-  <section className={card}>
-    <h3 className="font-semibold mb-2">{title}</h3>
-    {rows.length === 0 && <p className="text-sm text-[#ababab]">Nothing yet today.</p>}
-    <ul className="text-sm space-y-1">
-      {rows.map(([k, v]) => (
-        <li key={k} className="flex justify-between">
-          <span>{k}</span>
-          <span className="font-semibold">{v}</span>
+// Label, a bar sized against the biggest row, and the figure. Used for dishes, order types and payment types.
+const Bars = ({ rows }) => {
+  const max = Math.max(1, ...rows.map((r) => r.size));
+  return (
+    <ul className="space-y-3">
+      {rows.map((r) => (
+        <li key={r.label} className="text-sm">
+          <div className="flex justify-between gap-2">
+            <span className="truncate">{r.label}</span>
+            <span className="font-semibold tabular-nums shrink-0">{r.value}</span>
+          </div>
+          <div className="mt-1 h-2 rounded-full bg-[var(--main-bg)]" aria-hidden="true">
+            <div className="h-2 rounded-full bg-[#F6b100]" style={{ width: `${(r.size / max) * 100}%` }} />
+          </div>
         </li>
       ))}
     </ul>
-  </section>
-);
+  );
+};
+
+const SalesChart = ({ trend }) => {
+  const max = Math.max(1, ...trend.map((x) => x.totalPaise));
+  const total = trend.reduce((s, x) => s + x.totalPaise, 0);
+  const best = trend.reduce((a, b) => (b.totalPaise > a.totalPaise ? b : a), trend[0]);
+  return (
+    <>
+      <p className="text-sm text-[var(--muted)] -mt-1 mb-3">
+        {rupees(total)} in 14 days{best.totalPaise > 0 && <> · best day {dayLabel(best.key)} ({rupees(best.totalPaise)})</>}
+      </p>
+      <div className="relative">
+        <span className="absolute right-0 -top-1 text-[10px] text-[var(--muted)]">{rupees(max)}</span>
+        <div className="flex items-end gap-1 sm:gap-1.5 h-44 border-b border-[var(--border-color)] pt-3" role="img" aria-label={`Daily sales for the last 14 days. Today ${rupees(trend.at(-1).totalPaise)}.`}>
+          {trend.map((x, i) => (
+            <div key={x.key} className="flex-1 h-full flex items-end" title={`${dayLabel(x.key)}: ${rupees(x.totalPaise)}, ${x.orders} orders`}>
+              <div
+                className={`w-full rounded-t ${i === trend.length - 1 ? "bg-[#F6b100]" : "bg-[#F6b100]/40"}`}
+                style={{ height: `${(x.totalPaise / max) * 100}%`, minHeight: x.totalPaise ? 3 : 0 }}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-1 sm:gap-1.5 mt-1" aria-hidden="true">
+          {trend.map((x, i) => (
+            <span key={x.key} className={`flex-1 text-center text-[10px] leading-tight ${i === trend.length - 1 ? "font-bold" : "text-[var(--muted)]"}`}>
+              {dayLabel(x.key, true)}
+              <br />
+              {x.key.slice(8)}
+            </span>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+};
 
 const Metrics = () => {
   // Realtime order/table/kitchen events invalidate ["dashboard"]; the minute poll is a fallback.
   const { data, isLoading, error } = useQuery({ queryKey: ["dashboard"], queryFn: getDashboard, refetchInterval: 60000 });
+  const { data: ordersRes } = useQuery({ queryKey: ["orders"], queryFn: getOrders, placeholderData: keepPreviousData });
   const d = data?.data?.data;
-  if (isLoading) return <p className="px-6 text-[var(--text-color)]">Loading…</p>;
-  if (error) return <p className="px-6 text-red-500">{error.response?.data?.message || "Could not load the dashboard"}</p>;
+  if (isLoading) return <p className="text-[var(--text-color)]">Loading…</p>;
+  if (error) return <p className="text-red-500">{error.response?.data?.message || "Could not load the sales numbers"}</p>;
 
   const t = d.totals;
   const y = d.yesterday;
-  const max = Math.max(1, ...d.trend.map((x) => x.totalPaise));
+  const recent = (ordersRes?.data?.data || [])
+    .filter((o) => o.acceptance !== "Pending")
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 8);
 
   return (
-    <div className="container mx-auto py-2 px-6 md:px-4 space-y-4">
-      <div>
-        <h2 className="text-xl font-semibold text-[var(--text-color)]">Today ({d.today})</h2>
-        <p className="text-sm text-[#ababab]">Paid orders only. Updates live.</p>
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <Stat label="Sales today" value={rupees(t.totalPaise)} note={change(t.totalPaise, y.totalPaise)} />
+        <Stat label="Paid orders" value={t.orders} note={change(t.orders, y.orders)} />
+        <Stat label="Average bill" value={rupees(t.averagePaise)} note={change(t.averagePaise, y.averagePaise)} />
+        <Stat label="Open orders" value={d.openOrders} note={d.pendingGuest ? `${d.pendingGuest} guest orders to accept` : "Not paid yet"} to="/orders" />
+      </div>
+      <p className="text-xs text-[var(--muted)]">Sales count paid orders only, for {dayLabel(d.today)}.</p>
+
+      <div className="grid lg:grid-cols-3 gap-4">
+        <Panel title="Sales, last 14 days" className="lg:col-span-2">
+          <SalesChart trend={d.trend} />
+        </Panel>
+        <Panel title="Top dishes today">
+          {d.topItems.length === 0 ? <Empty>No dishes sold yet today.</Empty> : (
+            <Bars rows={d.topItems.map((i) => ({ label: i.key, size: i.revenuePaise, value: `${i.quantity} sold · ${rupees(i.revenuePaise)}` }))} />
+          )}
+        </Panel>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Kpi label="Sales" value={rupees(t.totalPaise)} now={t.totalPaise} before={y.totalPaise} />
-        <Kpi label="Paid orders" value={t.orders} now={t.orders} before={y.orders} />
-        <Kpi label="Average order" value={rupees(t.averagePaise)} now={t.averagePaise} before={y.averagePaise} />
-        <Kpi label="Open orders" value={d.openOrders} />
+      <div className="grid md:grid-cols-3 gap-4">
+        <Panel title="How it was ordered">
+          {d.byType.length === 0 ? <Empty>Nothing paid yet today.</Empty> : (
+            <Bars rows={d.byType.map((x) => ({ label: x.key, size: x.totalPaise, value: `${x.orders} · ${rupees(x.totalPaise)}` }))} />
+          )}
+          {d.qrOrders > 0 && <p className="mt-3 text-xs text-[var(--muted)]">{d.qrOrders} of these were ordered by guests from the table QR.</p>}
+        </Panel>
+        <Panel title="How people paid">
+          {d.byMethod.length === 0 ? <Empty>No payments yet today.</Empty> : <Bars rows={d.byMethod.map((m) => ({ label: m.key, size: m.paidPaise, value: rupees(m.paidPaise) }))} />}
+        </Panel>
+        <Panel title="Right now">
+          <ul className="text-sm">
+            {[
+              ["Tables busy", d.tables.Booked || 0],
+              ["Tables free", d.tables.Available || 0],
+              ["Reserved", d.tables.Reserved || 0],
+              ["Kitchen: new tickets", d.kitchen.New || 0],
+              ["Kitchen: cooking", d.kitchen.Preparing || 0],
+              ["Kitchen: ready to serve", d.kitchen.Ready || 0],
+            ].map(([k, v]) => (
+              <li key={k} className="flex justify-between py-1.5 border-b border-[var(--border-color)] last:border-0">
+                <span>{k}</span>
+                <span className="font-semibold tabular-nums">{v}</span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
       </div>
 
-      <section className={card}>
-        <h3 className="font-semibold mb-3">Sales, last 14 days</h3>
-        <div className="flex items-end gap-1 h-40" role="img" aria-label={`Daily sales for 14 days. Today ${rupees(d.trend.at(-1).totalPaise)}.`}>
-          {d.trend.map((x) => (
-            <div key={x.key} className="flex-1 flex flex-col items-center justify-end h-full" title={`${x.key}: ${rupees(x.totalPaise)}, ${x.orders} orders`}>
-              <div className="w-full rounded-t bg-[#F6b100]" style={{ height: `${(x.totalPaise / max) * 100}%`, minHeight: x.totalPaise ? 2 : 0 }} />
-              <span className="text-[10px] text-[#ababab] mt-1">{x.key.slice(8)}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-        <List
-          title="Floor"
-          rows={[
-            ["Tables busy", d.tables.Booked || 0],
-            ["Tables free", d.tables.Available || 0],
-            ["Reserved", d.tables.Reserved || 0],
-            ["Being cleaned", d.tables.Cleaning || 0],
-            ["Guest QR orders waiting", d.pendingGuest],
-          ]}
-        />
-        <List title="Kitchen tickets" rows={[["New", d.kitchen.New || 0], ["Preparing", d.kitchen.Preparing || 0], ["Ready to serve", d.kitchen.Ready || 0]]} />
-        <List title="Top items today" rows={d.topItems.map((i) => [i.key, `${i.quantity} · ${rupees(i.revenuePaise)}`])} />
-        <List
-          title="How it was ordered and paid"
-          rows={[
-            ...d.byType.map((x) => [x.key, `${x.orders} · ${rupees(x.totalPaise)}`]),
-            ["Table QR", d.qrOrders],
-            ...d.byMethod.map((m) => [`Paid by ${m.key}`, rupees(m.paidPaise)]),
-          ]}
-        />
-      </div>
+      <Panel title="Recent orders" to="/orders">
+        {recent.length === 0 ? <Empty>No orders yet.</Empty> : (
+          <ul>
+            {recent.map((o) => (
+              <OrderRow
+                key={o._id}
+                order={o}
+                right={<BillCell order={o} />}
+              />
+            ))}
+          </ul>
+        )}
+      </Panel>
     </div>
   );
 };

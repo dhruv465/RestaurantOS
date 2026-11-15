@@ -5,7 +5,7 @@ import { BellRing, Receipt } from "lucide-react";
 import { acceptGuestOrder, declineGuestOrder, getTableRequests, resolveTableRequest } from "../../https";
 
 // Guest QR orders waiting for staff, plus "call server" / "bill" taps. Shown on the Orders page.
-const GuestInbox = ({ orders, canManage }) => {
+const GuestInbox = ({ orders, canManage, className = "mx-4 md:mx-8 lg:mx-10 mb-4" }) => {
   const queryClient = useQueryClient();
   const pending = orders.filter((o) => o.acceptance === "Pending");
   const { data } = useQuery({ queryKey: ["tableRequests"], queryFn: getTableRequests });
@@ -28,7 +28,7 @@ const GuestInbox = ({ orders, canManage }) => {
   if (pending.length === 0 && requests.length === 0) return null;
 
   return (
-    <section className="mx-4 md:mx-8 lg:mx-10 mb-4 p-4 rounded-lg bg-[var(--card-bg)] border-2 border-[#F6b100]" aria-live="polite">
+    <section className={`${className} p-4 rounded-lg bg-[var(--card-bg)] border-2 border-[#F6b100]`} aria-live="polite">
       {requests.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
           {requests.map((r) => (

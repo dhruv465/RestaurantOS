@@ -29,9 +29,12 @@ const MyDeliveries = () => {
   const done = list.filter((o) => !["Assigned", "Out"].includes(o.delivery.status));
 
   return (
-    <div className="bg-[var(--main-bg)] min-h-screen px-4 pb-8 text-[var(--text-color)]">
+    <div className="bg-[var(--main-bg)] px-4 pb-8 text-[var(--text-color)]">
       <div className="max-w-xl mx-auto">
-      <h1 className="text-xl font-bold py-4">My deliveries</h1>
+      <h1 className="text-xl font-bold pt-5 pb-1">My deliveries</h1>
+      <p className="text-sm text-[var(--muted)] mb-4">
+        {active.length === 0 ? "New deliveries show up here when they are given to you." : `${active.length} to deliver · collect ${rupees(active.reduce((s, o) => s + Math.max(0, (o.bills?.totalPaise || 0) - (o.paidPaise || 0)), 0))} cash in total`}
+      </p>
       {isLoading && <p>Loading…</p>}
       {!isLoading && active.length === 0 && <p className="text-[#ababab]">Nothing to deliver right now.</p>}
       <div className="space-y-3">

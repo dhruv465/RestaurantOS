@@ -81,3 +81,29 @@ export const ALLERGENS = ["gluten", "dairy", "nuts", "egg", "soy", "fish", "shel
 
 // crypto.randomUUID only exists on https/localhost; staff phones on the shop Wi-Fi use plain http.
 export const newId = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+
+// Whole rupees for dashboards (amounts are stored in paise).
+export const rupees = (paise) => `₹${Math.round((paise || 0) / 100).toLocaleString("en-IN")}`;
+
+// shortcut: "today" is this device's calendar day, not the restaurant's time zone setting; fine while tills sit in the restaurant.
+const sameDay = (date, now) => new Date(date).toDateString() === now.toDateString();
+
+// Money taken today from a list of orders: payments made today minus refunds given today, by method. Paise.
+// Loyalty points are a discount, not money in the till, so they are left out.
+export const takenToday = (orders, now = new Date()) => {
+  const byMethod = {};
+  let total = 0;
+  for (const o of orders) {
+    for (const p of o.payments || []) {
+      if (p.method === "Points" || !sameDay(p.at, now)) continue;
+      byMethod[p.method] = (byMethod[p.method] || 0) + p.amountPaise;
+      total += p.amountPaise;
+    }
+    for (const r of o.refunds || []) {
+      if (r.method === "Points" || !sameDay(r.at, now)) continue;
+      byMethod[r.method] = (byMethod[r.method] || 0) - r.amountPaise;
+      total -= r.amountPaise;
+    }
+  }
+  return { total, byMethod };
+};
