@@ -62,7 +62,7 @@ const FloorPlan = ({ tables, canEdit, canChangeStatus }) => {
 
   const onTap = (table) => {
     if (editing) {
-      const area = window.prompt(`Area for table ${table.tableNo}`, draft[table._id]?.area || table.area || "Main");
+      const area = window.prompt(`Floor for table ${table.tableNo} (type a floor name to move it)`, draft[table._id]?.area || table.area || "Main");
       if (area && area.trim()) setDraft((d) => ({ ...d, [table._id]: { ...d[table._id], area: area.trim() } }));
       return;
     }
@@ -101,7 +101,7 @@ const FloorPlan = ({ tables, canEdit, canChangeStatus }) => {
           </div>
         )}
       </div>
-      {editing && <p className="text-xs text-[#ababab] mb-2">Drag tables into place. Tap a table to change its area.</p>}
+      {editing && <p className="text-xs text-[#ababab] mb-2">Drag tables into place. Tap a table to move it to another floor.</p>}
       <div
         ref={room}
         className={`relative w-full aspect-[16/10] min-h-[320px] rounded-lg bg-[var(--card-bg)] border ${

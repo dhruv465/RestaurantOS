@@ -9,6 +9,7 @@ import { can } from "../utils";
 import BackButton from "../components/ui/BackButton";
 import BottomNav from "../components/ui/BottomNav";
 import { deleteTable, getTables } from "../https";
+import AddTableModal from "../components/dashboard/Modal";
 
 const Tables = () => {
   useEffect(() => {
@@ -17,6 +18,7 @@ const Tables = () => {
 
   const [status, setStatus] = useState("all");
   const [area, setArea] = useState("");
+  const [adding, setAdding] = useState(null); // null | { area } | { newFloor: true }
   const [view, setView] = useState(() => {
     try {
       return localStorage.getItem("tables.view") || "grid";
@@ -69,9 +71,11 @@ const Tables = () => {
 
   // Filter tables based on status and navigation source
   const areas = [...new Set((resData?.data.data || []).map((t) => t.area || "Main"))];
+  // The floor plan draws one floor at a time; cards can show all floors together.
+  const shownArea = view === "floor" && !areas.includes(area) ? areas[0] || "" : area;
   const filteredTables =
     resData?.data.data.filter((table) => {
-      if (area && (table.area || "Main") !== area) return false;
+      if (shownArea && (table.area || "Main") !== shownArea) return false;
       // When coming from create order, only show available tables
       if (isFromCreateOrder) {
         return table.status === "Available";
@@ -152,18 +156,37 @@ const Tables = () => {
             </button>
           ))}
         </div>
-        {areas.length > 1 &&
-          ["", ...areas].map((a) => (
+        {(areas.length > 1 || view === "floor") &&
+          [...(view === "floor" ? [] : [""]), ...areas].map((a) => (
             <button
               key={a || "all"}
               onClick={() => setArea(a)}
-              aria-pressed={area === a}
-              className={`px-3 py-1 rounded-full text-sm ${area === a ? "bg-[#F6b100] text-white" : "bg-[var(--card-bg)] text-[var(--text-color)]"}`}
+              aria-pressed={shownArea === a}
+              className={`px-3 py-1 rounded-full text-sm ${shownArea === a ? "bg-[#F6b100] text-white" : "bg-[var(--card-bg)] text-[var(--text-color)]"}`}
             >
-              {a || "All areas"}
+              {a || "All floors"}
             </button>
           ))}
+        {can(user, "tables.manage") && !isFromCreateOrder && (
+          <div className="flex gap-2 ml-auto">
+            <button onClick={() => setAdding({ area: shownArea || "Main" })} className="px-3 py-1 rounded-lg text-sm bg-[var(--card-bg)] text-[var(--text-color)] font-semibold">
+              + Add table
+            </button>
+            <button onClick={() => setAdding({ newFloor: true })} className="px-3 py-1 rounded-lg text-sm bg-[var(--card-bg)] text-[var(--text-color)] font-semibold">
+              + Add floor
+            </button>
+          </div>
+        )}
       </div>
+      {adding && (
+        <AddTableModal
+          isOpen
+          defaultArea={adding.area}
+          newFloor={adding.newFloor}
+          onClose={() => setAdding(null)}
+          onAdded={(table) => setArea(table.area || "Main")}
+        />
+      )}
 
       {view === "floor" ? (
         <div className="pt-4">
