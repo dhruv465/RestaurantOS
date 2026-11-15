@@ -15,6 +15,12 @@ const { isVerifiedUser } = require('./middlewares/tokenVerification');
 const { subscribe } = require('./utils/realtime');
 
 
+// Without a signing secret every sign-in fails; in production a short one can be guessed.
+if (!config.accessTokenSecret || (config.nodeEnv === 'production' && config.accessTokenSecret.length < 32)) {
+    console.error('JWT_SECRET is missing or too short (production needs 32+ characters). Set it in Backend/.env.');
+    process.exit(1);
+}
+
 //Port
 const PORT = config.port;
 connectDB();
