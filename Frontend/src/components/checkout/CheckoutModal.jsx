@@ -1,11 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 import { QRCodeSVG } from "qrcode.react";
 import Modal from "../ui/Modal";
 import { newId, buildUpiUri } from "../../utils";
-import { showOnDisplay } from "../../utils/display";
-import { checkoutOrder, createOrderRazorpay, getCustomers, getOrderById, getSettings, setOrderCustomer, verifyPaymentRazorpay } from "../../https";
+import { checkoutOrder, createOrderRazorpay, getOrderById, getSettings, verifyPaymentRazorpay } from "../../https";
 
 const METHODS = ["Cash", "Card", "UPI", "Online"];
 const toPaise = (rupees) => Math.round(Number(rupees || 0) * 100);
@@ -31,32 +30,6 @@ const Row = ({ label, value, strong }) => (
     <span>{value}</span>
   </div>
 );
-
-// Attach a known customer to the order so they can earn and spend points.
-const CustomerPicker = ({ orderId, onAttached }) => {
-  const [q, setQ] = useState("");
-  const { data } = useQuery({ queryKey: ["customers", q], queryFn: () => getCustomers(q), enabled: q.trim().length >= 2 });
-  const attach = useMutation({
-    mutationFn: (customerId) => setOrderCustomer({ orderId, customerId }),
-    onSuccess: onAttached,
-    onError: (e) => enqueueSnackbar(e.response?.data?.message || "Could not attach customer", { variant: "error" }),
-  });
-  const results = q.trim().length >= 2 ? data?.data?.data || [] : [];
-  return (
-    <div className="space-y-1">
-      <input aria-label="Find customer" className={inputClass} placeholder="Customer: search name or phone" value={q} onChange={(e) => setQ(e.target.value)} />
-      {results.slice(0, 5).map((c) => (
-        <button
-          key={c._id}
-          onClick={() => attach.mutate(c._id)}
-          className="w-full text-left text-sm p-2 rounded-lg bg-[var(--input-bg)] text-[var(--text-color)]"
-        >
-          {c.name} · {c.phone} · {c.loyaltyPoints} pts
-        </button>
-      ))}
-    </div>
-  );
-};
 
 // Take payment for a saved order: discount, tip, one or more payments (split), cash change, or Razorpay.
 const CheckoutModal = ({ orderId, onClose, onPaid }) => {
@@ -109,11 +82,8 @@ const CheckoutModal = ({ orderId, onClose, onPaid }) => {
   const bills = preview?.bills;
   const due = preview?.duePaise ?? 0;
   const perPerson = Math.ceil(due / Math.max(splitWays, 1));
-  const customer = preview?.customer;
-  const pointPaise = preview?.loyaltyPointPaise || 100;
-  const pointsCapPaise = Math.min(due, (customer?.loyaltyPoints || 0) * pointPaise);
-  const methods = customer?.loyaltyPoints > 0 ? [...METHODS, "Points"] : METHODS;
-  const defaultAmount = method === "Points" ? pointsCapPaise : Math.min(perPerson, due);
+  const methods = METHODS;
+  const defaultAmount = Math.min(perPerson, due);
   const amountPaise = amountInput !== "" ? toPaise(amountInput) : defaultAmount;
   const changePaise = method === "Cash" && tenderedInput !== "" ? toPaise(tenderedInput) - amountPaise : 0;
 
@@ -121,9 +91,6 @@ const CheckoutModal = ({ orderId, onClose, onPaid }) => {
     method === "UPI" && settings?.upiVpa
       ? buildUpiUri({ vpa: settings.upiVpa, payeeName: settings.upiPayeeName || settings.restaurantName, amountPaise, note: `Order ${order?.orderNo || ""}` })
       : null;
-  useEffect(() => {
-    if (bills && due > 0) showOnDisplay({ type: "pay", amountPaise: method === "Online" ? due : amountPaise, upiUri });
-  }, [bills, due, amountPaise, method, upiUri]);
 
   const finish = (updated) => {
     queryClient.invalidateQueries({ queryKey: ["orders"] });
@@ -132,10 +99,7 @@ const CheckoutModal = ({ orderId, onClose, onPaid }) => {
     setAmountInput("");
     setTenderedInput("");
     setReference("");
-    if (updated.paymentStatus === "Paid") {
-      showOnDisplay({ type: "thanks" });
-      onPaid(updated);
-    }
+    if (updated.paymentStatus === "Paid") onPaid(updated);
     else enqueueSnackbar(`Received. Still due: ${rupees(updated.bills.totalPaise - updated.paidPaise)}`, { variant: "info" });
   };
   const onError = (error) =>
@@ -197,7 +161,6 @@ const CheckoutModal = ({ orderId, onClose, onPaid }) => {
     if (needsReason) return enqueueSnackbar("Give a reason for the discount", { variant: "warning" });
     if (method === "Online") return payOnline();
     if (amountPaise <= 0 || amountPaise > due) return enqueueSnackbar("Amount must be between ₹0.01 and the amount due", { variant: "warning" });
-    if (method === "Points" && amountPaise > pointsCapPaise) return enqueueSnackbar("Not enough points for that amount", { variant: "warning" });
     if (changePaise < 0) return enqueueSnackbar("Cash given is less than the amount", { variant: "warning" });
     tillMutation.mutate();
   };
@@ -257,23 +220,6 @@ const CheckoutModal = ({ orderId, onClose, onPaid }) => {
               placeholder="Reason for discount (required)"
               value={reasonShown}
               onChange={(e) => setReason(e.target.value)}
-            />
-          )}
-
-          {customer ? (
-            <div className="flex justify-between items-center text-sm text-[var(--text-color)] bg-[var(--input-bg)] rounded-lg p-2">
-              <span>
-                {customer.name} · {customer.phone}
-              </span>
-              <span className="font-semibold">{customer.loyaltyPoints} pts</span>
-            </div>
-          ) : (
-            <CustomerPicker
-              orderId={orderId}
-              onAttached={() => {
-                queryClient.invalidateQueries({ queryKey: ["checkout-preview", orderId] });
-                queryClient.invalidateQueries({ queryKey: ["order", orderId] });
-              }}
             />
           )}
 
@@ -342,11 +288,6 @@ const CheckoutModal = ({ orderId, onClose, onPaid }) => {
                 </label>
               )}
               {changePaise > 0 && <Row label="Change to give" value={rupees(changePaise)} strong />}
-              {method === "Points" && (
-                <p className="text-sm text-[var(--text-color)]">
-                  Uses {Math.ceil(amountPaise / pointPaise)} of {customer.loyaltyPoints} points (1 point = {rupees(pointPaise)}).
-                </p>
-              )}
               {method === "UPI" &&
                 (settings?.upiVpa ? (
                   <div className="flex flex-col items-center gap-2 bg-white p-3 rounded-lg">

@@ -5,7 +5,7 @@ import { BellRing, Receipt } from "lucide-react";
 import { acceptGuestOrder, declineGuestOrder, getTableRequests, resolveTableRequest } from "../../https";
 
 // Guest QR orders waiting for staff, plus "call server" / "bill" taps. Shown on the Orders page.
-const GuestInbox = ({ orders, canManage }) => {
+const GuestInbox = ({ orders, canManage, className = "mx-4 md:mx-8 lg:mx-10 mb-4" }) => {
   const queryClient = useQueryClient();
   const pending = orders.filter((o) => o.acceptance === "Pending");
   const { data } = useQuery({ queryKey: ["tableRequests"], queryFn: getTableRequests });
@@ -28,7 +28,7 @@ const GuestInbox = ({ orders, canManage }) => {
   if (pending.length === 0 && requests.length === 0) return null;
 
   return (
-    <section className="mx-4 md:mx-8 lg:mx-10 mb-4 p-4 rounded-lg bg-[var(--card-bg)] border-2 border-[#F6b100]" aria-live="polite">
+    <section className={`${className} p-4 rounded-lg bg-[var(--card-bg)] border-2 border-[#F6b100]`} aria-live="polite">
       {requests.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
           {requests.map((r) => (
@@ -49,7 +49,7 @@ const GuestInbox = ({ orders, canManage }) => {
         <div key={o._id} className="flex flex-wrap items-center justify-between gap-3 py-2 border-t border-[var(--border-color)] first:border-t-0">
           <div className="text-[var(--text-color)] text-sm">
             <p className="font-semibold">
-              {o.channel === "Kiosk" ? `Kiosk order ${o.orderNo} (accept once paid at the counter)` : `Table ${o.table?.tableNo ?? "?"} · QR order ${o.orderNo}`} · {o.customerDetails?.name}
+              {`Table ${o.table?.tableNo ?? "?"} · QR order ${o.orderNo}`} · {o.customerDetails?.name}
             </p>
             <p className="text-[#ababab]">
               {o.items.map((i) => `${i.quantity}× ${i.name}${i.modifiers?.length ? ` (${i.modifiers.map((m) => m.name).join(", ")})` : ""}`).join(", ")}

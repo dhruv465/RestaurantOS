@@ -22,8 +22,6 @@ const settingsSchema = new mongoose.Schema({
     loyaltyPointPaise: { type: Number, default: 100, min: 1, max: 100000 },
     // Scheduled orders go to the kitchen this many minutes before their time.
     scheduleLeadMinutes: { type: Number, default: 30, min: 0, max: 240 },
-    // Self-order kiosk link secret; empty = kiosk off. Changed only through POST /api/settings/kiosk.
-    kioskToken: { type: String, default: '' },
 }, { timestamps: true });
 
 settingsSchema.statics.load = function () {

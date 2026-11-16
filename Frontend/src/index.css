@@ -11,6 +11,7 @@
   --main-bg: #f0f0f0;
   --nav-bg: #f1f5f9;
   --card-bg: #f8fafc;
+  --muted: #5f6672; /* secondary text that still reads on the light background */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -21,6 +22,7 @@
     --main-bg: #1f1f1f;
     --nav-bg: #262626;
     --card-bg: #1a1a1a;
+    --muted: #a3a3a3;
   }
 }
 
@@ -74,4 +76,9 @@
    passes on to the page when a list reaches its end (setting none on every element made scrolling stick). */
 html {
   overscroll-behavior-y: none;
+}
+
+body {
+  background: var(--main-bg);
+  color: var(--text-color);
 }

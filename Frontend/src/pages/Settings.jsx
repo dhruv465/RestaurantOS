@@ -6,7 +6,6 @@ import StaffSettings from "../components/settings/StaffSettings";
 import AuditLog from "../components/settings/AuditLog";
 import ModifierSettings from "../components/settings/ModifierSettings";
 import BackButton from "../components/ui/BackButton";
-import BottomNav from "../components/ui/BottomNav";
 import { can } from "../utils";
 
 const Settings = () => {
@@ -24,7 +23,7 @@ const Settings = () => {
   }, []);
 
   return (
-    <div className="bg-[var(--main-bg)] min-h-screen pb-24 px-2 sm:px-4 md:px-6 lg:px-8">
+    <div className="bg-[var(--main-bg)] px-4 md:px-6 lg:px-8">
       <div className="flex items-center gap-4 py-4">
         <BackButton />
         <h1 className="text-lg sm:text-xl md:text-2xl text-[var(--text-color)] tracking-wider font-bold">
@@ -53,10 +52,6 @@ const Settings = () => {
       {activeTab === "addons" && <ModifierSettings />}
       {activeTab === "staff" && <StaffSettings />}
       {activeTab === "audit" && <AuditLog />}
-
-      <div className="fixed bottom-0 left-0 right-0">
-        <BottomNav />
-      </div>
     </div>
   );
 };

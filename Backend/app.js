@@ -49,14 +49,11 @@ app.use("/api/items", require('./routes/itemRoutes'));
 app.use("/api/settings", require('./routes/settingsRoute'));
 app.use("/api/kds", require('./routes/kdsRoute'));
 app.use("/api/modifier-groups", require('./routes/modifierGroupRoute'));
-app.use("/api/reservations", require('./routes/reservationRoute'));
 app.use("/api/public", require('./routes/publicRoute'));
-app.use("/api/customers", require('./routes/customerRoute'));
 app.use("/api/reports", require('./routes/reportRoute'));
 app.use("/api/inventory", require('./routes/inventoryRoute'));
 app.use("/api/hr", require('./routes/hrRoute'));
 app.use("/api/accounting", require('./routes/accountingRoute'));
-app.use("/api/delivery", require('./routes/deliveryRoute'));
 // Menu photos. nosniff so an uploaded file is only ever served as the image type we checked.
 app.use("/uploads", express.static(require('path').join(__dirname, 'uploads'), {
   setHeaders: (res) => res.set('X-Content-Type-Options', 'nosniff'),

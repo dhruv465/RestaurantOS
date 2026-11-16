@@ -2,7 +2,7 @@ import React from "react";
 import { formatDateAndTime } from "../../utils/index";
 
 // Plain words for where the order is: what the staff needs to do next.
-const STATUS = {
+export const STATUS = {
   "In Progress": ["In the kitchen", "bg-amber-100 text-amber-800"],
   Ready: ["Ready to serve", "bg-green-100 text-green-800"],
   Completed: ["Done", "bg-gray-200 text-gray-700"],
@@ -35,11 +35,6 @@ const OrderCard = ({ order, onTakePayment, actions = [], onAction }) => {
         {order.scheduledFor && (
           <span className="rounded-full border border-[#F6b100] px-2 py-0.5 text-[var(--text-color)]">
             {order.kitchenHeld ? "Starts" : "For"} {formatDateAndTime(order.scheduledFor)}
-          </span>
-        )}
-        {order.delivery?.status && (
-          <span className="rounded-full border border-[var(--border-color)] px-2 py-0.5 text-[var(--text-color)]">
-            Delivery: {order.delivery.status}{order.delivery.riderName ? ` · ${order.delivery.riderName}` : ""}
           </span>
         )}
         {order.orderStatus === "Cancelled" && <span className="text-red-500">Reason: {order.cancel?.reason}</span>}

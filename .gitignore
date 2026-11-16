@@ -22,3 +22,6 @@ node_modules
 *.sln
 *.sw?
 
+
+# gstack browser profile (saved logins)
+.gstack/

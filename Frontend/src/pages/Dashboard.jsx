@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { BiSolidDish } from "react-icons/bi";
 import { MdCategory, MdDelete, MdEdit, MdTableBar } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
+import { can } from "../utils";
 import Metrics from "../components/dashboard/Metrics";
 import Modal from "../components/dashboard/Modal";
 import RecentOrders from "../components/dashboard/RecentOrders";
@@ -21,14 +22,18 @@ const buttons = [
   { label: "Add Dishes", icon: <BiSolidDish />, action: "dishes" },
 ];
 
-const tabs = ["Metrics", "Orders", "Manage Menu"];
+const card = "rounded-xl border border-[var(--border-color)] bg-[var(--card-bg)]";
+const toolButton = "text-[var(--text-color)] bg-[var(--card-bg)] border border-[var(--border-color)] hover:border-[#F6b100] px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
   const categories = useSelector(selectCategories);
+  const user = useSelector((state) => state.user);
+  // Overview for everyone who can open this page; the menu editor only for those who may change it.
+  const tabs = ["Overview", "Orders", ...(can(user, "menu.manage") ? ["Manage Menu"] : [])];
 
   useEffect(() => {
-    document.title = "RestOS | Dashboard";
+    document.title = "RestOS | Sales";
   }, []);
 
   // Modals State
@@ -51,7 +56,7 @@ const Dashboard = () => {
   const [deletingItem, setDeletingItem] = useState(null);
   const [deletingCategory, setDeletingCategory] = useState(null);
 
-  const [activeTab, setActiveTab] = useState("Metrics");
+  const [activeTab, setActiveTab] = useState("Overview");
 
   // Fetch categories and items
   const { data: itemsData, refetch: refetchItems } = useQuery({
@@ -173,7 +178,7 @@ const Dashboard = () => {
 
     if (!categories || categories.length === 0) {
       return (
-        <div className="p-6 bg-[var(--card-bg)] rounded-lg">
+        <div className={`p-6 ${card}`}>
           <p className="text-[var(--text-color)]">
             No categories available. Add some categories to get started!
           </p>
@@ -183,31 +188,13 @@ const Dashboard = () => {
 
     return (
       <div className="space-y-8">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-semibold text-[var(--text-color)]">
-            Menu Items
-          </h2>
-          <div className="flex gap-2">
-            <button
-              onClick={() => handleOpenModal("category")}
-              className="text-[var(--text-color)] bg-[var(--card-bg)] hover:bg-[var(--main-bg)] px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2"
-            >
-              <MdCategory /> Add Category
-            </button>
-            <button
-              onClick={() => handleOpenModal("dishes")}
-              className="text-[var(--text-color)] bg-[var(--card-bg)] hover:bg-[var(--main-bg)] px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2"
-            >
-              <BiSolidDish /> Add Menu Item
-            </button>
-          </div>
-        </div>
+        <h2 className="text-xl font-semibold text-[var(--text-color)]">Menu items</h2>
 
         <div className="space-y-6">
           {uniqueCategoryNames.map((category) => (
             <div key={category} className="space-y-4">
-              <div className="flex justify-between items-center border-b pb-2">
-                <h3 className="text-xl font-medium text-[var(--text-color)]">
+              <div className="flex justify-between items-center border-b border-[var(--border-color)] pb-2">
+                <h3 className="text-lg font-semibold text-[var(--text-color)]">
                   {category}
                 </h3>
                 {category !== "Uncategorized" && (
@@ -233,15 +220,15 @@ const Dashboard = () => {
                   {completeItemsByCategory[category].map((item) => (
                     <div
                       key={item._id}
-                      className="bg-[var(--card-bg)] p-6 rounded-lg"
+                      className={`p-4 ${card}`}
                     >
                       <div className="flex justify-between items-start">
                         <div>
                           <h4 className="text-lg font-medium text-[var(--text-color)]">
                             {item.name}
                           </h4>
-                          <p className="text-[var(--text-color)] mt-1">
-                            {item.description || "No description provided"}
+                          <p className="text-sm text-[var(--muted)] mt-1">
+                            {item.description || "No description"}
                           </p>
                           <p className="font-medium mt-2 text-[var(--text-color)]">
                             ₹{item.price.toFixed(2)}
@@ -279,7 +266,7 @@ const Dashboard = () => {
                   ))}
                 </div>
               ) : (
-                <div className="bg-[var(--card-bg)] p-6 rounded-lg text-center">
+                <div className={`p-6 text-center ${card}`}>
                   <p className="text-[var(--text-color)]/70">
                     No items in this category
                   </p>
@@ -342,30 +329,22 @@ const Dashboard = () => {
   };
 
   return (
-    <section className="bg-[var(--main-bg)] min-h-screen">
-      <div className="container mx-auto flex flex-col md:flex-row items-center justify-between py-14 px-4 md:px-8 gap-4">
-        <div className="flex items-center gap-3">
-          {buttons.map(({ label, icon, action }) => (
-            <button
-              key={action}
-              onClick={() => handleOpenModal(action)}
-              className="text-[var(--text-color)] bg-[var(--card-bg)] hover:bg-[var(--main-bg)] px-4 md:px-8 py-3 rounded-lg text-[#f5f5f5] font-semibold text-sm md:text-md flex items-center gap-2"
-            >
-              {label} {icon}
-            </button>
-          ))}
+    <section className="mx-auto max-w-6xl px-4 md:px-6 lg:px-8 pb-6 text-[var(--text-color)]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 pt-5 pb-4">
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold">Sales</h1>
+          <p className="text-sm text-[var(--muted)]">Today&apos;s numbers, recent orders and the menu. Updates live.</p>
         </div>
-
-        <div className="flex items-center gap-3">
+        <div role="tablist" aria-label="Sales views" className="flex gap-1 p-1 rounded-lg bg-[var(--card-bg)] border border-[var(--border-color)] w-full md:w-auto">
           {tabs.map((tab) => (
             <button
               key={tab}
-              className={`px-4 md:px-6 py-2 rounded-lg text-[#f5f5f5] font-semibold text-sm md:text-md flex items-center gap-2 ${
-                activeTab === tab
-                  ? "text-[var(--text-color)] bg-[var(--main-bg)] "
-                  : "text-[var(--text-color)] bg-[var(--card-bg)] hover:bg-[var(--main-bg)]"
-              }`}
+              role="tab"
+              aria-selected={activeTab === tab}
               onClick={() => setActiveTab(tab)}
+              className={`flex-1 md:flex-none px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap ${
+                activeTab === tab ? "bg-[#F6b100] text-white" : "text-[var(--text-color)] hover:bg-[var(--main-bg)]"
+              }`}
             >
               {tab}
             </button>
@@ -373,11 +352,22 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 md:px-8 pb-14">
-        {activeTab === "Metrics" && <Metrics />}
-        {activeTab === "Orders" && <RecentOrders />}
-        {activeTab === "Manage Menu" && <MenuManagementComponent />}
-      </div>
+      {activeTab === "Overview" && <Metrics />}
+      {activeTab === "Orders" && <RecentOrders />}
+      {activeTab === "Manage Menu" && (
+        <>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {buttons
+              .filter(({ action }) => action !== "table" || can(user, "tables.manage"))
+              .map(({ label, icon, action }) => (
+                <button key={action} onClick={() => handleOpenModal(action)} className={toolButton}>
+                  {icon} {label}
+                </button>
+              ))}
+          </div>
+          <MenuManagementComponent />
+        </>
+      )}
 
       {/* Table Modal */}
       {isTableModalOpen && (

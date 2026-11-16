@@ -11,9 +11,7 @@ const QUERIES_BY_EVENT = {
   menu: [["items"], ["categories"]],
   settings: [["settings"], ["price"]],
   kot: [["kots"], ["dashboard"]],
-  reservation: [["reservations"], ["waitlist"]],
   request: [["tableRequests"]],
-  delivery: [["deliveryBoard"], ["myDeliveries"], ["orders"]],
   inventory: [["ingredients"], ["movements"], ["shoppingList"], ["purchaseOrders"], ["stockUsage"]],
 };
 
@@ -24,7 +22,7 @@ const ALERTS = {
   preparing: (e) => ({ text: `Kitchen started ${e.tableNo ? `Table ${e.tableNo} · ` : ""}order ${e.orderNo}.`, variant: "info", brief: true }),
   ready: (e) => ({ text: `${where(e)} food is ready (order ${e.orderNo}). Pick it up now.`, variant: "success" }),
 };
-// Floor staff take orders and serve; the kitchen and riders don't need table calls.
+// Floor staff take orders and serve; the kitchen doesn't need table calls.
 const isFloor = (user) => can(user, "orders.manage") && user.role !== "Chef";
 
 const chime = typeof Audio !== "undefined" ? new Audio("/notification-sound.mp3") : null;
@@ -61,7 +59,7 @@ const useRealtime = (enabled) => {
         queryClient.invalidateQueries({ queryKey })
       );
       const me = userRef.current;
-      if (event.type === "order" && event.guest && isFloor(me)) shout(`${event.tableNo ? `Table ${event.tableNo}` : "The kiosk"} sent a new order. Open Orders to accept it.`, "info");
+      if (event.type === "order" && event.guest && isFloor(me)) shout(`Table ${event.tableNo} sent a new order. Open Orders to accept it.`, "info");
       const alert = event.type === "alert" && ALERTS[event.kind]?.(event);
       if (!alert || event.actorId === me._id) return;
       // Kitchen progress goes to the waiter who took the order; table calls and unowned orders go to all floor staff.

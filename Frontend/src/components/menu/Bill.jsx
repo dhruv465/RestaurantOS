@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addOrder,
@@ -14,7 +14,6 @@ import { removeCustomer, setCustomer } from "../../redux/slices/customerSlice";
 import Invoice from "../invoice/Invoice";
 import ReturnedItemsReceipt from "../invoice/ReturnedItemsReceipt";
 import CheckoutModal from "../checkout/CheckoutModal";
-import { showOnDisplay } from "../../utils/display";
 
 const Bill = () => {
   const dispatch = useDispatch();
@@ -30,35 +29,18 @@ const Bill = () => {
     quantity,
     modifiers: (modifiers || []).map(({ groupId, optionId }) => ({ groupId, optionId })),
   }));
-  const zoneId = customerData.orderType === "Delivery" ? customerData.delivery?.zoneId : undefined;
   const { data: priceData } = useQuery({
-    queryKey: ["price", priceLines, zoneId],
-    queryFn: () => previewOrderPrice(priceLines, zoneId),
+    queryKey: ["price", priceLines],
+    queryFn: () => previewOrderPrice(priceLines),
     enabled: priceLines.length > 0,
     placeholderData: keepPreviousData,
   });
   const bills = cartData.length ? priceData?.data?.data?.bills : null;
-  const total = bills ? bills.total - (bills.deliveryFeePaise || 0) / 100 : cartTotal; // food only; fee has its own line
+  const total = bills ? bills.total : cartTotal;
   const tax = bills?.tax ?? 0;
   const grandTotal = bills?.grandTotal ?? cartTotal;
   const taxLabel = bills ? `Tax (${bills.taxRatePercent}%${bills.taxInclusive ? " incl." : ""})` : "Tax";
 
-  // Mirror the cart on the customer display (no-op when none is open).
-  useEffect(() => {
-    if (!cartData.length) return showOnDisplay({ type: "idle" });
-    const lines = priceData?.data?.data?.items;
-    showOnDisplay({
-      type: "cart",
-      items: cartData.map((l, i) => ({
-        name: l.name,
-        quantity: l.quantity,
-        modifiers: (l.modifiers || []).map((m) => m.name),
-        pricePaise: Math.round((lines?.[i]?.price ?? l.price) * 100),
-      })),
-      taxPaise: Math.round(tax * 100),
-      totalPaise: Math.round(grandTotal * 100),
-    });
-  }, [cartData, priceData, tax, grandTotal]);
 
   const [checkoutId, setCheckoutId] = useState(null);
   // Same id for repeated taps on one new order, so the server creates it (and its KOT) once.
@@ -89,7 +71,6 @@ const Bill = () => {
       items: cartData,
       table: customerData.table?.tableId,
       orderType: customerData.orderType,
-      delivery: customerData.orderType === "Delivery" && customerData.delivery ? { zoneId: customerData.delivery.zoneId, address: customerData.delivery.address, note: customerData.delivery.note } : undefined,
       scheduledFor: customerData.scheduledFor || undefined,
       clientRequestId: requestIdRef.current,
     };
@@ -102,7 +83,7 @@ const Bill = () => {
     return orderData;
   };
 
-  // Dine-in books the table (its success clears the cart); takeaway/delivery has no table, so clear now.
+  // Dine-in books the table (its success clears the cart); takeaway has no table, so clear now.
   const bookTableFor = (order) => {
     if (!order?.table) {
       dispatch(removeCustomer());
@@ -117,10 +98,6 @@ const Bill = () => {
   const canSubmit = () => {
     if (cartData.length === 0) {
       enqueueSnackbar("Add at least one item", { variant: "warning" });
-      return false;
-    }
-    if (customerData.orderType === "Delivery" && !customerData.delivery?.zoneId) {
-      enqueueSnackbar("Start a new delivery order and pick its zone and address", { variant: "warning" });
       return false;
     }
     if (customerData.orderType === "Dine-in" && !customerData.table?.tableId) {
@@ -269,12 +246,6 @@ const Bill = () => {
           ₹{total.toFixed(2)}
         </h1>
       </div>
-      {bills?.deliveryFeePaise > 0 && (
-        <div className="flex items-center justify-between px-5 mt-2">
-          <p className="text-xs text-[var(--text-color)] font-medium mt-2">Delivery ({customerData.delivery?.zoneName})</p>
-          <h1 className="text-[var(--text-color)] text-md font-bold">₹{(bills.deliveryFeePaise / 100).toFixed(2)}</h1>
-        </div>
-      )}
       <div className="flex items-center justify-between px-5 mt-2">
         <p className="text-xs text-[var(--text-color)] font-medium mt-2">
             {taxLabel}

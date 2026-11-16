@@ -32,7 +32,7 @@ export const updateOrderStatus = ({ orderId, orderStatus }) => api.put(`/api/ord
 export const getOrderById = (orderId) => api.get(`/api/order/${orderId}`);
 export const updateOrder = ({ orderId, ...data }) => api.put(`/api/order/${orderId}`, data);
 export const deleteItemFromOrder = (orderId, itemId) => api.delete(`/api/order/${orderId}/items/${itemId}`);
-export const previewOrderPrice = (items, deliveryZoneId) => api.post('/api/order/price', { items, deliveryZoneId });
+export const previewOrderPrice = (items) => api.post('/api/order/price', { items });
 export const cancelOrder = ({ orderId, reason }) => api.post(`/api/order/${orderId}/cancel`, { reason });
 export const moveOrder = ({ orderId, tableId }) => api.post(`/api/order/${orderId}/move`, { tableId });
 export const mergeOrder = ({ orderId, fromOrderId }) => api.post(`/api/order/${orderId}/merge`, { fromOrderId });
@@ -76,14 +76,6 @@ export const createModifierGroup = (data) => api.post('/api/modifier-groups', da
 export const updateModifierGroup = (id, data) => api.put(`/api/modifier-groups/${id}`, data);
 export const deleteModifierGroup = (id) => api.delete(`/api/modifier-groups/${id}`);
 
-// Reservations and waitlist
-export const getReservations = (date) => api.get('/api/reservations', { params: { date } });
-export const createReservation = (data) => api.post('/api/reservations', data);
-export const updateReservation = (id, data) => api.patch(`/api/reservations/${id}`, data);
-export const getWaitlist = () => api.get('/api/reservations/waitlist');
-export const addToWaitlist = (data) => api.post('/api/reservations/waitlist', data);
-export const updateWaitlist = (id, data) => api.patch(`/api/reservations/waitlist/${id}`, data);
-
 // Guest QR ordering (staff side)
 export const rotateTableQr = (tableId) => api.post(`/api/table/${tableId}/qr`);
 export const newGuestCode = (tableId) => api.post(`/api/table/${tableId}/guest-code`);
@@ -98,14 +90,6 @@ export const joinTable = ({ qrToken, code }) => api.post(`/api/public/menu/${qrT
 export const placeGuestOrder = (data) => api.post('/api/public/order', data);
 export const getGuestOrders = () => api.get('/api/public/orders');
 export const callStaff = (type) => api.post('/api/public/request', { type });
-
-// Customers and loyalty
-export const getCustomers = (q) => api.get('/api/customers', { params: { q: q || undefined } });
-export const getCustomer = (id) => api.get(`/api/customers/${id}`);
-export const createCustomer = (data) => api.post('/api/customers', data);
-export const updateCustomer = (id, data) => api.patch(`/api/customers/${id}`, data);
-export const adjustCustomerPoints = (id, data) => api.post(`/api/customers/${id}/points`, data);
-export const setOrderCustomer = ({ orderId, customerId }) => api.put(`/api/order/${orderId}/customer`, { customerId });
 
 // Reports
 export const getSalesReport = (params) => api.get('/api/reports/sales', { params });
@@ -176,16 +160,7 @@ export const closeDay = (data) => api.post('/api/accounting/closings', data);
 export const getPnl = (params) => api.get('/api/accounting/pnl', { params });
 export const getGst = (params) => api.get('/api/accounting/gst', { params });
 
-// Delivery
-export const getDeliveryZones = (params) => api.get('/api/delivery/zones', { params });
-export const saveDeliveryZone = ({ id, ...data }) => (id ? api.patch(`/api/delivery/zones/${id}`, data) : api.post('/api/delivery/zones', data));
-export const getDeliveryBoard = () => api.get('/api/delivery/board');
-export const assignRider = ({ orderId, riderId }) => api.post(`/api/delivery/${orderId}/assign`, { riderId });
-export const setDeliveryStatus = ({ orderId, ...data }) => api.post(`/api/delivery/${orderId}/status`, data);
-export const getMyDeliveries = () => api.get('/api/delivery/mine');
-export const releaseOrder = (id) => api.post(`/api/order/${id}/release`);
 
-// Self-order kiosk (no login)
-export const getKioskMenu = (token) => api.get(`/api/public/kiosk/${token}/menu`);
-export const placeKioskOrder = (token, data) => api.post(`/api/public/kiosk/${token}/order`, data);
-export const setKiosk = (enabled) => api.post('/api/settings/kiosk', { enabled });
+
+// Scheduled orders
+export const releaseOrder = (id) => api.post(`/api/order/${id}/release`);

@@ -7,7 +7,6 @@ import TableCard from "../components/tables/TableCard";
 import FloorPlan from "../components/tables/FloorPlan";
 import { can } from "../utils";
 import BackButton from "../components/ui/BackButton";
-import BottomNav from "../components/ui/BottomNav";
 import { deleteTable, getTables } from "../https";
 import AddTableModal from "../components/dashboard/Modal";
 
@@ -40,7 +39,8 @@ const Tables = () => {
   const customerData = useSelector((state) => state.customer);
 
   // Check if we're coming from the create order flow
-  const isFromCreateOrder = customerData.customerName && !customerData.table;
+  // "New order" set a guest count but no table yet: this visit is to pick the table.
+  const isFromCreateOrder = customerData.guests > 0 && !customerData.table;
 
   const {
     data: resData,
@@ -97,7 +97,7 @@ const Tables = () => {
   });
 
   return (
-    <section className="bg-[var(--main-bg)] min-h-screen pb-20">
+    <section className="bg-[var(--main-bg)]">
       <div className="flex flex-col md:flex-row items-center justify-between px-4 md:px-8 lg:px-10 py-4 gap-4">
         <div className="flex items-center gap-4">
           <BackButton />
@@ -289,7 +289,6 @@ const Tables = () => {
       </div>
       )}
 
-      <BottomNav />
     </section>
   );
 };

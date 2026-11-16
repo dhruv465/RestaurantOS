@@ -1,16 +1,12 @@
-const crypto = require('crypto');
 const createHttpError = require('http-errors');
 const Settings = require('../models/settingsModel');
 const AuditLog = require('../models/auditLogModel');
 const { record } = require('../utils/audit');
 const { emit } = require('../utils/realtime');
-const { can } = require('../config/permissions');
 
 const getSettings = async (req, res, next) => {
     try {
         const settings = (await Settings.load()).toObject();
-        // Only people who can change the kiosk link see it.
-        if (!can(req.user, 'settings.manage')) delete settings.kioskToken;
         res.status(200).json({ success: true, data: settings });
     } catch (error) {
         next(error);
@@ -75,17 +71,4 @@ const getAuditLogs = async (req, res, next) => {
     }
 };
 
-// POST /api/settings/kiosk { enabled } — a new link each time (old kiosk screens stop working); off clears it.
-const setKiosk = async (req, res, next) => {
-    try {
-        const kioskToken = req.body.enabled === true ? crypto.randomBytes(18).toString('base64url') : '';
-        const settings = await Settings.findOneAndUpdate({ _id: 'restaurant' }, { kioskToken }, { new: true, upsert: true, setDefaultsOnInsert: true });
-        record(req.user, kioskToken ? 'kiosk.new-link' : 'kiosk.off', 'settings', 'restaurant', {});
-        emit('settings');
-        res.status(200).json({ success: true, data: { kioskToken: settings.kioskToken } });
-    } catch (error) {
-        next(error);
-    }
-};
-
-module.exports = { getSettings, updateSettings, getAuditLogs, setKiosk };
+module.exports = { getSettings, updateSettings, getAuditLogs };

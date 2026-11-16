@@ -81,7 +81,7 @@ const Reports = () => {
   const t = r?.totals;
 
   return (
-    <div className="bg-[var(--main-bg)] min-h-screen px-2 sm:px-4 md:px-6 pb-8 text-[var(--text-color)]">
+    <div className="bg-[var(--main-bg)] px-4 md:px-6 pb-8 text-[var(--text-color)]">
       <div className="flex flex-wrap items-center justify-between gap-3 py-4">
         <div className="flex items-center gap-4">
           <BackButton />

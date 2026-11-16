@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
-import { getSettings, setKiosk, updateSettings } from "../../https";
+import { getSettings, updateSettings } from "../../https";
 
 const FIELDS = [
   { key: "restaurantName", label: "Restaurant name" },
@@ -37,15 +37,6 @@ const GeneralSettings = ({ canEdit }) => {
       enqueueSnackbar(error.response?.data?.message || "Could not save settings", { variant: "error" }),
   });
 
-  const kioskMutation = useMutation({
-    mutationFn: setKiosk,
-    onSuccess: (_, enabled) => {
-      enqueueSnackbar(enabled ? "New kiosk link made. Old kiosk screens stop working." : "Kiosk turned off", { variant: "success" });
-      queryClient.invalidateQueries({ queryKey: ["settings"] });
-    },
-    onError: (error) => enqueueSnackbar(error.response?.data?.message || "Could not change the kiosk", { variant: "error" }),
-  });
-  const kioskUrl = data?.data?.data?.kioskToken ? `${data.data.data.publicBaseUrl || window.location.origin}/kiosk/${data.data.data.kioskToken}` : "";
 
   if (isLoading || !form) return <p className="text-[var(--text-color)]">Loading settings…</p>;
 
@@ -56,9 +47,7 @@ const GeneralSettings = ({ canEdit }) => {
     const payload = Object.fromEntries(FIELDS.map(({ key }) => [key, form[key] ?? ""]));
     payload.taxRatePercent = Number(form.taxRatePercent);
     payload.taxInclusive = !!form.taxInclusive;
-    payload.loyaltyEarnPer100 = Number(form.loyaltyEarnPer100) || 0;
     payload.scheduleLeadMinutes = Number(form.scheduleLeadMinutes ?? 30) || 0;
-    payload.loyaltyPointPaise = Math.round(Number(form.loyaltyPointRupees ?? (form.loyaltyPointPaise || 100) / 100) * 100);
     payload.stations = String(form.stationsText ?? form.stations.join(", ")).split(",").map((s) => s.trim()).filter(Boolean);
     saveMutation.mutate(payload);
   };
@@ -104,30 +93,6 @@ const GeneralSettings = ({ canEdit }) => {
           Menu prices already include GST
         </label>
         <label className="space-y-2 block">
-          <span className="block text-[#ababab] text-sm font-medium">Loyalty points earned per ₹100 (0 = off)</span>
-          <input
-            type="number"
-            min="0"
-            max="100"
-            className={inputClass}
-            value={form.loyaltyEarnPer100 ?? 0}
-            disabled={!canEdit}
-            onChange={(e) => set("loyaltyEarnPer100", e.target.value)}
-          />
-        </label>
-        <label className="space-y-2 block">
-          <span className="block text-[#ababab] text-sm font-medium">One point is worth (₹)</span>
-          <input
-            type="number"
-            min="0.01"
-            step="0.01"
-            className={inputClass}
-            value={form.loyaltyPointRupees ?? (form.loyaltyPointPaise || 100) / 100}
-            disabled={!canEdit}
-            onChange={(e) => set("loyaltyPointRupees", e.target.value)}
-          />
-        </label>
-        <label className="space-y-2 block">
           <span className="block text-[#ababab] text-sm font-medium">Send scheduled orders to the kitchen (minutes before)</span>
           <input type="number" min="0" max="240" className={inputClass} value={form.scheduleLeadMinutes ?? 30} disabled={!canEdit} onChange={(e) => set("scheduleLeadMinutes", e.target.value)} />
         </label>
@@ -144,28 +109,6 @@ const GeneralSettings = ({ canEdit }) => {
           />
         </label>
       </div>
-      {canEdit && (
-        <div className="space-y-2 border-t border-[var(--border-color)] pt-4">
-          <span className="block text-[#ababab] text-sm font-medium">Self-order kiosk</span>
-          {kioskUrl ? (
-            <p className="text-sm text-[var(--text-color)] break-all">
-              Open this on the counter screen: <a className="underline" href={kioskUrl} target="_blank" rel="noreferrer">{kioskUrl}</a>
-            </p>
-          ) : (
-            <p className="text-sm text-[#ababab]">Off. Turn it on to get a link for a screen at the counter. Kiosk orders wait in the Orders inbox until the guest pays.</p>
-          )}
-          <div className="flex gap-2">
-            <button type="button" disabled={kioskMutation.isPending} onClick={() => kioskMutation.mutate(true)} className="px-4 py-2 rounded-lg bg-[var(--nav-bg)] text-[var(--text-color)] text-sm">
-              {kioskUrl ? "Make a new link" : "Turn on"}
-            </button>
-            {kioskUrl && (
-              <button type="button" disabled={kioskMutation.isPending} onClick={() => kioskMutation.mutate(false)} className="px-4 py-2 rounded-lg bg-[var(--nav-bg)] text-[var(--text-color)] text-sm">
-                Turn off
-              </button>
-            )}
-          </div>
-        </div>
-      )}
       {canEdit && (
         <div className="flex justify-end">
           <button

@@ -1,4 +1,3 @@
-import React from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -8,10 +7,9 @@ const BackButton = () => {
     <button
       onClick={() => navigate(-1)}
       aria-label="Go back" title="Go back"
-      className="back-button bg-[#f6b0006e] text-white rounded-full p-2 text-xl sm:p-4 shadow-lg hover:bg-[#f6b100]/90 transition-colors duration-200"
+      className="back-button h-10 w-10 shrink-0 flex items-center justify-center rounded-lg border border-[var(--border-color)] bg-[var(--card-bg)] text-[var(--text-color)] hover:border-[#F6b100] transition-colors"
     >
-      <span className="sr-only">Go Back</span>
-      <ArrowLeft className="text-2xl sm:text-3xl" />
+      <ArrowLeft size={20} aria-hidden="true" />
     </button>
   );
 };

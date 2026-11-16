@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 import { BellRing, Minus, Plus, Receipt } from "lucide-react";
-import { callStaff, getGuestOrders, getKioskMenu, getPublicMenu, joinTable, placeGuestOrder, placeKioskOrder } from "../https";
+import { callStaff, getGuestOrders, getPublicMenu, joinTable, placeGuestOrder } from "../https";
 import { assetUrl, newId } from "../utils";
 import ModifierPicker from "../components/menu/ModifierPicker";
 
@@ -11,10 +11,8 @@ const errorText = (error, fallback) => error?.response?.data?.message || fallbac
 const rupees = (paise) => `₹${(paise / 100).toFixed(2)}`;
 
 // What a guest sees after scanning the table QR: enter the table code, browse, order, call staff.
-// kiosk: the counter screen at /kiosk/:token. No table code; orders wait for staff until paid at the counter.
-const GuestOrder = ({ kiosk = false }) => {
-  const { qrToken, token } = useParams();
-  const [done, setDone] = useState(null); // kiosk: the order just placed
+const GuestOrder = () => {
+  const { qrToken } = useParams();
   const queryClient = useQueryClient();
   const [code, setCode] = useState("");
   const [cart, setCart] = useState([]); // [{ key, item, quantity, modifiers, unitPaise, instructions }]
@@ -24,8 +22,8 @@ const GuestOrder = ({ kiosk = false }) => {
   const requestId = useRef(newId());
 
   const menuQuery = useQuery({
-    queryKey: ["publicMenu", kiosk ? token : qrToken],
-    queryFn: () => (kiosk ? getKioskMenu(token) : getPublicMenu(qrToken)),
+    queryKey: ["publicMenu", qrToken],
+    queryFn: () => getPublicMenu(qrToken),
     retry: false,
   });
   const menu = menuQuery.data?.data?.data;
@@ -34,10 +32,9 @@ const GuestOrder = ({ kiosk = false }) => {
     queryKey: ["guestOrders"],
     queryFn: getGuestOrders,
     retry: false,
-    enabled: !kiosk,
     refetchInterval: (q) => (q.state.status === "error" ? false : 10000),
   });
-  const joined = kiosk || ordersQuery.isSuccess;
+  const joined = ordersQuery.isSuccess;
   const myOrders = ordersQuery.data?.data?.data?.orders || [];
 
   // Tell the guest when the kitchen starts or finishes their food (not on first load).
@@ -59,15 +56,8 @@ const GuestOrder = ({ kiosk = false }) => {
   }, [ordersQuery.data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    document.title = menu ? `${menu.restaurantName} | ${kiosk ? "Order here" : `Table ${menu.tableNo}`}` : "Order";
-  }, [menu, kiosk]);
-
-  // Kiosk: the thank-you screen clears itself for the next guest.
-  useEffect(() => {
-    if (!done) return;
-    const t = setTimeout(() => setDone(null), 30000);
-    return () => clearTimeout(t);
-  }, [done]);
+    document.title = menu ? `${menu.restaurantName} | Table ${menu.tableNo}` : "Order";
+  }, [menu]);
 
   const joinMutation = useMutation({
     mutationFn: () => joinTable({ qrToken, code }),
@@ -77,7 +67,7 @@ const GuestOrder = ({ kiosk = false }) => {
 
   const orderMutation = useMutation({
     mutationFn: () =>
-      (kiosk ? (body) => placeKioskOrder(token, body) : placeGuestOrder)({
+      placeGuestOrder({
         clientRequestId: requestId.current,
         name,
         items: cart.map((l) => ({
@@ -87,14 +77,9 @@ const GuestOrder = ({ kiosk = false }) => {
           modifiers: l.modifiers.map(({ groupId, optionId }) => ({ groupId, optionId })),
         })),
       }),
-    onSuccess: (res) => {
+    onSuccess: () => {
       requestId.current = newId();
       setCart([]);
-      if (kiosk) {
-        setName("");
-        setDone(res.data.data);
-        return;
-      }
       enqueueSnackbar("Order sent. Staff will confirm it shortly.", { variant: "success" });
       queryClient.invalidateQueries({ queryKey: ["guestOrders"] });
     },
@@ -136,21 +121,6 @@ const GuestOrder = ({ kiosk = false }) => {
   if (menuQuery.isLoading) return <Shell><p className="text-center pt-20">Loading menu…</p></Shell>;
   if (menuQuery.isError) return <Shell><p className="text-center pt-20">{errorText(menuQuery.error, "Menu unavailable")}</p></Shell>;
 
-  if (done) {
-    return (
-      <Shell>
-        <div className="text-center pt-20 space-y-4" aria-live="polite">
-          <p className="text-lg">Thank you, {done.name}!</p>
-          <p className="text-sm text-[#ababab]">Your order number</p>
-          <p className="text-6xl font-bold tracking-wider">{done.orderNo.split("-").pop()}</p>
-          <p className="text-xl">Please pay {rupees(done.totalPaise)} at the counter.</p>
-          <p className="text-sm text-[#ababab]">We start cooking once you have paid.</p>
-          <button onClick={() => setDone(null)} className="px-6 py-3 rounded-lg bg-[#F6b100] text-white font-semibold">New order</button>
-        </div>
-      </Shell>
-    );
-  }
-
   if (!joined) {
     return (
       <Shell>
@@ -191,9 +161,9 @@ const GuestOrder = ({ kiosk = false }) => {
       <header className="flex items-center justify-between gap-2 py-3">
         <div>
           <h1 className="text-xl font-bold">{menu.restaurantName}</h1>
-          <p className="text-sm text-[#ababab]">{kiosk ? "Order here, pay at the counter" : `Table ${menu.tableNo}`}</p>
+          <p className="text-sm text-[#ababab]">Table {menu.tableNo}</p>
         </div>
-        {!kiosk && <div className="flex gap-2">
+        <div className="flex gap-2">
           <button
             onClick={() => staffMutation.mutate("waiter")}
             className="flex items-center gap-1 px-3 py-2 rounded-lg bg-[var(--card-bg)] text-sm"
@@ -206,7 +176,7 @@ const GuestOrder = ({ kiosk = false }) => {
           >
             <Receipt size={16} /> Bill
           </button>
-        </div>}
+        </div>
       </header>
 
       {myOrders.length > 0 && (
@@ -293,12 +263,12 @@ const GuestOrder = ({ kiosk = false }) => {
             <input
               value={name}
               onChange={(e) => setName(e.target.value.slice(0, 60))}
-              placeholder={kiosk ? "Your name (we call it when ready)" : "Your name (optional)"}
+              placeholder="Your name (optional)"
               aria-label="Your name"
               className="w-full p-2 rounded bg-[var(--input-bg)] border border-[var(--border-color)] text-sm"
             />
             <button
-              disabled={orderMutation.isPending || (kiosk && !name.trim())}
+              disabled={orderMutation.isPending}
               onClick={() => orderMutation.mutate()}
               className="w-full py-3 rounded-lg bg-[#F6b100] text-white font-semibold disabled:opacity-60"
             >

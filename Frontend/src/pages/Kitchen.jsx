@@ -25,11 +25,12 @@ const readStation = () => {
   }
 };
 
-const minutesSince = (date, now) => Math.floor((now - new Date(date)) / 60000);
+export const minutesSince = (date, now) => Math.floor((now - new Date(date)) / 60000);
+export const isLate = (ticket, now) => ticket.status !== "Ready" && minutesSince(ticket.createdAt, now) >= (ticket.prepMinutes || LATE_MINUTES);
 
 const TicketCard = ({ ticket, now, onMove, onPriority, busy }) => {
   const age = minutesSince(ticket.createdAt, now);
-  const late = ticket.status !== "Ready" && age >= (ticket.prepMinutes || LATE_MINUTES);
+  const late = isLate(ticket, now);
   const where = ticket.orderType === "Dine-in" || !ticket.orderType ? `Table ${ticket.tableNo ?? "?"}` : ticket.orderType;
 
   return (
@@ -150,7 +151,7 @@ const Kitchen = () => {
   });
 
   return (
-    <div className="bg-[var(--main-bg)] min-h-screen px-2 sm:px-4 md:px-6 pb-8">
+    <div className="bg-[var(--main-bg)] px-4 md:px-6 pb-8">
       <div className="flex flex-wrap items-center justify-between gap-3 py-4">
         <div className="flex items-center gap-4">
           <BackButton />

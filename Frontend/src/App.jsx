@@ -5,8 +5,8 @@ import {
   useLocation,
   Navigate,
 } from "react-router-dom";
-import { Home, Auth, Orders, Tables, Menu, NotFound, Dashboard, Settings, Kitchen, Reservations, GuestOrder, Customers, CustomerDisplay, Reports, Inventory, Team, Accounting, Deliveries, MyDeliveries } from "./pages";
-import Header from "./components/ui/Header";
+import { Home, Auth, Orders, Tables, Menu, NotFound, Dashboard, Settings, Kitchen, GuestOrder, Reports, Inventory, Team, Accounting } from "./pages";
+import AppShell from "./components/ui/AppShell";
 import { ThemeProvider } from "./context/ThemeContext";
 import { useSelector } from "react-redux";
 import useLoadData from "./hooks/useLoadData";
@@ -17,15 +17,12 @@ import { can } from "./utils";
 function Layout() {
   const location = useLocation();
   const isLoading = useLoadData();
-  const hideHeaderRoutes = ["/auth", "*"];
   const { isAuth } = useSelector((state) => state.user);
   useRealtime(isAuth);
 
   if (isLoading) return <Loader />;
 
-  return (
-    <>
-      {hideHeaderRoutes.includes(location.pathname) ? null : <Header />}
+  const routes = (
       <Routes>
         <Route path="/menu/:id" element={<Menu />} />
         
@@ -34,7 +31,7 @@ function Layout() {
           path="/"
           element={
             <ProtectedRoutes>
-              <HomeOrRider />
+              <Home />
             </ProtectedRoutes>
           }
         />
@@ -72,14 +69,6 @@ function Layout() {
           }
         />
         <Route
-          path="/reservations"
-          element={
-            <ProtectedRoutes permission="orders.manage">
-              <Reservations />
-            </ProtectedRoutes>
-          }
-        />
-        <Route
           path="/inventory"
           element={
             <ProtectedRoutes permission={["inventory.manage", "inventory.waste"]}>
@@ -104,34 +93,10 @@ function Layout() {
           }
         />
         <Route
-          path="/deliveries"
-          element={
-            <ProtectedRoutes permission="delivery.manage">
-              <Deliveries />
-            </ProtectedRoutes>
-          }
-        />
-        <Route
-          path="/my-deliveries"
-          element={
-            <ProtectedRoutes permission="delivery.rider">
-              <MyDeliveries />
-            </ProtectedRoutes>
-          }
-        />
-        <Route
           path="/reports"
           element={
             <ProtectedRoutes permission="dashboard.view">
               <Reports />
-            </ProtectedRoutes>
-          }
-        />
-        <Route
-          path="/customers"
-          element={
-            <ProtectedRoutes permission="orders.view">
-              <Customers />
             </ProtectedRoutes>
           }
         />
@@ -152,14 +117,9 @@ function Layout() {
           }
         />
       </Routes>
-    </>
   );
-}
-
-// Riders have no POS screens; their home is their delivery list.
-function HomeOrRider() {
-  const user = useSelector((state) => state.user);
-  return !can(user, "orders.view") && can(user, "delivery.rider") ? <Navigate to="/my-deliveries" /> : <Home />;
+  // Signed-in staff get the sidebar / bottom bar; the sign-in screen stays bare.
+  return isAuth && location.pathname !== "/auth" ? <AppShell>{routes}</AppShell> : routes;
 }
 
 function ProtectedRoutes({ children, permission }) {
@@ -182,8 +142,6 @@ function App() {
         <Routes>
           {/* Guests' phones: no staff login, no header, no staff data loading. */}
           <Route path="/order/:qrToken" element={<GuestOrder />} />
-          <Route path="/kiosk/:token" element={<GuestOrder kiosk />} />
-          <Route path="/display" element={<CustomerDisplay />} />
           <Route path="/*" element={<Layout />} />
         </Routes>
       </Router>

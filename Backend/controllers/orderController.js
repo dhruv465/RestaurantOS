@@ -9,13 +9,10 @@ const { emit } = require('../utils/realtime');
 const { sendToKitchen } = require('../utils/kitchen');
 const Table = require('../models/tableModel');
 const Kot = require('../models/kotModel');
-const Customer = require('../models/customerModel');
-const Settings = require('../models/settingsModel');
-const { findOrCreateByPhone } = require('../utils/loyalty');
-const DeliveryZone = require('../models/deliveryZoneModel');
 const scheduler = require('../utils/scheduler');
 
-const ORDER_TYPES = Order.schema.path('type').enumValues;
+// Delivery stays in the schema only so old orders still load; new orders are dine-in or takeaway.
+const ORDER_TYPES = ['Dine-in', 'Takeaway'];
 
 // Cancelled is only set by POST /:id/cancel, never by a plain status change.
 // Clients may only move kitchen progress. Completed is set by payment (completeIfDone), never by a plain update,
@@ -30,9 +27,9 @@ const assertAccepted = (order) => {
 const pickOrderFields = (body, user) => {
   const fields = {};
   if (body.customerDetails) {
-    const { name, phone, guests } = body.customerDetails;
-    // A waiter tapping a table often has no name: the bill says Guest.
-    fields.customerDetails = { name: (typeof name === 'string' && name.trim()) || 'Guest', phone, guests: Number(guests) > 0 ? Number(guests) : 1 };
+    // No guest name or phone is kept: the restaurant doesn't collect customer data.
+    const { guests } = body.customerDetails;
+    fields.customerDetails = { name: 'Guest', phone: '', guests: Number(guests) > 0 ? Number(guests) : 1 };
   }
   if (body.table !== undefined) fields.table = body.table || undefined;
   if (body.orderType !== undefined) {
@@ -52,11 +49,6 @@ const pickOrderFields = (body, user) => {
 const previewPrice = async (req, res, next) => {
   try {
     const adjustments = cleanAdjustments(req.body.adjustments);
-    // Delivery preview: add the zone's fee so the till shows the real total before sending.
-    if (mongoose.isValidObjectId(req.body.deliveryZoneId)) {
-      const zone = await DeliveryZone.findOne({ _id: req.body.deliveryZoneId, active: true }).select('feePaise');
-      if (zone?.feePaise) adjustments.deliveryFeePaise = zone.feePaise;
-    }
     const { items, bills } = await priceOrder(req.body.items, adjustments);
     res.status(200).json({ success: true, data: { items, bills } });
   } catch (error) {
@@ -64,24 +56,11 @@ const previewPrice = async (req, res, next) => {
   }
 };
 
-// Delivery orders need an active zone (its fee is added to the bill) and an address.
-// Takeaway/delivery may be scheduled up to 14 days ahead.
-const deliveryAndSchedule = async (body, fields) => {
+// Takeaway may be scheduled up to 14 days ahead.
+const schedule = (body, fields) => {
   const out = { adjustments: {} };
-  if (fields.type === 'Delivery') {
-    const d = body.delivery || {};
-    if (!mongoose.isValidObjectId(d.zoneId)) throw createHttpError(400, 'Pick a delivery zone');
-    const zone = await DeliveryZone.findOne({ _id: d.zoneId, active: true });
-    if (!zone) throw createHttpError(400, 'That delivery zone is not available');
-    const address = typeof d.address === 'string' ? d.address.trim().slice(0, 300) : '';
-    if (!address) throw createHttpError(400, 'Delivery address is required');
-    if (!/\d{6,}/.test(String(fields.customerDetails?.phone || '').replace(/\D/g, ''))) throw createHttpError(400, 'A phone number is needed for delivery');
-    out.zone = zone;
-    out.adjustments = zone.feePaise ? { deliveryFeePaise: zone.feePaise } : {};
-    out.delivery = { zone: zone._id, zoneName: zone.name, address, note: typeof d.note === 'string' ? d.note.slice(0, 200) : '', status: 'Waiting' };
-  }
   if (body.scheduledFor) {
-    if (!['Takeaway', 'Delivery'].includes(fields.type)) throw createHttpError(400, 'Only takeaway and delivery orders can be scheduled');
+    if (fields.type !== 'Takeaway') throw createHttpError(400, 'Only takeaway orders can be scheduled');
     const at = new Date(body.scheduledFor);
     if (Number.isNaN(at.getTime())) throw createHttpError(400, 'Scheduled time is not valid');
     if (at.getTime() < Date.now() + 5 * 60000) throw createHttpError(400, 'Schedule at least 5 minutes ahead');
@@ -103,15 +82,9 @@ const addOrder = async (req, res, next) => {
       const existing = await Order.findOne({ clientRequestId });
       if (existing) return res.status(200).json({ success: true, message: "Order already created", data: existing, replay: true });
     }
-    const extra = await deliveryAndSchedule(req.body, fields);
+    const extra = schedule(req.body, fields);
     const { items, bills, settings } = await priceOrder(req.body.items, extra.adjustments, []);
-    if (extra.zone && bills.subtotalPaise - bills.discountPaise < extra.zone.minOrderPaise) {
-      return next(createHttpError(400, `Minimum order for ${extra.zone.name} is ₹${(extra.zone.minOrderPaise / 100).toFixed(2)}`));
-    }
     const kitchenHeld = !!extra.scheduledFor && extra.scheduledFor.getTime() - Date.now() > (settings.scheduleLeadMinutes ?? 30) * 60000;
-    // A real phone number on the order puts the guest in Customers (for history and points).
-    const customer = fields.customerDetails?.phone ? await findOrCreateByPhone(fields.customerDetails) : null;
-    if (customer) fields.customer = customer._id;
 
     let order;
     try {
@@ -122,7 +95,6 @@ const addOrder = async (req, res, next) => {
         items,
         bills,
         adjustments: extra.adjustments,
-        delivery: extra.delivery,
         scheduledFor: extra.scheduledFor,
         kitchenHeld: kitchenHeld || undefined,
         orderNo: await Counter.nextOrderNo(settings.timezone),
@@ -190,9 +162,6 @@ const updateOrder = async (req, res, next) => {
     const before = await Order.findById(id).select('items adjustments paidPaise paymentStatus acceptance type');
     if (!before) return next(createHttpError(404, "Order not found!"));
     assertAccepted(before);
-    if (update.type && update.type !== before.type && [update.type, before.type].includes('Delivery')) {
-      return next(createHttpError(400, 'Delivery orders are created as delivery; start a new order to change that'));
-    }
     if (req.body.items !== undefined) {
       if (before.paymentStatus === 'Paid') return next(createHttpError(409, 'Order is already paid; start a new order'));
       const { items, bills } = await priceOrder(req.body.items, before.toObject().adjustments, before.items);
@@ -458,30 +427,6 @@ const declineGuestOrder = async (req, res, next) => {
   }
 };
 
-// PUT /api/order/:id/customer { customerId | null } — attach a customer before paying (for points).
-const setOrderCustomer = async (req, res, next) => {
-  try {
-    if (!mongoose.isValidObjectId(req.params.id)) return next(createHttpError(404, 'Order not found'));
-    const { customerId } = req.body;
-    let customer = null;
-    if (customerId) {
-      if (!mongoose.isValidObjectId(customerId)) return next(createHttpError(404, 'Customer not found'));
-      customer = await Customer.findById(customerId);
-      if (!customer) return next(createHttpError(404, 'Customer not found'));
-    }
-    const update = customer
-      ? { customer: customer._id, 'customerDetails.name': customer.name, 'customerDetails.phone': customer.phone }
-      : { $unset: { customer: 1 } };
-    const order = await Order.findOneAndUpdate({ _id: req.params.id, paymentStatus: { $ne: 'Paid' } }, update, { new: true });
-    if (!order) return next(createHttpError(409, 'Order not found or already paid'));
-    record(req.user, 'order.customer', 'order', order._id, { orderNo: order.orderNo, customer: customer?._id });
-    emit('order', { orderId: order._id });
-    res.status(200).json({ success: true, data: order });
-  } catch (error) {
-    next(error);
-  }
-};
-
 // POST /api/order/:id/checkout { requestId, adjustments?, payments: [{ method, amountPaise, tenderedPaise? }], dryRun? }
 // dryRun returns the bill for the given discount/tip without saving. payments: [] just saves discount/tip.
 const checkout = async (req, res, next) => {
@@ -495,18 +440,12 @@ const checkout = async (req, res, next) => {
       const order = await Order.findById(id);
       if (!order) return next(createHttpError(404, 'Order not found'));
       const bills = await billsFor(order, withFee(order, adjustments));
-      const [customer, settings] = await Promise.all([
-        order.customer ? Customer.findById(order.customer).select('name phone loyaltyPoints') : null,
-        Settings.load(),
-      ]);
       return res.status(200).json({
         success: true,
         data: {
           bills,
           paidPaise: order.paidPaise || 0,
           duePaise: bills.totalPaise - (order.paidPaise || 0),
-          customer,
-          loyaltyPointPaise: settings.loyaltyPointPaise,
         },
       });
     }
@@ -534,7 +473,6 @@ const checkout = async (req, res, next) => {
 
 module.exports = {
   releaseNow,
-  setOrderCustomer,
   acceptGuestOrder,
   declineGuestOrder,
   cancelOrder,

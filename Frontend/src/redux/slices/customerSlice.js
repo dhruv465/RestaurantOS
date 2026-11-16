@@ -7,8 +7,7 @@ const initialState = {
   guests: 0,
   table: null,
   orderType: "Dine-in",
-  delivery: null, // { zoneId, zoneName, feePaise, minOrderPaise, address, note }
-  scheduledFor: "", // ISO time, takeaway/delivery only
+  scheduledFor: "", // ISO time, takeaway only
 }
 
 const customerSlice = createSlice({
@@ -17,7 +16,7 @@ const customerSlice = createSlice({
   reducers: {
     setCustomer: (state, action) => {
       // Destructure only the fields that are being updated
-      const { orderId, customerName, customerPhone, guests, table, orderType, delivery, scheduledFor } = action.payload;
+      const { orderId, customerName, customerPhone, guests, table, orderType, scheduledFor } = action.payload;
       
       // Only update fields that exist in the payload
       if (orderId !== undefined) state.orderId = orderId;
@@ -25,7 +24,6 @@ const customerSlice = createSlice({
       if (customerPhone !== undefined) state.customerPhone = customerPhone;
       if (guests !== undefined) state.guests = guests;
       if (orderType !== undefined) state.orderType = orderType;
-      if (delivery !== undefined) state.delivery = delivery;
       if (scheduledFor !== undefined) state.scheduledFor = scheduledFor;
       
       // Preserve table data if it's not in the payload
@@ -43,7 +41,6 @@ const customerSlice = createSlice({
       state.guests = 0;
       state.table = null;
       state.orderType = "Dine-in";
-      state.delivery = null;
       state.scheduledFor = "";
     },
     updateTable: (state, action) => {
@@ -64,8 +61,8 @@ const customerSlice = createSlice({
         state.guests = customerDetails.guests || 1;
         state.orderId = action.payload.table.currentOrder.data._id || "";
       } 
-      // If we have customer info passed with the table selection, use that
-      else if (isNewTable && customerName) {
+      // A new order from "New order" carries its guest count to the table
+      else if (isNewTable && guests) {
         state.customerName = customerName;
         state.customerPhone = customerPhone || "";
         state.guests = guests || 1;

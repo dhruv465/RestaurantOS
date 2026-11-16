@@ -197,7 +197,7 @@ const refundOrder = async (req, res, next) => {
         const reason = typeof req.body.reason === "string" ? req.body.reason.trim().slice(0, 200) : "";
         const requestId = typeof req.body.requestId === "string" ? req.body.requestId.slice(0, 100) : "";
         if (!mongoose.isValidObjectId(orderId)) return next(createHttpError(404, "Order not found"));
-        if (!["Cash", "Card", "UPI", "Online", "Points"].includes(method)) return next(createHttpError(400, "Pick how the money goes back"));
+        if (!["Cash", "Card", "UPI", "Online"].includes(method)) return next(createHttpError(400, "Pick how the money goes back"));
         if (!Number.isInteger(amountPaise) || amountPaise <= 0) return next(createHttpError(400, "Invalid refund amount"));
         if (!reason) return next(createHttpError(400, "Give a reason for the refund"));
         if (requestId.length < 8) return next(createHttpError(400, "requestId is required"));
